@@ -4,6 +4,8 @@ import sys
 from PySide import QtCore
 from PySide import QtGui
 
+import actions
+
 class Window(QtGui.QDialog):
     def __init__(self):
         super(Window, self).__init__()
@@ -12,7 +14,7 @@ class Window(QtGui.QDialog):
 
     def createActions(self):
         #TODO: Figure out how to hide tooltips: http://stackoverflow.com/questions/9471791/suppress-qtgui-qaction-tooltips-in-pyside
-        self.openAction = QtGui.QAction("&Open Map", self)
+        self.openAction = QtGui.QAction("&Open Map", self, triggered=actions.open_map)
         self.refreshAction = QtGui.QAction("&Refresh My Location", self)        
         self.newLocAction = QtGui.QAction("&Create New Location", self)        
         self.locationIndicator = QtGui.QAction("Location: Dining Hall", self, enabled=False)        

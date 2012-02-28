@@ -75,10 +75,11 @@ def getcoordinates():
         ntwks = list()
         try:
             # Get information about networks 
-            o = subprocess.Popen(['/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport', '-s', '-x']).stdout.read()
+            cmd = '/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport'
+            o = subprocess.Popen(['/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport', '-s', '-x'], stdout=subprocess.PIPE).stdout
             ntwks = plistlib.readPlist(o)
         except Exception as e:
-            print "Failed to find networks.  The command '%s' may not exist." % cmd
+            print "Failed to find networks.  The command '%s' may not exist." % '/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport'
             print "Traceback is:\n%s" % e            
         
         for network in ntwks:
