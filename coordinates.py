@@ -52,8 +52,8 @@ def getcoordinates():
         for row in data:
             RSSI,SSID,BSSID = row['RSSI'], row['SSID'],row['BSSID']
             if 'OLIN' in SSID and 'GUEST' not in SSID: #Only take into account OLIN wifi and non-guest WIFI
-                ret[BSSID] = [int(RSSI),SSID]
-                print SSID,RSSI,BSSID
+                ret[BSSID] = [interpretDBString(RSSI),SSID]
+                #print SSID,RSSI,BSSID
         # for line in res:
         #   # if line=='': continue
         #    # linepts = line.split(',')
@@ -102,7 +102,7 @@ def getcoordinates():
                         bssid.append(('0%s' % byte).upper())
                     else:
                         bssid.append(byte.upper())
-                ret[':'.join(bssid)] = [interpretDB(network['RSSI']), network['SSID_STR']]
+                ret[':'.join(bssid)] = [interpretDBString(network['RSSI']), network['SSID_STR']]
     return ret
     
 class Coordinate:
@@ -111,10 +111,10 @@ class Coordinate:
     strength = ''
     mac = ''
 
-def interpretDB(string):
+def interpretDBString(signalStrength):
     # All platforms return the Received Signal Strength Indication (RSSI) in dBm units (http://en.wikipedia.org/wiki/DBm)
     # The following is a convenient way to indicate, for example, that -85 is weaker than -10
-    return 100 + int(string)
+    return 100 + int(signalStrength)
     
 def getpath():
     # XXX: Only works on Windows and Linux. This should be made private unless it is used in another file - Julian
