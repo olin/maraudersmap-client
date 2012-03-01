@@ -28,10 +28,13 @@ def getAvgCoords(n=3, tsleep=0.15):
     
 
 def getCoords():
-    binutilspath = getpath()
-    coord = Coordinate()
+    '''
+    Scans (or gets cached versions, on some systems) of wireless signal strengths around the computer,
+    using platform-dependent methods.
+    Returns a dictionary of the format listed below.
+    '''
 
-    ret = dict()
+    signalStrengthDict = dict()
     # Dictionary with key : value pairs of the form
     # MAC_Address : [Signal_Strength, Network_Name]
     # Example:
@@ -44,31 +47,22 @@ def getCoords():
     
     # WINDOWS
     if sys.platform.startswith('win'):        
-        #should work on Windows > XP SP3
-        o = subprocess.Popen(os.path.join(binutilspath, 'Get Wireless Strengths.exe'), stderr=subprocess.PIPE, stdout=subprocess.PIPE,shell=True).stdout#shell=true hides shell
+        # Should work on Windows > XP SP3
+        o = subprocess.Popen(os.path.join(__getExePath(), 'Get Wireless Strengths.exe'), stderr=subprocess.PIPE, stdout=subprocess.PIPE,shell=True).stdout#shell=true hides shell
         res = o.read()
         o.close()
         data = json.loads(res)
         for row in data:
             RSSI,SSID,BSSID = row['RSSI'], row['SSID'],row['BSSID']
             if 'OLIN' in SSID and 'GUEST' not in SSID: #Only take into account OLIN wifi and non-guest WIFI
-                ret[BSSID] = [int(RSSI),SSID]
+                signalStrengthDict[BSSID] = [int(RSSI),SSID]
                 print SSID,RSSI,BSSID
-        # for line in res:
-        #   # if line=='': continue
-        #    # linepts = line.split(',')
-        #   # if 'OLIN' in linepts[2] and 'GUEST' not in linepts[2]: #don't allow other wifi hotspots!
-        #        # coord.strength = interpretDB(linepts[0])
-        #       # coord.mac = linepts[1]
-        #        # coord.name = linepts[2]
-        #        
-        #        # ret[coord.mac] = [coord.strength, coord.name]
     # LINUX
     elif sys.platform.startswith('linux'):
         # This should work on most recent versions of Linux, according to Riley - Julian
         # TODO: Fall back to old method for systems without nm-tool
         # In that case, users will need to run the application as root, however
-        ret = __getNetworkManagerSignalStrength()
+        signalStrengthDict = __getNetworkManagerSignalStrength()
     # MAC OS X
     elif sys.platform.startswith('darwin'):
         import plistlib
@@ -102,34 +96,24 @@ def getCoords():
                         bssid.append(('0%s' % byte).upper())
                     else:
                         bssid.append(byte.upper())
-                ret[':'.join(bssid)] = [interpretDB(network['RSSI']), network['SSID_STR']]
-    return ret
+                signalStrengthDict[':'.join(bssid)] = [interpretDB(network['RSSI']), network['SSID_STR']]
+    return signalStrengthDict
     
-class Coordinate:
-    # XXX: The way this class is used is really silly. It should probably die. - Julian
-    name = ''
-    strength = ''
-    mac = ''
-
 def interpretDB(string):
-    # All platforms return the Received Signal Strength Indication (RSSI) in dBm units (http://en.wikipedia.org/wiki/DBm)
-    # The following is a convenient way to indicate, for example, that -85 is weaker than -10
+    '''
+    Most platforms (nm-tool doesn't for some reason) return the Received Signal Strength Indication (RSSI) in dBm units (http://en.wikipedia.org/wiki/DBm)
+    The following is a convenient way to indicate, for example, that -85 is weaker than -10
+    '''
     return 100 + int(string)
     
-def getpath():
-    # XXX: Only works on Windows and Linux. This should be made private unless it is used in another file - Julian
-    if sys.platform.startswith('linux') and os.path.exists('/usr/bin/olinmm.py') and os.path.exists('/usr/share/olinmm'):
-        return '/usr/share/olinmm/binutils/'
-    elif sys.platform.startswith('linux'):
-        return 'binutils/'
-    else:
-        return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
-        #~ pathname = os.path.split( os.path.abspath(sys.argv[0]))[0]
-        #~ return os.path.join(pathname, 'binutils')
+def __getExePath():
+    return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
 
 def __getNetworkManagerSignalStrength():
-    # Uses nm-tool on Linux to get the signal strength
-    # Note: I couldn't find out the signal strength units. Hopefully they are compatible.
+    '''
+    Uses nm-tool on Linux to get the signal strength
+    Note: I couldn't find out the signal strength units. Hopefully they are compatible.
+    '''
     p1 = subprocess.Popen("nm-tool", stdout=subprocess.PIPE)
     p2 = subprocess.Popen(['grep', '-E', "(\*|\s)OLIN_"], stdin=p1.stdout, stdout=subprocess.PIPE)
     p3 = subprocess.Popen(['grep', '-Eo', "OLIN_.*"], stdin=p2.stdout, stdout=subprocess.PIPE)
@@ -142,14 +126,15 @@ def __getNetworkManagerSignalStrength():
     for line in result:
         # Format is now
         # ['OLIN_GUEST:      Infra', ' 00:26:3E:30:2B:82', ' Freq 2442 MHz', ' Rate 54 Mb/s', ' Strength 25 WPA']
-        accessPtInfo = line.split(',')
-        sepLoc = accessPtInfo[0].find(':')
-        ssid = accessPtInfo[0][:sepLoc]
-        bssid = accessPtInfo[1].strip()
-        strength = int(accessPtInfo[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to interpretDB's output - Julian
-        signalStrengthDict[bssid] = [strength, ssid]
+        if 'GUEST' not in line:
+            accessPtInfo = line.split(',')
+            sepLoc = accessPtInfo[0].find(':')
+            ssid = accessPtInfo[0][:sepLoc]
+            bssid = accessPtInfo[1].strip()
+            strength = int(accessPtInfo[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to interpretDB's output - Julian
+            signalStrengthDict[bssid] = [strength, ssid]
     return signalStrengthDict
 
 if __name__ == '__main__':
     # test code
-    print getavgcoords(3, 0.15)
+    print getAvgCoords(3, 0.15)
