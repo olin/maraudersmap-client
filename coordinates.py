@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import json
 
 def getavgcoords(n=3, tsleep=0.15):
     ''' 
@@ -40,23 +41,28 @@ def getcoordinates():
     #   '00:20:D8:2D:65:02': [12, 'OLIN_WH'],
     #   '00:20:D8:2D:85:40': [38, 'OLIN_CC']
     # }
-
-    # WINDOWS #FIXME: untested since the MM went offline #XXX: Won't work any longer
-    if sys.platform.startswith('win'):
-        o = subprocess.Popen(os.path.join(binutilspath, 'getcoords.exe'), stderr=subprocess.PIPE, stdout=subprocess.PIPE).stdout.read()
-        #o = os.popen(os.path.join(binutilspath, 'getcoords.exe'))
-        res = o.read().replace('\r\n','\n').split('\n')
+    
+    # WINDOWS
+    if sys.platform.startswith('win'):        
+        #should work on Windows > XP SP3
+        o = subprocess.Popen(os.path.join(binutilspath, 'Get Wireless Strengths.exe'), stderr=subprocess.PIPE, stdout=subprocess.PIPE,shell=True).stdout#shell=true hides shell
+        res = o.read()
         o.close()
-        
-        for line in res:
-            if line=='': continue
-            linepts = line.split(',')
-            if 'OLIN' in linepts[2] and 'GUEST' not in linepts[2]: #don't allow other wifi hotspots!
-                coord.strength = interpretDB(linepts[0])
-                coord.mac = linepts[1]
-                coord.name = linepts[2]
-                
-                ret[coord.mac] = [coord.strength, coord.name]
+        data = json.loads(res)
+        for row in data:
+            RSSI,SSID,BSSID = row['RSSI'], row['SSID'],row['BSSID']
+            if 'OLIN' in SSID and 'GUEST' not in SSID: #Only take into account OLIN wifi and non-guest WIFI
+                ret[BSSID] = [int(RSSI),SSID]
+                print SSID,RSSI,BSSID
+        # for line in res:
+        #   # if line=='': continue
+        #    # linepts = line.split(',')
+        #   # if 'OLIN' in linepts[2] and 'GUEST' not in linepts[2]: #don't allow other wifi hotspots!
+        #        # coord.strength = interpretDB(linepts[0])
+        #       # coord.mac = linepts[1]
+        #        # coord.name = linepts[2]
+        #        
+        #        # ret[coord.mac] = [coord.strength, coord.name]
     # LINUX
     elif sys.platform.startswith('linux'):
         # This should work on most recent versions of Linux, according to Riley - Julian
@@ -70,7 +76,7 @@ def getcoordinates():
         # This is an undocumented system utility available on Mac OS X
         # From the included help:
         # -s[<arg>] --scan=[<arg>]       Perform a wireless broadcast scan.
-        #    	   Will perform a directed scan if the optional <arg> is provided
+        #           Will perform a directed scan if the optional <arg> is provided
         # -x        --xml                Print info as XML
         ntwks = list()
         try:
@@ -117,7 +123,7 @@ def getpath():
     elif sys.platform.startswith('linux'):
         return 'binutils/'
     else:
-        return '.\\binutils\\'
+        return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
         #~ pathname = os.path.split( os.path.abspath(sys.argv[0]))[0]
         #~ return os.path.join(pathname, 'binutils')
 
