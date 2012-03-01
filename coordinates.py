@@ -2,16 +2,16 @@ import os
 import sys
 import subprocess
 
-def getavgcoords(n=3, tsleep=0.15):
+def getAvgCoords(n=3, tsleep=0.15):
     ''' 
     Get the average signal strength from n samples, at intervals of tsleep seconds
-    (although it will take a bit longer since getcoordinates() takes a while to execute)
+    (although it will take a bit longer since getCoords() takes a while to execute)
     '''
     import time
     totals = dict()
     for i in range(n):
         print i
-        res = getcoordinates()
+        res = getCoords()
         for spot in res:
             if spot in totals:
                 totals[spot][0] += res[spot][0]
@@ -26,7 +26,7 @@ def getavgcoords(n=3, tsleep=0.15):
     return totals
     
 
-def getcoordinates():
+def getCoords():
     binutilspath = getpath()
     coord = Coordinate()
 
