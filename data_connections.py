@@ -31,13 +31,14 @@ def sendToServer(strPHPScript, dictParams):
     else:
         return True, ret[len('success:'):]
 
-def serializeMACData(a):
+def serializeMACData(signalStrengthDict):
     '''
-    XXX: ??????
+    Convert signalStrengthDict to a string 
     '''
     s = ''
     for mac in a:
-        s += mac + ',' + str(a[mac][0]) + ';'
+        s += mac + ',' + str(signalStrengthDict[mac][0]) + ';'
+        # 00:11:22:33:44:55,45;
     return s.rstrip(';')
 
 def unserializePersonData(s):
@@ -57,12 +58,17 @@ def unserializePersonData(s):
     return personData
 
 def unserializeMACData(s):
+    '''
+    Takes in a string from the server and returns an array of arrays
+    where each subarray is in the sequence 'placename', 'distance','mapx','mapy','mapw'
+    '''
+    # XXX: Is not the opposite of serializeMACData! - Julian
     ret = []
     for point in s.split(';'):
         if len(point)==0: continue
         pointpts = point.split('|')
         # placename , distance , mapx, mapy, mapw
-        ret.append([ pointpts[0], float(pointpts[1]), int(pointpts[2]), int(pointpts[3]), int(pointpts[4])  ])
+        ret.append([ pointpts[0], float(pointpts[1]), int(pointpts[2]), int(pointpts[3]), int(pointpts[4])])
     #name and distance pairs
     return ret
 
