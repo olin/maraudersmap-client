@@ -1,4 +1,7 @@
 ﻿//Adapted from Managed Wifi example by Cory Dolphin
+//Outputs Wireless Signal Strengths in JSON format, an array with many objects as described below:
+//EXAMPLE: [{"SSID":"OLIN_GUEST","BSSID":"00:15:E8:E3:DF","RSSI":"-78"}]
+
 
 using System;
 using System.Collections.Generic;
@@ -18,7 +21,7 @@ class Program
             foreach (WlanClient.WlanInterface wlanIface in client.Interfaces)
             {
                 Wlan.WlanBssEntry[] wlanBssEntries = wlanIface.GetNetworkBssList();
-                Dictionary<string, List<String>> dictionary = new Dictionary<string, List<String>>();
+                List<string> wirelessData = new List<string>();
                 foreach (Wlan.WlanBssEntry network in wlanBssEntries)
                 {
                     int rss = network.rssi;
@@ -37,25 +40,24 @@ class Program
                     }
 
                     string ssid = System.Text.ASCIIEncoding.ASCII.GetString(network.dot11Ssid.SSID).ToString().Replace(((char)0) + "", ""); //replace null chars
-                    string dataString = "\"MAC\":\"" + macAddress + "\",\"Signal\":\"" + network.linkQuality + "\",\"RSSI\":\"" + rss.ToString() + "\"";
-                    if (dictionary.ContainsKey(ssid))
-                    {
-                        dictionary[ssid].Add(dataString);
-                    }
-                    else
-                    {
-                        //there must be a more efficient/ better pattern in C#? Literal lists are not a thing...
-                        List<String> tList = new List<String>();
-                        tList.Add(dataString);
-                        dictionary.Add(ssid,tList);
-                    }
+                    string dataString = "\"SSID\":\"" + ssid + "\",\"BSSID\":\"" + macAddress + "\",\"RSSI\":\"" + rss.ToString() + "\"";
+                    wirelessData.Add(dataString);
                 }
-                Console.Write("{");
-                foreach (String ssid in dictionary.Keys)
+                Console.Write("[");
+
+                int iter = 0;
+                int numValues = wirelessData.Count;
+                foreach (String row in wirelessData)
                 {
-                    Console.Write("\"" + ssid + "\"" + ":[{" + String.Join("},{",dictionary[ssid]) + "}],"); //TODO: more elegant solution for JSON
+                    Console.Write("{" + String.Join("},{", row+ "}")); //TODO: more elegant solution for JSON
+
+                    if (iter + 1 < numValues)
+                    {
+                        Console.Write(",");
+                    }
+                    iter++;
                 }
-                Console.Write("}");
+                Console.Write("]");
             }
             
         }
