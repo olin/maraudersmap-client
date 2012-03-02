@@ -11,25 +11,46 @@ class Window(QtGui.QDialog):
         super(Window, self).__init__()
         self.createActions()
         self.makeSysTray()
+        self.correctLocationAction.setEnabled(False)
 
     def createActions(self):
         #TODO: Figure out how to hide tooltips: http://stackoverflow.com/questions/9471791/suppress-qtgui-qaction-tooltips-in-pyside
         self.openAction = QtGui.QAction("&Open Map", self, triggered=actions.open_map)
-        self.refreshAction = QtGui.QAction("&Refresh My Location", self)        
-        self.newLocAction = QtGui.QAction("&Create New Location", self)        
-        self.locationIndicator = QtGui.QAction("Location: Dining Hall", self, enabled=False)        
+        self.refreshAction = QtGui.QAction("&Refresh My Location", self, triggered=self.refreshLocation)        
+        self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)        
+        
+        self.correctLocationAction = QtGui.QAction("&Correct My Location", self)
+        self.otherLocationAction = QtGui.QAction("Other...", self)
+        
         self.offlineAction = QtGui.QAction("&Go Offline", self)        
         self.prefsAction = QtGui.QAction("&Preferences...", self)                
         self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=QtGui.qApp.quit)
+
+    def refreshLocation(self):
+        locations = actions.refresh_location()
+        if locations:
+            subMenu = QtGui.QMenu("Popup Submenu", self)
+            for loc in locations:
+                subMenu.addAction(loc[0].replace(',',' '))
+            subMenu.addSeparator()            
+            subMenu.addAction(self.otherLocationAction)
+            self.correctLocationAction.setMenu(subMenu)            
+            bestLocation = locations[0]
+            self.locationIndicator.setText(bestLocation[0].replace(',',' '))
+            self.correctLocationAction.setEnabled(True)
+        else:
+            self.locationIndicator.setText("Unable to Connect to Server")
+            self.correctLocationAction.setEnabled(False)
+
 
     def makeSysTray(self):
         self.menu = QtGui.QMenu(self)
         self.menu.addAction(self.openAction)
         self.menu.addSeparator()
         self.menu.addAction(self.refreshAction)
-        self.menu.addAction(self.newLocAction)
         self.menu.addSeparator()
         self.menu.addAction(self.locationIndicator)
+        self.menu.addAction(self.correctLocationAction)        
         self.menu.addSeparator()
         self.menu.addAction(self.offlineAction)
         self.menu.addAction(self.prefsAction)
