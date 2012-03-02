@@ -22,7 +22,7 @@ def getAvgSignalStrengthDict(samples=3, tsleep=0.15):
     totals = dict()
     for i in range(samples):
         print i
-        res = getCoords()
+        res = getSignalStrengthDict()
         for spot in res:
             if spot in totals:
                 totals[spot][0] += res[spot][0]
@@ -133,6 +133,7 @@ def __getNetworkManagerSignalStrength():
     p1.wait()
     p2.wait()
     signalStrengthDict = dict()
+    numLines = 0
     for line in result:
         # Format is now
         # ['OLIN_GUEST:      Infra', ' 00:26:3E:30:2B:82', ' Freq 2442 MHz', ' Rate 54 Mb/s', ' Strength 25 WPA']
@@ -140,10 +141,12 @@ def __getNetworkManagerSignalStrength():
         sepLoc = accessPtInfo[0].find(':')
         if sepLoc <= 0: #fail gracefully if we are parsing a line we shouldn't be...
             continue
+        numLines +=1
         ssid = accessPtInfo[0][:sepLoc]
         bssid = accessPtInfo[1].strip()
         strength = int(accessPtInfo[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to interpretDB's output - Julian
         signalStrengthDict[bssid] = [strength, ssid]
+    print numLines
     return signalStrengthDict
 
 if __name__ == '__main__':
