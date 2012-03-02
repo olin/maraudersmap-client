@@ -35,7 +35,7 @@ def do_update(username, currPlaceName = None, status=None):
             print 'Error:', result
             return flag, result, signalStrengthStr
         
-        l = data_connections.unserializeMACData(result)
+        l = data_connections.parseServerResponse(result)
         return True, l, signalStrengthStr
 
 def __getPlatform():
@@ -75,8 +75,8 @@ def do_query(username):
     if not flag:
         print 'Error:', result
         return flag, result
-   
-    result = data_connections.parseServerResponse(result)
+    
+    result = data_connections.unserializePersonData(result)
     return True, result
 
 def do_datapointexistence(placename):

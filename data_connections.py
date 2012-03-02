@@ -73,16 +73,19 @@ def unserializeMACData(s):
     return ret
 
 def parseServerResponse(responseStr):
+    #XXX: This Doesn't work properly; from original code
+    #TODO: Rewrite!
+
+
     # location strings look like WH,in,rm309
     locationList = unserializeMACData(responseStr)
-    return [parseLocationString(loc) for loc in locationList]
 
     def parseLocationString(theString):
-        location = location.replace("OC", "MH")
+        location = theString.replace("OC", "MH")
+ 
         try:
             building, inside, description = location.split(",")
         except:
-            wx.MessageBox("Error: Failed to parse location string: " + location, "MM@Olin Error")
             return None
 
         floor = building[2]
@@ -121,7 +124,10 @@ def parseServerResponse(responseStr):
                 location = inside + " " + building + " " + floor + " floor " + description
             else:
                 location = inside + " " + building + " (" + floor + ") " + description
-            return location
+        
+        return location
+    
+    return [parseLocationString(loc[0]) for loc in locationList]
 
 
 if __name__=='__main__':

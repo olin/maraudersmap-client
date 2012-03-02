@@ -31,12 +31,12 @@ class Window(QtGui.QDialog):
         if locations:
             subMenu = QtGui.QMenu("Popup Submenu", self)
             for loc in locations:
-                subMenu.addAction(loc[0].replace(',',' '))
+                subMenu.addAction(loc)
             subMenu.addSeparator()            
             subMenu.addAction(self.otherLocationAction)
             self.correctLocationAction.setMenu(subMenu)            
             bestLocation = locations[0]
-            self.locationIndicator.setText(bestLocation[0].replace(',',' '))
+            self.locationIndicator.setText(bestLocation)
             self.correctLocationAction.setEnabled(True)
         else:
             self.locationIndicator.setText("Unable to Connect to Server")
