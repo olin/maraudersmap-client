@@ -109,12 +109,12 @@ def getSignalStrengthDict():
                 signalStrengthDict[':'.join(bssid)] = [interpretDB(network['RSSI']), network['SSID_STR']]
     return signalStrengthDict
     
-def interpretDB(string):
+def interpretDB(signalString):
     '''
     Most platforms (nm-tool doesn't for some reason) return the Received Signal Strength Indication (RSSI) in dBm units (http://en.wikipedia.org/wiki/DBm)
     The following is a convenient way to indicate, for example, that -85 is weaker than -10
     '''
-    return 100 + int(string)
+    return 100 + int(signalString)
     
 def __getExePath():
     return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
@@ -133,6 +133,7 @@ def __getNetworkManagerSignalStrength():
     p1.wait()
     p2.wait()
     signalStrengthDict = dict()
+
     for line in result:
         # Format is now
         # ['OLIN_GUEST:      Infra', ' 00:26:3E:30:2B:82', ' Freq 2442 MHz', ' Rate 54 Mb/s', ' Strength 25 WPA']
@@ -144,6 +145,7 @@ def __getNetworkManagerSignalStrength():
         bssid = accessPtInfo[1].strip()
         strength = int(accessPtInfo[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to interpretDB's output - Julian
         signalStrengthDict[bssid] = [strength, ssid]
+
     return signalStrengthDict
 
 if __name__ == '__main__':
