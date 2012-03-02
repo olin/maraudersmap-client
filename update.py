@@ -3,17 +3,27 @@
 import coordinates
 import data_connections
 
-def do_update(username, currentplace = None, status=None):
+def do_update(username, currPlaceName = None, status=None):
+    '''
+    Sends the following stuff to the server:
+    username -> string representing user
+    data -> signalStrengthDict
+    platform -> linux,win,darwin
+    placename -> string of curr place
+    status -> never used ?!?!?!
+    '''
     signalStrengthDict = coordinates.getAvgSignalStrengthDict()
-    if not currCoords:
-        pass # Failed to get coordinates
+    if not signalStrengthDict:
+        return False, "Failed to get coordinates"
     else:
-        strCoords = data_connections.serializeMACData( currentCoords )
+        signalStrengthStr = data_connections.serializeMACData( signalStrengthDict )
         
-        dictSend = {'username':username, 'data':strCoords}
-        dictSend['platform'] = _getplatform()
-        if currentplace != None:
-            dictSend['placename'] = currentplace
+        dictSend = dict()
+        dictSend['username'] = username
+        dictSend['data'] = signalStrengthStr
+        dictSend['platform'] = __getPlatform()
+        if currPlaceName != None:
+            dictSend['placename'] = currPlaceName  
             
         if status != None:
             dictSend['status'] = status
