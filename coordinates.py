@@ -22,7 +22,7 @@ def getAvgSignalStrengthDict(samples=3, tsleep=0.15):
     totals = dict()
     for i in range(samples):
         print i
-        res = getCoords()
+        res = getSignalStrengthDict()
         for spot in res:
             if spot in totals:
                 totals[spot][0] += res[spot][0]

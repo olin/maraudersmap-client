@@ -36,7 +36,7 @@ def serializeMACData(signalStrengthDict):
     Convert signalStrengthDict to a string 
     '''
     s = ''
-    for mac in a:
+    for mac in signalStrengthDict:
         s += mac + ',' + str(signalStrengthDict[mac][0]) + ';'
         # 00:11:22:33:44:55,45;
     return s.rstrip(';')

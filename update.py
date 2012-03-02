@@ -5,10 +5,12 @@ import data_connections
 
 def do_update(username, currPlaceName = None, status=None):
     '''
+    Allows user to be drawn on map by sending location to server.
+
     Sends the following stuff to the server:
     username -> string representing user
     data -> signalStrengthDict
-    platform -> linux,win,darwin
+    platform -> string: 'linux'/'win'/'darwin'
     placename -> string of curr place
     status -> never used ?!?!?!
     '''
@@ -31,10 +33,10 @@ def do_update(username, currPlaceName = None, status=None):
         flag, result = data_connections.sendToServer('update.php', dictSend)
         if not flag:
             print 'Error:', result
-            return flag, result, currentCoords
+            return flag, result, signalStrengthStr
         
         l = data_connections.unserializeMACData(result)
-        return True, l, currentCoords
+        return True, l, signalStrengthStr
 
 def __getPlatform():
     '''
@@ -50,6 +52,9 @@ def __getPlatform():
     return sys.platform # non-standard platform
 
 def do_train(username, placename, mapx, mapy, mapw, data):
+    '''
+    Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data)
+    '''
     strCoords = data_connections.serializeMACData(data)
     dictSend = {'username':username, 'placename':placename,'mapx':mapx,'mapy':mapy, 'mapw':mapw, 'data':strCoords}
     dictSend['platform'] = __getPlatform()
@@ -63,6 +68,9 @@ def do_train(username, placename, mapx, mapy, mapw, data):
     return True, result
 
 def do_query(username):
+    '''
+    Get the name of the place at which a user with a specific username is located
+    '''
     flag, result = data_connections.sendToServer('query.php', {'username':username})
     if not flag:
         print 'Error:', result
@@ -72,6 +80,9 @@ def do_query(username):
     return True, result
 
 def do_datapointexistence(placename):
+    '''
+    Check if a point with a specific place name exists
+    '''
     flag, result = data_connections.sendToServer('pointexistence.php', {'placename':placename})
     if not flag:
         print 'Error:', result
@@ -81,6 +92,9 @@ def do_datapointexistence(placename):
     else: return True, False
 
 def do_cloak(username):
+    '''
+    Tell the server to stop displaying a user with username on the map
+    '''
     flag, result = data_connections.sendToServer('cloak.php', {'username':username})
     if not flag:
         print 'Error:', result
