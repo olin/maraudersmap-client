@@ -72,6 +72,58 @@ def unserializeMACData(s):
     #name and distance pairs
     return ret
 
+def parseServerResponse(responseStr):
+    # location strings look like WH,in,rm309
+    locationList = unserializeMACData(responseStr)
+    return [parseLocationString(loc) for loc in locationList]
+
+    def parseLocationString(theString):
+        location = location.replace("OC", "MH")
+        try:
+            building, inside, description = location.split(",")
+        except:
+            wx.MessageBox("Error: Failed to parse location string: " + location, "MM@Olin Error")
+            return None
+
+        floor = building[2]
+        building = building[0:2]
+
+        if (inside == "in"):
+            inside = "inside"
+        elif (inside == "out"):
+            inside = "outside of"
+        if (floor == "1"):
+            floor = "1st"
+        elif (floor == "2"):
+            floor = "2nd"
+        elif (floor == "3"):
+            floor = "3rd"
+        elif (floor == "4"):
+            floor = "4th"
+        elif (floor == "0"):
+            floor = "LL"
+
+
+        if (description.find("rm") != -1 or
+            description.find("room") != -1 or
+            description.find("Room") != -1 or
+            description.find("ROOM") != -1):
+            
+            # this has a room
+            description = description.replace("rm", "")
+            description = description.replace("room", "")
+            description = description.replace("Room", "")
+            description = description.replace("ROOM", "")
+
+            location = inside + " " + building + description
+        else:
+            if (floor != "LL"):
+                location = inside + " " + building + " " + floor + " floor " + description
+            else:
+                location = inside + " " + building + " (" + floor + ") " + description
+            return location
+
+
 if __name__=='__main__':
     ret = sendToServer('update.php',{})
     print ret

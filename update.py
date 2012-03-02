@@ -75,8 +75,8 @@ def do_query(username):
     if not flag:
         print 'Error:', result
         return flag, result
-    
-    result = data_connections.unserializePersonData(result)
+   
+    result = data_connections.parseServerResponse(result)
     return True, result
 
 def do_datapointexistence(placename):
