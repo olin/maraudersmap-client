@@ -6,9 +6,20 @@ from PySide import QtGui
 
 import actions
 
+class Killer(QtCore.QObject):
+    speak = QtCore.Signal(str)
+
 class Window(QtGui.QDialog):
     def __init__(self):
         super(Window, self).__init__()
+        self.aThread = MyThread(self)
+        self.aThread.started.connect(self.started)
+        self.aThread.finished.connect(self.finished)
+        self.aThread.terminated.connect(self.terminated)
+       
+        self.killer = Killer()
+        self.killer.speak.connect(self.aThread.deathSlot)
+        
         self.createActions()
         self.makeSysTray()
         self.correctLocationAction.setEnabled(False)
@@ -24,7 +35,7 @@ class Window(QtGui.QDialog):
         
         self.offlineAction = QtGui.QAction("&Go Offline", self)        
         self.prefsAction = QtGui.QAction("&Preferences...", self)                
-        self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=QtGui.qApp.quit)
+        self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.quit)
 
     def refreshLocation(self):
         locations = actions.refresh_location()
@@ -63,6 +74,43 @@ class Window(QtGui.QDialog):
 
         self.sysTray.setContextMenu(self.menu)
 
+    def started(self):
+        print "YAYYYY"
+    
+    def finished(self):
+        print "Finished!"
+
+    def terminated(self):
+        print "Terminated!"
+
+    def quit(self):
+        if self.aThread.isRunning():
+            self.exiting=True
+            self.killer.speak.emit("Die!") 
+            self.aThread.wait()
+            #while self.aThread.isRunning():
+            #    print "Trying to stop!"
+        QtGui.qApp.quit()
+        
+
+class MyThread (QtCore.QThread):
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.exiting = False
+
+    @QtCore.Slot(str)
+    def deathSlot(self,aStr):
+        print aStr
+        self.exiting = True
+
+    def run(self):
+        self.runs = True
+        self.exiting = False
+        while not self.exiting:
+            print "Hi, I'm a thread"
+            self.sleep(1) # 1 Second
+        return 
+
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
 
@@ -72,6 +120,7 @@ if __name__ == '__main__':
         sys.exit(1)
 
     promptStartup = False
+    
     window = Window()
 
     #TODO: Use http://www.dallagnese.fr/en/computers-it/recette-python-qt4-qsingleapplication-pyside/
@@ -83,7 +132,8 @@ if __name__ == '__main__':
 
     window.sysTray.show()
 
+    window.aThread.start()
+
     # Enter Qt application main loop
-    app.exec_()
-    sys.exit()
+    sys.exit(app.exec_())
 
