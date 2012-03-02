@@ -3,14 +3,24 @@ import sys
 import subprocess
 import json
 
-def getAvgCoords(n=3, tsleep=0.15):
+def getAvgSignalStrengthDict(samples=3, tsleep=0.15):
     ''' 
-    Get the average signal strength from n samples, at intervals of tsleep seconds
+    Get the average signal strength from samples samples, at intervals of tsleep seconds
     (although it will take a bit longer since getCoords() takes a while to execute)
+
+    Returns a dictionary with key : value pairs of the form
+    MAC_Address : [Signal_Strength, Network_Name]
+    Example:
+     {
+       '00:20:D8:2D:2C:C1': [14, 'OLIN_CC'],
+       '00:20:D8:2D:B3:C0': [12, 'OLIN_CC'],
+       '00:20:D8:2D:65:02': [12, 'OLIN_WH'],
+       '00:20:D8:2D:85:40': [38, 'OLIN_CC']
+     }
     '''
     import time
     totals = dict()
-    for i in range(n):
+    for i in range(samples):
         print i
         res = getCoords()
         for spot in res:
@@ -20,14 +30,14 @@ def getAvgCoords(n=3, tsleep=0.15):
                 totals[spot] = res[spot]
         time.sleep(tsleep)
         
-    # And divide each by n
+    # And divide each by sample count
     for spot in totals:
-        totals[spot][0] = totals[spot][0] / (float(n))
+        totals[spot][0] = totals[spot][0] / (float(samples))
 
     return totals
     
 
-def getCoords():
+def getSignalStrengthDict():
     '''
     Scans (or gets cached versions, on some systems) of wireless signal strengths around the computer,
     using platform-dependent methods.
@@ -138,4 +148,4 @@ def __getNetworkManagerSignalStrength():
 
 if __name__ == '__main__':
     # test code
-    print getAvgCoords(3, 0.15)
+    print getAvgSignalStrengthDict(samples=3, tsleep=0.15)

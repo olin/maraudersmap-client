@@ -7,7 +7,7 @@ def sendToServer(strPHPScript, dictParams):
     '''
     Uses urllib to send a dictionary to a PHP script on the server specified in configuration.py 
 
-    Returns a tuple (successBOOL, explanationSTR)
+    Returns a tuple (successBOOL, responseSTR/explanation_of_failureSTR)
     '''
 
     strUrl = Settings.SERVER_ADDRESS + '/' + strPHPScript + '?'
@@ -48,7 +48,7 @@ def unserializePersonData(s):
     'username', 'placename', 'status', and 'lastupdate'
     '''
     personData = dict()
-    if s=='nobody': 
+    if s == 'nobody': 
         return 'nobody'
     s = s.split('|')
     personData['username'] = s[0]
