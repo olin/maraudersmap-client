@@ -9,6 +9,12 @@ import actions
 class Killer(QtCore.QObject):
     speak = QtCore.Signal(str)
 
+class LocationReporter(QtCore.QObject):
+    reporter = QtCore.Signal(list)
+
+class UpdateSignaler(QtCore.QObject):
+    signal = QtCore.Signal()
+
 class Window(QtGui.QDialog):
     def __init__(self):
         super(Window, self).__init__()
@@ -19,10 +25,30 @@ class Window(QtGui.QDialog):
        
         self.killer = Killer()
         self.killer.speak.connect(self.aThread.deathSlot)
-        
+
+                
         self.createActions()
         self.makeSysTray()
         self.correctLocationAction.setEnabled(False)
+
+        self.updateSignaler = UpdateSignaler()
+        self.updateSignaler.signal.connect(self.aThread.updateSlot)
+
+    @QtCore.Slot(list)
+    def locationSlot(self, locations):
+        if locations:
+            subMenu = QtGui.QMenu("Popup Submenu", self)
+            for loc in locations:
+                subMenu.addAction(loc)
+            subMenu.addSeparator()            
+            subMenu.addAction(self.otherLocationAction)
+            self.correctLocationAction.setMenu(subMenu)            
+            bestLocation = locations[0]
+            self.locationIndicator.setText(bestLocation)
+            self.correctLocationAction.setEnabled(True)
+        else:
+            self.locationIndicator.setText("Unable to Connect to Server")
+            self.correctLocationAction.setEnabled(False)
 
     def createActions(self):
         #TODO: Figure out how to hide tooltips: http://stackoverflow.com/questions/9471791/suppress-qtgui-qaction-tooltips-in-pyside
@@ -38,6 +64,7 @@ class Window(QtGui.QDialog):
         self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.quit)
 
     def refreshLocation(self):
+        '''
         locations = actions.refresh_location()
         if locations:
             subMenu = QtGui.QMenu("Popup Submenu", self)
@@ -52,6 +79,8 @@ class Window(QtGui.QDialog):
         else:
             self.locationIndicator.setText("Unable to Connect to Server")
             self.correctLocationAction.setEnabled(False)
+        '''
+        self.updateSignaler.signal.emit()
 
 
     def makeSysTray(self):
@@ -85,7 +114,7 @@ class Window(QtGui.QDialog):
 
     def quit(self):
         if self.aThread.isRunning():
-            self.exiting=True
+            self.exiting = True
             self.killer.speak.emit("Die!") 
             self.aThread.wait()
             #while self.aThread.isRunning():
@@ -94,21 +123,41 @@ class Window(QtGui.QDialog):
         
 
 class MyThread (QtCore.QThread):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QtCore.QThread.__init__(self, parent)
         self.exiting = False
+        self.working = False
+
+        self.locationReporter = LocationReporter()
+        self.locationReporter.reporter.connect(parent.locationSlot)
+
 
     @QtCore.Slot(str)
     def deathSlot(self,aStr):
+        # Slot to kill the thread
         print aStr
         self.exiting = True
+        while self.working:
+            pass
+        self.terminate()
+
+    @QtCore.Slot()
+    def updateSlot(self):
+        # Slot to get message to update location
+        if not self.working:
+            self.locationReporter.reporter.emit(actions.refresh_location())
 
     def run(self):
         self.runs = True
         self.exiting = False
         while not self.exiting:
             print "Hi, I'm a thread"
-            self.sleep(1) # 1 Second
+            self.working = True
+            print "Working"
+            self.locationReporter.reporter.emit(actions.refresh_location())
+            print "Done Working"
+            self.working = False 
+            self.sleep(5) # Seconds
         return 
 
 if __name__ == '__main__':
