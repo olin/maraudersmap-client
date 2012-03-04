@@ -6,6 +6,14 @@ from PySide import QtGui
 
 import actions
 
+class GeneralTab(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(GeneralTab, self).__init__(parent)
+
+class AdvancedTab(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(AdvancedTab, self).__init__(parent)
+
 class Killer(QtCore.QObject):
     speak = QtCore.Signal(str)
 
@@ -34,6 +42,33 @@ class Window(QtGui.QDialog):
         self.updateSignaler = UpdateSignaler()
         self.updateSignaler.signal.connect(self.aThread.updateSlot)
 
+        self.aThread.start()
+
+        self.setupPrefs()
+
+    def setupPrefs(self):
+        self.tabPane = QtGui.QTabWidget()
+        self.tabPane.addTab(GeneralTab(), "General")
+        self.tabPane.addTab(AdvancedTab(), "Advanced")
+
+        mainLayout = QtGui.QVBoxLayout()
+        mainLayout.addWidget(self.tabPane)
+        self.setMinimumWidth(500)        
+        self.setMaximumWidth(500)                
+        self.setMinimumHeight(200)
+        self.setMaximumHeight(200)
+        #mainLayout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
+        #mainLayout.addWidget(buttonBox)
+        self.setLayout(mainLayout)
+
+        self.setWindowTitle("Marauder's Map @ Olin Preferences")
+
+    def closeEvent(self, event):
+        # Handling prefs window close button pressed
+        if self.sysTray.isVisible():
+            self.hide()
+            event.ignore()
+
     @QtCore.Slot(list)
     def locationSlot(self, locations):
         if locations:
@@ -49,6 +84,7 @@ class Window(QtGui.QDialog):
         else:
             self.locationIndicator.setText("Unable to Connect to Server")
             self.correctLocationAction.setEnabled(False)
+        self.update()
 
     def createActions(self):
         #TODO: Figure out how to hide tooltips: http://stackoverflow.com/questions/9471791/suppress-qtgui-qaction-tooltips-in-pyside
@@ -60,7 +96,7 @@ class Window(QtGui.QDialog):
         self.otherLocationAction = QtGui.QAction("Other...", self)
         
         self.offlineAction = QtGui.QAction("&Go Offline", self)        
-        self.prefsAction = QtGui.QAction("&Preferences...", self)                
+        self.prefsAction = QtGui.QAction("&Preferences...", self, triggered=self.showPrefs)                
         self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.quit)
 
     def refreshLocation(self):
@@ -100,6 +136,7 @@ class Window(QtGui.QDialog):
 
         self.sysTrayIcon = QtGui.QIcon("demoIcon.png")
         self.sysTray = QtGui.QSystemTrayIcon(self, icon=self.sysTrayIcon)
+        self.sysTray.setToolTip("Marauder's Map")
 
         self.sysTray.setContextMenu(self.menu)
 
@@ -111,6 +148,10 @@ class Window(QtGui.QDialog):
 
     def terminated(self):
         print "Terminated!"
+
+    def showPrefs(self):
+        self.show()
+        self.raise_()            
 
     def quit(self):
         if self.aThread.isRunning():
@@ -151,11 +192,8 @@ class MyThread (QtCore.QThread):
         self.runs = True
         self.exiting = False
         while not self.exiting:
-            print "Hi, I'm a thread"
             self.working = True
-            print "Working"
             self.locationReporter.reporter.emit(actions.refresh_location())
-            print "Done Working"
             self.working = False 
             self.sleep(5) # Seconds
         return 
@@ -169,7 +207,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     promptStartup = False
-    
+
+    QtGui.QApplication.setQuitOnLastWindowClosed(False) # Can continue without window
     window = Window()
 
     #TODO: Use http://www.dallagnese.fr/en/computers-it/recette-python-qt4-qsingleapplication-pyside/
@@ -180,8 +219,6 @@ if __name__ == '__main__':
     #label.show()
 
     window.sysTray.show()
-
-    window.aThread.start()
 
     # Enter Qt application main loop
     sys.exit(app.exec_())
