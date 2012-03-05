@@ -163,7 +163,7 @@ def setupWindow():
     '''
     QtGui.QApplication.setQuitOnLastWindowClosed(False)
     preferencesWindow = PreferencesWindow()
-    preferencesWindow.display()
+    #preferencesWindow.display()
     return preferencesWindow
 
 def canLaunch():
