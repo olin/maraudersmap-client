@@ -10,8 +10,8 @@ def sendToServer(strPHPScript, dictParams):
     Returns a tuple (successBOOL, responseSTR/explanation_of_failureSTR)
     '''
 
-    strUrl = "%s/%s?%s" % (Settings.SERVER_ADDRESS, strPHPScript, urllib.urlencode(dictParams))
     # Construct url with the parameters specified in the dictionary
+    strUrl = "%s/%s?%s" % (Settings.SERVER_ADDRESS, strPHPScript, urllib.urlencode(dictParams))
     print strUrl 
     
     try:
