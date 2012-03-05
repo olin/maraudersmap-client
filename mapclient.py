@@ -12,6 +12,8 @@
 from PySide import QtCore
 from PySide import QtGui
 
+import actions
+
 class GeneralPrefs(QtGui.QWidget):
     def __init__(self):
         super(GeneralPrefs, self).__init__()
@@ -25,15 +27,6 @@ class AdvancedPrefs(QtGui.QWidget):
         mainLayout = QtGui.QVBoxLayout()
         mainLayout.addWidget(QtGui.QLabel("You will be able to configure advanced stuff here."))
         self.setLayout(mainLayout)
-
-class SystemTray(QtGui.QSystemTrayIcon):
-    def __init__(self, parent, icon):
-        super(SystemTray, self).__init__(parent, icon=icon)
-
-    '''def activated(self, reason):
-        print "Activated", reason
-        super(SystemTray, self).activated(reason)
-    '''
 
 class PreferencesWindow(QtGui.QDialog):
     def __init__(self):
@@ -70,23 +63,56 @@ class PreferencesWindow(QtGui.QDialog):
         return tabPane
 
     def createSystemTray(self):
+        '''
+        
+        '''
         self.sysTrayIconDefault = QtGui.QIcon("demoIcon.png")
         self.sysTrayIconClicked = QtGui.QIcon("demoIconWhite.png")        
-        #self.sysTray = SystemTray(self, self.sysTrayIconDefault)
         self.sysTray = QtGui.QSystemTrayIcon(self, icon=self.sysTrayIconDefault)
         self.sysTray.setToolTip("Marauder's Map")
 
         self.sysTray.activated.connect(self.sysTrayMenuClicked)
+        self.createSystemTrayActions()
+        self.sysTrayMenu = self.createSystemTrayMenu()
+        self.sysTray.setContextMenu(self.sysTrayMenu)
+        self.sysTrayMenu.aboutToHide.connect(self.sysTrayMenuClosed) # XXX: NEVER GETS TRIGGERED!?!
+        # I expected this to emit on menu close when no action is selected
 
         self.sysTray.show()
 
+    def createSystemTrayActions(self):
+        self.openAction = QtGui.QAction("&Open Map", self, triggered=actions.open_map)
+        self.refreshAction = QtGui.QAction("&Refresh My Location", self, triggered=self.sysTrayInitiateLocationRefresh)
+        self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)
+        self.correctLocationAction = QtGui.QAction("&Correct My Location", self)
+        self.otherLocationAction = QtGui.QAction("Other...", self)
+        self.offlineAction = QtGui.QAction("&Go Offline", self)
+        self.prefsAction = QtGui.QAction("&Preferences...", self, triggered=self.display)
+        self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.sysTrayQuitAction)
+
+    def createSystemTrayMenu(self):
+        sysTrayMenu = QtGui.QMenu(self)
+        sysTrayMenu.addAction(self.openAction)
+        
+        sysTrayMenu.addSeparator()
+        sysTrayMenu.addAction(self.refreshAction)
+        sysTrayMenu.addSeparator()
+        sysTrayMenu.addAction(self.locationIndicator)
+        sysTrayMenu.addAction(self.correctLocationAction)        
+        sysTrayMenu.addSeparator()
+        sysTrayMenu.addAction(self.offlineAction)
+        sysTrayMenu.addAction(self.prefsAction)
+        sysTrayMenu.addSeparator()
+        sysTrayMenu.addAction(self.quitAction)
+        
+        return sysTrayMenu
+        
     def display(self):
         '''
         Display the preferences window
-
+        '''
         # TODO: There is an ugly jumping effect where the window starts out below
         #  the active application and moves to the top. I'd like it to appear on top
-        '''
         self.show()
         self.raise_()
 
@@ -115,11 +141,25 @@ class PreferencesWindow(QtGui.QDialog):
         #    # Double click
         #    pass
 
+    @QtCore.Slot()
     def sysTrayMenuClosed(self):  
+        print "Closed Menu"
+        # XXX: NEVER GETS TRIGGERED
         self.sysTray.setIcon(self.sysTrayIconDefault)
+
+    def sysTrayQuitAction(self):
+        '''
+        Cleans up and quits the application.
+        '''
+        QtGui.qApp.quit()
+
+    def sysTrayInitiateLocationRefresh(self):
+        pass
 
 def setupWindow():
     '''
+    Create and return the preferences window,
+    which owns every other element
     '''
     QtGui.QApplication.setQuitOnLastWindowClosed(False)
     preferencesWindow = PreferencesWindow()
