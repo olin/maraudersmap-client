@@ -1,5 +1,3 @@
-#XXX: WARNING: THIS FILE DOES NOT WORK BECAUSE getAvgSignalNodes IS BROKEN
-                
 import os
 import sys
 import subprocess
@@ -8,9 +6,8 @@ import json
 class SignalNode(object):
     '''
     A highly optimized object to keep track of the signal strength
-    associated with a node. It is hashable, so it can be put into a set,
-    and two instances are equivalent if they have the same name 
-    (signal strength can differ).
+    associated with a node. It is hashable, so it can be a key in a dict
+    or an element in a set.
 
     MACAddress and name are immutable once the instance is created,
     but signalStrength can be changed
@@ -21,6 +18,10 @@ class SignalNode(object):
         self.__MACAddress = MACAddress
         self.__name = name        
         self.signalStrength = signalStrength
+
+    @property
+    def identifier(self):
+        return self.__MACAddress + self.__name
 
     @property
     def MACAddress(self):
@@ -43,15 +44,23 @@ class SignalNode(object):
     def __str__(self):
         return "%s,%i" % (self.__MACAddress, self.signalStrength)
 
+    def __repr__(self):
+        return str(self)
+
     def __hash__(self):
-        return hash(self.__MACAddress + self.__name)
+        return hash(self.__MACAddress + self.__name + str(self.signalStrength))
 
     def __eq__(self, other):
         return self.__hash__() == other.__hash__()
 
 
 def getAvgSignalNodes(samples=3, tsleep=0.15):
-    #XXX: BROKEN!, MAY NEED TO CHANGE SignalNode OR DO SOMETHING ELSE
+    '''
+    Returns list of signal nodes
+    '''
+    return getAvgSignalNodesDict(samples=samples, tsleep=tsleep).values()
+    
+def getAvgSignalNodesDict(samples=3, tsleep=0.15):
     ''' 
     Get the average signal strength from samples samples, at intervals of tsleep seconds
     (although it will take a bit longer since getCoords() takes a while to execute)
@@ -67,30 +76,32 @@ def getAvgSignalNodes(samples=3, tsleep=0.15):
      }
     '''
     import time
-    allSurroundingNodes = set()
+    allSurroundingNodes = dict() 
 
     for i in range(samples):
         print i
-        res = getSignalNodes()
-        for node in res:
-            if node in allSurroundingNodes:
-#XXX: THIS IS VERY BROKEN; I THOUGHT YOU COULD GET AN ELEMENT FROM A SET
-                node.signalStrength += res[node].signalStrength
+        res = getSignalNodeDict()
+        for nodeIdentifier in res:
+            if nodeIdentifier in allSurroundingNodes:
+                allSurroundingNodes[nodeIdentifier].signalStrength += res[nodeIdentifier].signalStrength
             else:
-                allSurroundingNodes.add(node)
+                allSurroundingNodes[nodeIdentifier] = res[nodeIdentifier]
         time.sleep(tsleep)
-        
+    
+
+    #TODO: Figure out what to in terms of division if the else statement above is triggered.
+
     # And divide each by sample count
-    for node in allSurroundingNodes:
-        allSurroundingNodes.signalStrength /= float(samples)
+    for node in allSurroundingNodes.values():
+        node.signalStrength /= float(samples)
 
-    return totals
+    return allSurroundingNodes
 
-def getSignalNodes():
+def getSignalNodeDict():
     '''
     Scans (or gets cached versions, on some systems) of wireless signal strengths around the computer,
     using platform-dependent methods.
-    Returns a set of SignalNodes
+    Returns a dict mapping SignalNode identifiers to SignalNodes
     '''
     
     # WINDOWS
@@ -118,7 +129,7 @@ def __getExePath():
     return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
 
 def __getSignalNodesWin():
-    signalNodes = set()
+    signalNodesDict = dict()
     # Should work on Windows > XP SP3
     o = subprocess.Popen(os.path.join(__getExePath(), 'Get Wireless Strengths.exe'), stderr=subprocess.PIPE, stdout=subprocess.PIPE,shell=True).stdout#shell=true hides shell
     res = o.read()
@@ -128,8 +139,8 @@ def __getSignalNodesWin():
         RSSI,SSID,BSSID = row['RSSI'], row['SSID'],row['BSSID']
         if 'OLIN' in SSID and 'GUEST' not in SSID: #Only take into account OLIN wifi and non-guest WIFI
             currNode = SignalNode(BSSID, SSID, __interpretDB(RSSI))
-            signalNodes.add(currNode)
-    return signalNodes
+            signalNodesDict[currNode.identifier] = currNode
+    return signalNodesDict
 
 def __getSignalNodesMac():
     import plistlib
@@ -139,7 +150,7 @@ def __getSignalNodesMac():
     # -s[<arg>] --scan=[<arg>]       Perform a wireless broadcast scan.
     #           Will perform a directed scan if the optional <arg> is provided
     # -x        --xml                Print info as XML
-    signalNodes = set()
+    signalNodesDict = dict()
     
     ntwks = list()
     try:
@@ -167,12 +178,12 @@ def __getSignalNodesMac():
                     bssid.append(byte.upper())
             currNode = SignalNode(':'.join(bssid), network['SSID_STR'], __interpretDB(network['RSSI']))
             print currNode
-            signalNodes.add(currNode)
-    return signalNodes
+            signalNodesDict[currNode.identifier] = currNode
+    return signalNodesDict
 
 def __getSignalNodesNetworkManager():
     '''
-    Uses nm-tool on Linux to get the signal strength as a set of SignalNodes
+    Uses nm-tool on Linux to get the signal strength as a dict of SignalNode identifiers -> SignalNodes
     Note: I couldn't find out the signal strength units. Hopefully they are compatible.
     '''
     p1 = subprocess.Popen("nm-tool", stdout=subprocess.PIPE)
@@ -183,7 +194,7 @@ def __getSignalNodesNetworkManager():
     result = p3.communicate()[0].strip().split('\n')
     p1.wait()
     p2.wait()
-    signalNodes = set()
+    signalNodesDict = dict()
 
     for line in result:
         # Format is now
@@ -196,10 +207,9 @@ def __getSignalNodesNetworkManager():
         bssid = accessPtInfo[1].strip()
         strength = int(accessPtInfo[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to __interpretDB's output - Julian
         currNode = SignalNode(bssid, ssid, strength)
-        signalNodes.add(currNode)
-    return signalNodes
+        signalNodesDict[currNode.identifier] = currNode
+    return signalNodesDict
 
 if __name__ == '__main__':
     # test code
-#XXX: BROKEN
-    print getAvgSignalNodes(samples=3, tsleep=0.15)
+    print ";".join([str(node) for node in getAvgSignalNodes(samples=3, tsleep=0.15)])
