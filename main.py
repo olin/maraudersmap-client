@@ -74,11 +74,11 @@ class Window(QtGui.QDialog):
         if locations:
             subMenu = QtGui.QMenu("Popup Submenu", self)
             for loc in locations:
-                subMenu.addAction(loc)
+                subMenu.addAction(loc.getReadableName())
             subMenu.addSeparator()            
             subMenu.addAction(self.otherLocationAction)
             self.correctLocationAction.setMenu(subMenu)            
-            bestLocation = locations[0]
+            bestLocation = locations[0].getReadableName()
             self.locationIndicator.setText(bestLocation)
             self.correctLocationAction.setEnabled(True)
         else:
@@ -193,7 +193,7 @@ class MyThread (QtCore.QThread):
         self.exiting = False
         while not self.exiting:
             self.working = True
-            self.locationReporter.reporter.emit(actions.refresh_location())
+            self.locationReporter.reporter.emit(actions.getLocation())
             self.working = False 
             self.sleep(5) # Seconds
         return 
