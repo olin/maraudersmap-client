@@ -181,13 +181,14 @@ def canLaunch():
 if __name__ == '__main__':
     import sys
     
+    app = QtGui.QApplication(sys.argv)
     ableToLaunch, reason = canLaunch()
+    
     if not ableToLaunch:
         print "ERROR: Unable to launch Marauder's Map!"
         print reason
         sys.exit(1)
     else:
-        app = QtGui.QApplication(sys.argv)
         # Note: we have to retain a reference to the window so that it isn't killed
-        preferencesWindow = setupWindow() 
+        preferencesWindow = setupWindow()
         sys.exit(app.exec_())
