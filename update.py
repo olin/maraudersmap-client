@@ -1,6 +1,6 @@
 # Send position / username. Retrieve guesses.
 
-import coordinates
+import signalStrength
 import data_connections
 
 def do_update(username, currPlaceName = None, status=None):
@@ -14,8 +14,8 @@ def do_update(username, currPlaceName = None, status=None):
     placename -> string of curr place
     status -> never used ?!?!?!
     '''
-    signalStrengthDict = coordinates.getAvgSignalStrengthDict()
-    if not signalStrengthDict:
+    signalNodeArray = signalStrength.getAvgSignalNodes()
+    if not signalNodeArray:
         return False, "Failed to get coordinates"
     else:
         signalStrengthStr = data_connections.serializeMACData( signalStrengthDict )
