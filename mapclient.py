@@ -144,13 +144,16 @@ class PreferencesWindow(QtGui.QDialog):
     @QtCore.Slot()
     def sysTrayMenuClosed(self):  
         print "Closed Menu"
-        # XXX: NEVER GETS TRIGGERED
+        # XXX: NEVER GETS TRIGGERED on Mac OsX
         self.sysTray.setIcon(self.sysTrayIconDefault)
 
     def sysTrayQuitAction(self):
         '''
         Cleans up and quits the application.
         '''
+        # On Ubuntu 10.10, a Python fatal error is encountered if the
+        # window is not hidden before the application exits
+        self.hide()
         QtGui.qApp.quit()
 
     def sysTrayInitiateLocationRefresh(self):
