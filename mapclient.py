@@ -144,13 +144,16 @@ class PreferencesWindow(QtGui.QDialog):
     @QtCore.Slot()
     def sysTrayMenuClosed(self):  
         print "Closed Menu"
-        # XXX: NEVER GETS TRIGGERED
+        # XXX: NEVER GETS TRIGGERED on Mac OsX
         self.sysTray.setIcon(self.sysTrayIconDefault)
 
     def sysTrayQuitAction(self):
         '''
         Cleans up and quits the application.
         '''
+        # On Ubuntu 10.10, a Python fatal error is encountered if the
+        # window is not hidden before the application exits
+        self.hide()
         QtGui.qApp.quit()
 
     def sysTrayInitiateLocationRefresh(self):
@@ -181,13 +184,14 @@ def canLaunch():
 if __name__ == '__main__':
     import sys
     
+    app = QtGui.QApplication(sys.argv)
     ableToLaunch, reason = canLaunch()
+    
     if not ableToLaunch:
         print "ERROR: Unable to launch Marauder's Map!"
         print reason
         sys.exit(1)
     else:
-        app = QtGui.QApplication(sys.argv)
         # Note: we have to retain a reference to the window so that it isn't killed
-        preferencesWindow = setupWindow() 
+        preferencesWindow = setupWindow()
         sys.exit(app.exec_())
