@@ -1,5 +1,6 @@
 import urllib
 
+import webbrowser
 from configuration import Settings
 import signalStrength
 from getpass import getuser
@@ -67,6 +68,9 @@ class Coordinate(object):
         self.y = y
         self.w = w # Which map the coord refers to (1 or 2)
         self.distance = distance
+
+def openMap():
+    webbrowser.open(Settings.WEB_ADDRESS)
 
 def sendToServer(strPHPScript, dictParams):
     '''
@@ -142,6 +146,8 @@ def postLocation(placeName):
     Returns a list of potential locations, 
     sorted from most to least likely.
     '''
+
+    print "Name to post:", placeName
     
     return __update(currPlaceName=placeName)
     

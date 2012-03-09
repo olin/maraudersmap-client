@@ -4,7 +4,7 @@ import sys
 from PySide import QtCore
 from PySide import QtGui
 
-import actions
+import api
 
 class GeneralTab(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -70,11 +70,19 @@ class Window(QtGui.QDialog):
             event.ignore()
 
     @QtCore.Slot(list)
-    def locationSlot(self, locations):
-        if locations:
+    def locationSlot(self, flagResponseTuple):
+        flag, response = flagResponseTuple
+        if flag:
+            locations = response
             subMenu = QtGui.QMenu("Popup Submenu", self)
             for loc in locations:
-                subMenu.addAction(loc.getReadableName())
+                def correctLocation(realName):
+                    def postFunction():
+                        api.postLocation(realName)
+                    return postFunction
+                
+                subAction = QtGui.QAction(loc.getReadableName(), self, triggered=correctLocation(loc.encodedName))
+                subMenu.addAction(subAction)
             subMenu.addSeparator()            
             subMenu.addAction(self.otherLocationAction)
             self.correctLocationAction.setMenu(subMenu)            
@@ -88,7 +96,7 @@ class Window(QtGui.QDialog):
 
     def createActions(self):
         #TODO: Figure out how to hide tooltips: http://stackoverflow.com/questions/9471791/suppress-qtgui-qaction-tooltips-in-pyside
-        self.openAction = QtGui.QAction("&Open Map", self, triggered=actions.open_map)
+        self.openAction = QtGui.QAction("&Open Map", self, triggered=api.openMap)
         self.refreshAction = QtGui.QAction("&Refresh My Location", self, triggered=self.refreshLocation)        
         self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)        
         
@@ -186,16 +194,16 @@ class MyThread (QtCore.QThread):
     def updateSlot(self):
         # Slot to get message to update location
         if not self.working:
-            self.locationReporter.reporter.emit(actions.refresh_location())
+            self.locationReporter.reporter.emit(api.getLocation())
 
     def run(self):
         self.runs = True
         self.exiting = False
         while not self.exiting:
             self.working = True
-            self.locationReporter.reporter.emit(actions.getLocation())
+            self.locationReporter.reporter.emit(api.getLocation())
             self.working = False 
-            self.sleep(5) # Seconds
+            self.sleep(500) # Seconds
         return 
 
 if __name__ == '__main__':
