@@ -27,30 +27,27 @@ def sendToServer(strPHPScript, dictParams):
     else:
         return True, ret[len('success:'):]
 
-def serializeMACData(signalStrengthDict):
+def serializeMACData(signalNodeArray):
     '''
-    Convert signalStrengthDict to a string 
+    Convert signalNodeArray to a string 
     '''
-    s = ''
-    for mac in signalStrengthDict:
-        s += mac + ',' + str(signalStrengthDict[mac][0]) + ';'
-        # 00:11:22:33:44:55,45;
-    return s.rstrip(';')
+    return ";".join([node for node in signalNodeArray])
+    # 00:11:22:33:44:55,45;
 
-def unserializePersonData(s):
+def unserializePersonData(serverResponseString):
     '''
-    Takes in a pipe-separated string (from a server response?) and 
+    Takes in a pipe-separated string and 
     outputs a dictionary with the keys
     'username', 'placename', 'status', and 'lastupdate'
     '''
     personData = dict()
-    if s == 'nobody': 
+    if serverResponseString == 'nobody': 
         return 'nobody'
-    s = s.split('|')
-    personData['username'] = s[0]
-    personData['placename'] = s[1]
-    personData['status'] = s[2]
-    personData['lastupdate'] = s[3]
+    serverResponseArray = serverResponseString.split('|')
+    personData['username'] = serverResponseArray[0]
+    personData['placename'] = serverResponseArray[1]
+    personData['status'] = serverResponseArray[2]
+    personData['lastupdate'] = serverResponseArray[3]
     return personData
 
 def unserializeMACData(s):
