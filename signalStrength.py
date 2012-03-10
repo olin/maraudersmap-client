@@ -79,7 +79,6 @@ def getAvgSignalNodesDict(samples=3, tsleep=0.15):
     allSurroundingNodes = dict() 
 
     for i in range(samples):
-        print i
         res = getSignalNodeDict()
         for nodeIdentifier in res:
             if nodeIdentifier in allSurroundingNodes:
@@ -177,7 +176,6 @@ def __getSignalNodesMac():
                 else:
                     bssid.append(byte.upper())
             currNode = SignalNode(':'.join(bssid), network['SSID_STR'], __interpretDB(network['RSSI']))
-            print currNode
             signalNodesDict[currNode.identifier] = currNode
     return signalNodesDict
 

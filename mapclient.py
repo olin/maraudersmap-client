@@ -12,7 +12,7 @@
 from PySide import QtCore
 from PySide import QtGui
 
-import actions
+import api
 
 class GeneralPrefs(QtGui.QWidget):
     def __init__(self):
@@ -27,6 +27,34 @@ class AdvancedPrefs(QtGui.QWidget):
         mainLayout = QtGui.QVBoxLayout()
         mainLayout.addWidget(QtGui.QLabel("You will be able to configure advanced stuff here."))
         self.setLayout(mainLayout)
+
+class UpdateSignaler(QtCore.QObject):
+    '''
+    A signal that can be sent to the BackgroundThread in order to tell it
+    to get the user's new location
+    '''
+    signal = QtCore.Signal()
+
+class LocationReporter(QtCore.QObject):
+    reporter = QtCore.Signal(list)
+
+class BackgroundThread(QtCore.QThread):
+    def __init__(self, parent):
+        QtCore.QThread.__init__(self, parent)
+
+        self.locationReporter = LocationReporter()
+        self.locationReporter.reporter.connect(parent.locationSlot)
+
+    @QtCore.Slot()
+    def updateSlot(self):
+        print "Update Slot"
+        resp = api.getLocation()
+        print "Got Loc"
+        self.locationReporter.reporter.emit(resp)
+        print "Reported Loc"
+
+    def run(self):
+        self.exec_()
 
 class PreferencesWindow(QtGui.QDialog):
     def __init__(self):
@@ -43,6 +71,7 @@ class PreferencesWindow(QtGui.QDialog):
         self.setWindowTitle("Marauder's Map @ Olin Preferences") 
 
         self.createSystemTray()
+        self.startRefreshTimer()
 
     def setSize(self, width, height):
         self.setMinimumWidth(width)        
@@ -75,13 +104,13 @@ class PreferencesWindow(QtGui.QDialog):
         self.createSystemTrayActions()
         self.sysTrayMenu = self.createSystemTrayMenu()
         self.sysTray.setContextMenu(self.sysTrayMenu)
-        self.sysTrayMenu.aboutToHide.connect(self.sysTrayMenuClosed) # XXX: NEVER GETS TRIGGERED!?!
+        self.sysTrayMenu.aboutToHide.connect(self.sysTrayMenuClosed) # XXX: NEVER GETS TRIGGERED ON MAC OS X!?!
         # I expected this to emit on menu close when no action is selected
 
         self.sysTray.show()
 
     def createSystemTrayActions(self):
-        self.openAction = QtGui.QAction("&Open Map", self, triggered=actions.open_map)
+        self.openAction = QtGui.QAction("&Open Map", self, triggered=api.openMap)
         self.refreshAction = QtGui.QAction("&Refresh My Location", self, triggered=self.sysTrayInitiateLocationRefresh)
         self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)
         self.correctLocationAction = QtGui.QAction("&Correct My Location", self)
@@ -107,6 +136,26 @@ class PreferencesWindow(QtGui.QDialog):
         
         return sysTrayMenu
         
+    def startRefreshTimer(self):
+        self.bgThread = BackgroundThread(self)
+
+        self.updateSignaler = UpdateSignaler()
+        self.updateSignaler.signal.connect(self.bgThread.updateSlot)
+        
+        self.bgThread.start()
+
+        self.refreshTimer = QtCore.QTimer(self)
+        self.refreshTimer.timeout.connect(self.refreshLocation)
+        self.refreshTimer.start(1000*20)
+        print "Timer Started"
+
+    def refreshLocation(self):
+        print "Refreshing!"
+        self.updateSignaler.signal.emit()
+
+    def setupBackgroundThread(self):
+        pass
+
     def display(self):
         '''
         Display the preferences window
@@ -153,11 +202,20 @@ class PreferencesWindow(QtGui.QDialog):
         '''
         # On Ubuntu 10.10, a Python fatal error is encountered if the
         # window is not hidden before the application exits
+        self.bgThread.quit()
+        while self.bgThread.isRunning():
+            print "Thread Still Running!"
         self.hide()
         QtGui.qApp.quit()
 
     def sysTrayInitiateLocationRefresh(self):
         pass
+
+    # Background actions
+    @QtCore.Slot(list)
+    def locationSlot(self, flagResponseTuple):
+        flag, response = flagResponseTuple
+        print response
 
 def setupWindow():
     '''
