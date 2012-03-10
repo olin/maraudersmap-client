@@ -36,14 +36,20 @@ class LocationWorker(QtCore.QObject):
     @QtCore.Slot()
     def getLocation(self):  
         print "GettingLocation!"
-        #self.locationUpdatedSignaler.signal.emit(api.getLocation())
         self.locationUpdatedSignal.emit(api.getLocation())
+
+    @QtCore.Slot(str)
+    def postLocation(self, locationString):  
+        print "Posting User-Specified Location:", locationString
+        api.postLocation(locationString)
 
 class PreferencesWindow(QtGui.QDialog):
     
     # A signal that can be sent to the LocationWorker to tell it
     # to get the user's new location    
     updateSignal = QtCore.Signal()
+
+    postSignal = QtCore.Signal(str)
 
     def __init__(self):
         super(PreferencesWindow, self).__init__()
@@ -140,12 +146,22 @@ class PreferencesWindow(QtGui.QDialog):
         print "Refreshing!"
         self.updateSignal.emit()
 
+    def postLocation(self, loc):
+        '''
+        Sends a signal to the LocationWorker in bgThread
+        to post a specified location
+        '''
+        print "Posting!"
+        self.postSignal.emit(loc.encodedName)
+        self.locationIndicator.setText(loc.getReadableName())
+
     def setupBackgroundThread(self):
         print "Setting up bgThread"
         self.bgThread = QtCore.QThread()
         self.locationWorker = LocationWorker()
         self.locationWorker.locationUpdatedSignal.connect(self.locationSlot)
         self.updateSignal.connect(self.locationWorker.getLocation)
+        self.postSignal.connect(self.locationWorker.postLocation)
         self.locationWorker.moveToThread(self.bgThread)
 
     def display(self):
@@ -211,8 +227,29 @@ class PreferencesWindow(QtGui.QDialog):
         happens
         '''
         flag, response = flagResponseTuple
-        print response
+        if flagResponseTuple:
+            potLocs = response
+            subMenu = QtGui.QMenu("Correct Location Submenu", self)
+            for potLoc in potLocs:
+                def correctLocation(realLoc):
+                    def postFunction():
+                        self.postLocation(realLoc)
+                    return postFunction
+                
+                subAction = QtGui.QAction(potLoc.getReadableName(), self, triggered=correctLocation(potLoc))
+                subMenu.addAction(subAction)
+            subMenu.addSeparator()            
+            subMenu.addAction(self.otherLocationAction)
+            self.correctLocationAction.setMenu(subMenu)
+            self.correctLocationAction.setEnabled(True)
 
+            self.mostLikelyLoc = potLocs[0]
+            self.locationIndicator.setText(self.mostLikelyLoc.getReadableName())
+
+        else:
+            self.locationIndicator.setText("Unable to Connect to Server")
+            self.correctLocationAction.setEnabled(False)
+            
 def setupWindow():
     '''
     Create and return the preferences window,
