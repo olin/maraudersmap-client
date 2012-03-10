@@ -7,9 +7,10 @@ Usage:
 
 from setuptools import setup
 
-APP = ['main.py']
+APP = ['mapclient.py']
 DATA_FILES = ['qt.conf', # Used to fix mysterious segfault based on advice from http://www.thetoryparty.com/2009/03/03/pyqt4-i-hate-you/
-              'demoIcon.png']
+              'demoIcon.png',
+              'demoIconWhite.png']
 
 # The plist file specifies that there should be no icon in the dock 
 # See: http://www.macosxtips.co.uk/index_files/disable-the-dock-icon-for-any-application.php

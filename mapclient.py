@@ -28,39 +28,25 @@ class AdvancedPrefs(QtGui.QWidget):
         mainLayout.addWidget(QtGui.QLabel("You will be able to configure advanced stuff here."))
         self.setLayout(mainLayout)
 
-class UpdateSignaler(QtCore.QObject):
+class LocationUpdatedSignaler(QtCore.QObject):
     '''
-    A signal that can be sent to the BackgroundThread in order to tell it
-    to get the user's new location
+    A signal sent by the LocationWorker whenever the location is reported by the server
     '''
     signal = QtCore.Signal()
 
-class LocationReporter(QtCore.QObject):
-    reporter = QtCore.Signal(list)
+
+class UpdateSignaler(QtCore.QObject):
+    '''
+    A signal that can be sent to the LocationWorker to tell it
+    to get the user's new location
+    '''
+    signal = QtCore.Signal()
 
 class LocationWorker(QtCore.QObject):
     @QtCore.Slot()
     def getLocation(self):  
         print "GettingLocation!"
         print api.getLocation()
-
-class BackgroundThread(QtCore.QThread):
-    def __init__(self, parent):
-        QtCore.QThread.__init__(self, parent)
-
-        self.locationReporter = LocationReporter()
-        self.locationReporter.reporter.connect(parent.locationSlot)
-
-    @QtCore.Slot()
-    def updateSlot(self):
-        print "Update Slot"
-        resp = api.getLocation()
-        print "Got Loc"
-        self.locationReporter.reporter.emit(resp)
-        print "Reported Loc"
-
-    def run(self):
-        self.exec_()
 
 class PreferencesWindow(QtGui.QDialog):
     def __init__(self):
@@ -77,6 +63,7 @@ class PreferencesWindow(QtGui.QDialog):
         self.setWindowTitle("Marauder's Map @ Olin Preferences") 
 
         self.createSystemTray()
+        self.setupBackgroundThread()
         self.startRefreshTimer()
 
     def setSize(self, width, height):
@@ -143,26 +130,27 @@ class PreferencesWindow(QtGui.QDialog):
         return sysTrayMenu
         
     def startRefreshTimer(self):
-        self.bgThread = QtCore.QThread()
-        self.updateSignaler = UpdateSignaler()
         self.bgThread.start()        
         self.refreshTimer = QtCore.QTimer(self)
         self.refreshTimer.timeout.connect(self.refreshLocation)
-        self.refreshTimer.start(10000)#1000*10)
+        self.refreshTimer.start(10000)
         print "Timer Started"
 
-        self.locationWorker = LocationWorker()
-        self.updateSignaler.signal.connect(self.locationWorker.getLocation)
-        self.locationWorker.moveToThread(self.bgThread)
-
     def refreshLocation(self):
+        '''
+        Sends a signal to the LocationWorker in bgThread
+        to get the location
+        '''
         print "Refreshing!"
-        #self.updateSignaler.signal.emit()
-
         self.updateSignaler.signal.emit()
 
     def setupBackgroundThread(self):
-        pass
+        print "Setting up bgThread"
+        self.bgThread = QtCore.QThread()
+        self.updateSignaler = UpdateSignaler()
+        self.locationWorker = LocationWorker()
+        self.updateSignaler.signal.connect(self.locationWorker.getLocation)
+        self.locationWorker.moveToThread(self.bgThread)
 
     def display(self):
         '''
@@ -222,6 +210,10 @@ class PreferencesWindow(QtGui.QDialog):
     # Background actions
     @QtCore.Slot(list)
     def locationSlot(self, flagResponseTuple):
+        '''
+        Slot that gets data whenever a location refresh
+        happens
+        '''
         flag, response = flagResponseTuple
         print response
 
