@@ -28,27 +28,23 @@ class AdvancedPrefs(QtGui.QWidget):
         mainLayout.addWidget(QtGui.QLabel("You will be able to configure advanced stuff here."))
         self.setLayout(mainLayout)
 
-class LocationUpdatedSignaler(QtCore.QObject):
-    '''
-    A signal sent by the LocationWorker whenever the location is reported by the server
-    '''
-    signal = QtCore.Signal()
-
-
-class UpdateSignaler(QtCore.QObject):
-    '''
-    A signal that can be sent to the LocationWorker to tell it
-    to get the user's new location
-    '''
-    signal = QtCore.Signal()
-
 class LocationWorker(QtCore.QObject):
+
+    # A signal sent by the LocationWorker whenever the location is reported by the server
+    locationUpdatedSignal = QtCore.Signal(list)
+
     @QtCore.Slot()
     def getLocation(self):  
         print "GettingLocation!"
-        print api.getLocation()
+        #self.locationUpdatedSignaler.signal.emit(api.getLocation())
+        self.locationUpdatedSignal.emit(api.getLocation())
 
 class PreferencesWindow(QtGui.QDialog):
+    
+    # A signal that can be sent to the LocationWorker to tell it
+    # to get the user's new location    
+    updateSignal = QtCore.Signal()
+
     def __init__(self):
         super(PreferencesWindow, self).__init__()
         self.setup()
@@ -142,14 +138,14 @@ class PreferencesWindow(QtGui.QDialog):
         to get the location
         '''
         print "Refreshing!"
-        self.updateSignaler.signal.emit()
+        self.updateSignal.emit()
 
     def setupBackgroundThread(self):
         print "Setting up bgThread"
         self.bgThread = QtCore.QThread()
-        self.updateSignaler = UpdateSignaler()
         self.locationWorker = LocationWorker()
-        self.updateSignaler.signal.connect(self.locationWorker.getLocation)
+        self.locationWorker.locationUpdatedSignal.connect(self.locationSlot)
+        self.updateSignal.connect(self.locationWorker.getLocation)
         self.locationWorker.moveToThread(self.bgThread)
 
     def display(self):
