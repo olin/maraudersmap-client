@@ -38,6 +38,12 @@ class UpdateSignaler(QtCore.QObject):
 class LocationReporter(QtCore.QObject):
     reporter = QtCore.Signal(list)
 
+class LocationWorker(QtCore.QObject):
+    @QtCore.Slot()
+    def getLocation(self):  
+        print "GettingLocation!"
+        print api.getLocation()
+
 class BackgroundThread(QtCore.QThread):
     def __init__(self, parent):
         QtCore.QThread.__init__(self, parent)
@@ -137,20 +143,22 @@ class PreferencesWindow(QtGui.QDialog):
         return sysTrayMenu
         
     def startRefreshTimer(self):
-        self.bgThread = BackgroundThread(self)
-
+        self.bgThread = QtCore.QThread()
         self.updateSignaler = UpdateSignaler()
-        self.updateSignaler.signal.connect(self.bgThread.updateSlot)
-        
-        self.bgThread.start()
-
+        self.bgThread.start()        
         self.refreshTimer = QtCore.QTimer(self)
         self.refreshTimer.timeout.connect(self.refreshLocation)
-        self.refreshTimer.start(1000*20)
+        self.refreshTimer.start(10000)#1000*10)
         print "Timer Started"
+
+        self.locationWorker = LocationWorker()
+        self.updateSignaler.signal.connect(self.locationWorker.getLocation)
+        self.locationWorker.moveToThread(self.bgThread)
 
     def refreshLocation(self):
         print "Refreshing!"
+        #self.updateSignaler.signal.emit()
+
         self.updateSignaler.signal.emit()
 
     def setupBackgroundThread(self):
@@ -203,8 +211,8 @@ class PreferencesWindow(QtGui.QDialog):
         # On Ubuntu 10.10, a Python fatal error is encountered if the
         # window is not hidden before the application exits
         self.bgThread.quit()
-        while self.bgThread.isRunning():
-            print "Thread Still Running!"
+        while not self.bgThread.isFinished():
+            continue # Wait until thread done 
         self.hide()
         QtGui.qApp.quit()
 
