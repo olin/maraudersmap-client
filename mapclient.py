@@ -108,7 +108,7 @@ class PreferencesWindow(QtGui.QDialog):
         self.openAction = QtGui.QAction("&Open Map", self, triggered=api.openMap)
         self.refreshAction = QtGui.QAction("&Refresh My Location", self, triggered=self.sysTrayInitiateLocationRefresh)
         self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)
-        self.correctLocationAction = QtGui.QAction("&Correct My Location", self)
+        self.correctLocationAction = QtGui.QAction("&Correct My Location", self, enabled=False)
         self.otherLocationAction = QtGui.QAction("Other...", self)
         self.offlineAction = QtGui.QAction("&Go Offline", self)
         self.prefsAction = QtGui.QAction("&Preferences...", self, triggered=self.display)

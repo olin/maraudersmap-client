@@ -15,7 +15,8 @@ class Location(object):
         #TODO: Rewrite!
 
         # location strings look like WH,in,rm309
-        location = self.encodedName.replace("OC", "MH")
+        location = self.encodedName.replace("OC", "MH") # Once upon a time, Milas hall was called Olin Center
+        # XXX: Should be changed on server, probably
  
         try:
             building, inside, description = location.split(",")
@@ -28,7 +29,7 @@ class Location(object):
         if (inside == "in"):
             inside = "inside"
         elif (inside == "out"):
-            inside = "outside of"
+            inside = "outside"
         if (floor == "1"):
             floor = "1st"
         elif (floor == "2"):
@@ -52,12 +53,12 @@ class Location(object):
             description = description.replace("Room", "")
             description = description.replace("ROOM", "")
 
-            location = inside + " " + building + description
+            location = '%s %s%s' % (inside,building,description)
         else:
             if (floor != "LL"):
-                location = inside + " " + building + " " + floor + " floor " + description
+                location = '%s %s %s floor%s' % (inside,building,floor,description)
             else:
-                location = inside + " " + building + " (" + floor + ") " + description
+                location = '%s %s (%s) %s' % (inside,building,floor,description)
         
         return location
 
