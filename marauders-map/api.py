@@ -97,12 +97,12 @@ def sendToServer(strPHPScript, dictParams):
     else:
         return True, ret[len('success:'):]
 
-def __update(currPlaceName = None, status=None):
+def __update(username, currPlaceName = None, status=None):
     signalStrengthNodes = signalStrength.getAvgSignalNodes(samples=3, tsleep=0.15)
     signalStrengthStr = ";".join([str(node) for node in signalStrengthNodes])
     
     dictSend = dict()
-    dictSend['username'] = getuser()
+    dictSend['username'] = username
     dictSend['data'] = signalStrengthStr
     dictSend['platform'] = __getPlatform()
     
@@ -138,11 +138,11 @@ def getLocation():
     sorted from most to least likely.
     '''
     
-    return __update()
+    return __update(getuser())
 
 def postLocation(placeName):
     '''
-    Post location to server.
+    Post encoded location to server.
     
     Returns a list of potential locations, 
     sorted from most to least likely.
@@ -150,7 +150,7 @@ def postLocation(placeName):
 
     print "Name to post:", placeName
     
-    return __update(currPlaceName=placeName)
+    return __update(getuser(), currPlaceName=placeName)
     
 def __getPlatform():
     '''
@@ -165,13 +165,13 @@ def __getPlatform():
         return 'linux'
     return sys.platform # non-standard platform
 
-def do_train(username, placename, mapx, mapy, mapw, data):
+def do_train(placename, mapx, mapy, mapw, data):
     #XXX: UNTESTED
     '''
     Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data)
     '''
     strCoords = data_connections.serializeMACData(data)
-    dictSend = {'username':username, 'placename':placename,'mapx':mapx,'mapy':mapy, 'mapw':mapw, 'data':strCoords}
+    dictSend = {'username':getuser(), 'placename':placename,'mapx':mapx,'mapy':mapy, 'mapw':mapw, 'data':strCoords}
     dictSend['platform'] = __getPlatform()
         
     retStatus, result = data_connections.sendToServer('train.php', dictSend)
@@ -182,17 +182,35 @@ def do_train(username, placename, mapx, mapy, mapw, data):
         
     return True, result
 
+def unserializePersonData(serverResponseString):
+    '''
+    Takes in a pipe-separated string and 
+    outputs a dictionary with the keys
+    'username', 'placename', 'status', and 'lastupdate'
+    '''
+    personData = dict()
+    if serverResponseString == 'nobody': 
+        return 'nobody'
+    serverResponseArray = serverResponseString.split('|')
+    personData['username'] = serverResponseArray[0]
+    personData['placename'] = serverResponseArray[1]
+    personData['status'] = serverResponseArray[2]
+    personData['lastupdate'] = serverResponseArray[3]
+    return personData
+
 def do_query(username):
     #XXX: UNTESTED
     '''
-    Get the name of the place at which a user with a specific username is located
+    Get a dictionary containing
+    username, placename, status, and lastupdate
+    of person with username
     '''
-    flag, result = data_connections.sendToServer('query.php', {'username':username})
+    flag, result = sendToServer('query.php', {'username':username})
     if not flag:
         print 'Error:', result
         return flag, result
     
-    result = data_connections.unserializePersonData(result)
+    result = unserializePersonData(result)
     return True, result
 
 def do_datapointexistence(placename):
@@ -213,7 +231,7 @@ def do_cloak(username):
     '''
     Tell the server to stop displaying a user with username on the map
     '''
-    flag, result = data_connections.sendToServer('cloak.php', {'username':username})
+    flag, result = sendToServer('cloak.php', {'username':username})
     if not flag:
         print 'Error:', result
         return flag, result
