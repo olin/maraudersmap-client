@@ -71,6 +71,9 @@ class Coordinate(object):
         self.distance = distance
 
 def openMap():
+    """
+    Brings up the marauder's map in a web browser
+    """
     webbrowser.open(Settings.WEB_ADDRESS)
 
 def sendToServer(strPHPScript, dictParams):
@@ -98,6 +101,11 @@ def sendToServer(strPHPScript, dictParams):
         return True, ret[len('success:'):]
 
 def __update(username, currPlaceName = None, status=None):
+    """
+    Update can tell you where you are or tell the server where you are.
+    This is different based on the server call and is still confusing - 
+    we are still trying to figure out how it works.
+    """
     signalStrengthNodes = signalStrength.getAvgSignalNodes(samples=3, tsleep=0.15)
     signalStrengthStr = ";".join([str(node) for node in signalStrengthNodes])
     
@@ -168,7 +176,8 @@ def __getPlatform():
 def do_train(placename, mapx, mapy, mapw, data):
     #XXX: UNTESTED
     '''
-    Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data)
+    Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and
+    encoded placename string
     '''
     strCoords = data_connections.serializeMACData(data)
     dictSend = {'username':getuser(), 'placename':placename,'mapx':mapx,'mapy':mapy, 'mapw':mapw, 'data':strCoords}
@@ -216,7 +225,7 @@ def do_query(username):
 def do_datapointexistence(placename):
     #XXX: UNTESTED
     '''
-    Check if a point with a specific place name exists
+    Check if a point with a specific encoded placename exists
     '''
     flag, result = data_connections.sendToServer('pointexistence.php', {'placename':placename})
     if not flag:
@@ -229,7 +238,9 @@ def do_datapointexistence(placename):
 def do_cloak(username):
     #XXX: UNTESTED
     '''
-    Tell the server to stop displaying a user with username on the map
+    Tell the server to stop displaying a user with username on the map.
+
+    This is kind of sketchy and probably shoudn't be possible?
     '''
     flag, result = sendToServer('cloak.php', {'username':username})
     if not flag:
