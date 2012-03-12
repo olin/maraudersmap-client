@@ -35,7 +35,7 @@ class LocationWorker(QtCore.QObject):
 
     @QtCore.Slot()
     def getLocation(self):  
-        print "GettingLocation!"
+        print "Getting location"
         self.locationUpdatedSignal.emit(api.getLocation())
 
     @QtCore.Slot(str)
@@ -136,14 +136,12 @@ class PreferencesWindow(QtGui.QDialog):
         self.refreshTimer = QtCore.QTimer(self)
         self.refreshTimer.timeout.connect(self.refreshLocation)
         self.refreshTimer.start(10000)
-        print "Timer Started"
 
     def refreshLocation(self):
         '''
         Sends a signal to the LocationWorker in bgThread
         to get the location
         '''
-        print "Refreshing!"
         self.updateSignal.emit()
 
     def postLocation(self, loc):
@@ -151,12 +149,10 @@ class PreferencesWindow(QtGui.QDialog):
         Sends a signal to the LocationWorker in bgThread
         to post a specified location
         '''
-        print "Posting!"
         self.postSignal.emit(loc.encodedName)
         self.locationIndicator.setText(loc.getReadableName())
 
     def setupBackgroundThread(self):
-        print "Setting up bgThread"
         self.bgThread = QtCore.QThread()
         self.locationWorker = LocationWorker()
         self.locationWorker.locationUpdatedSignal.connect(self.locationSlot)
@@ -217,7 +213,7 @@ class PreferencesWindow(QtGui.QDialog):
         QtGui.qApp.quit()
 
     def sysTrayInitiateLocationRefresh(self):
-        pass
+        self.refreshLocation()
 
     # Background actions
     @QtCore.Slot(list)
