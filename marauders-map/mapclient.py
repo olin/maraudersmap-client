@@ -36,12 +36,20 @@ class LocationWorker(QtCore.QObject):
     @QtCore.Slot()
     def getLocation(self):  
         print "Getting location"
-        self.locationUpdatedSignal.emit(api.getLocation())
+        responseTuple = api.getLocation()
+        self.locationUpdatedSignal.emit(responseTuple)
+        flag, response = responseTuple
+        if flag:
+            locations = response
+            print locations
+            api.weakPostLocation(locations[0].encodedName)
 
     @QtCore.Slot(str)
-    def postLocation(self, locationString):  
-        print "Posting User-Specified Location:", locationString
-        api.postLocation(locationString)
+    def postLocation(self, loc):  
+        # Should only be invoked directly by a user specifying the correct location
+        print "Posting User-Specified Location:", loc.getReadableName()
+        api.do_train(loc.encodedName, loc.coordinate)
+        api.weakPostLocation(loc.encodedName)
 
 class PreferencesWindow(QtGui.QDialog):
     
@@ -49,7 +57,7 @@ class PreferencesWindow(QtGui.QDialog):
     # to get the user's new location    
     updateSignal = QtCore.Signal()
 
-    postSignal = QtCore.Signal(str)
+    postSignal = QtCore.Signal(api.Location)
 
     def __init__(self):
         super(PreferencesWindow, self).__init__()
@@ -142,6 +150,7 @@ class PreferencesWindow(QtGui.QDialog):
         Sends a signal to the LocationWorker in bgThread
         to get the location
         '''
+        self.sysTray.showMessage("Updating", "Determining Location...")
         self.updateSignal.emit()
 
     def postLocation(self, loc):
@@ -149,7 +158,7 @@ class PreferencesWindow(QtGui.QDialog):
         Sends a signal to the LocationWorker in bgThread
         to post a specified location
         '''
-        self.postSignal.emit(loc.encodedName)
+        self.postSignal.emit(loc)
         self.locationIndicator.setText(loc.getReadableName())
 
     def setupBackgroundThread(self):
@@ -216,14 +225,14 @@ class PreferencesWindow(QtGui.QDialog):
         self.refreshLocation()
 
     # Background actions
-    @QtCore.Slot(list)
+    @QtCore.Slot(tuple)
     def locationSlot(self, flagResponseTuple):
         '''
         Slot that gets data whenever a location refresh
         happens
         '''
         flag, response = flagResponseTuple
-        if flagResponseTuple:
+        if flag:
             potLocs = response
             subMenu = QtGui.QMenu("Correct Location Submenu", self)
             for potLoc in potLocs:
@@ -241,6 +250,8 @@ class PreferencesWindow(QtGui.QDialog):
 
             self.mostLikelyLoc = potLocs[0]
             self.locationIndicator.setText(self.mostLikelyLoc.getReadableName())
+
+            self.sysTray.showMessage("Location: %s" % self.mostLikelyLoc.getReadableName(), "Click here to fix the location.")
 
         else:
             self.locationIndicator.setText("Unable to Connect to Server")

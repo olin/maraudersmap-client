@@ -70,6 +70,11 @@ class Coordinate(object):
         self.w = w # Which map the coord refers to (1 or 2)
         self.distance = distance
 
+# XXX: Sketchy global variable to get around server api requirement of getting location without posting it
+# XXX: Using this method until the server api gets fixed. I know it is REALLY BAD - Julian
+global lastSignalStrengthString
+lastSignalStrengthString = None 
+
 def openMap():
     """
     Brings up the marauder's map in a web browser
@@ -100,15 +105,21 @@ def sendToServer(strPHPScript, dictParams):
     else:
         return True, ret[len('success:'):]
 
-def __update(username, currPlaceName = None, status=None):
+def __update(username, currPlaceName = None, status=None, refresh=True):
     """
-    Update can tell you where you are or tell the server where you are.
-    This is different based on the server call and is still confusing - 
-    we are still trying to figure out how it works.
+    Update can tell you where you are or tell the server where you are, without affecting
+    the database.
     """
-    signalStrengthNodes = signalStrength.getAvgSignalNodes(samples=3, tsleep=0.15)
-    signalStrengthStr = ";".join([str(node) for node in signalStrengthNodes])
-    
+
+    #XXX: Using this method until the server api gets fixed. I know it is REALLY BAD - Julian
+    global lastSignalStrengthString
+    if refresh or lastSignalStrengthString == None:
+        signalStrengthNodes = signalStrength.getAvgSignalNodes(samples=3, tsleep=0.15)
+        signalStrengthStr = ";".join([str(node) for node in signalStrengthNodes])
+        lastSignalStrengthString = signalStrengthStr
+    else:
+        signalStrengthStr = lastSignalStrengthString
+
     dictSend = dict()
     dictSend['username'] = username
     dictSend['data'] = signalStrengthStr
@@ -150,7 +161,7 @@ def getLocation():
 
 def postLocation(placeName):
     '''
-    Post encoded location to server.
+    Post encoded location to server, without changing the database.
     
     Returns a list of potential locations, 
     sorted from most to least likely.
@@ -160,6 +171,18 @@ def postLocation(placeName):
     
     return __update(getuser(), currPlaceName=placeName)
     
+def weakPostLocation(placeName):
+    '''
+    Post encoded location to server, without changing the database and without refreshing signal strength.
+    
+    Returns a list of potential locations, 
+    sorted from most to least likely.
+    '''
+
+    print "Name to post:", placeName
+    
+    return __update(getuser(), currPlaceName=placeName, refresh=False)
+
 def __getPlatform():
     '''
     Return a standard readable string based on the operating system.
@@ -173,17 +196,28 @@ def __getPlatform():
         return 'linux'
     return sys.platform # non-standard platform
 
-def do_train(placename, mapx, mapy, mapw, data):
+def do_train(placename, coord):
     #XXX: UNTESTED
     '''
     Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and
-    encoded placename string
+    encoded placename string.
+    This actually changes the database and can be used to create novel locations or improve the
+    database entry for existing locations.
     '''
-    strCoords = data_connections.serializeMACData(data)
-    dictSend = {'username':getuser(), 'placename':placename,'mapx':mapx,'mapy':mapy, 'mapw':mapw, 'data':strCoords}
+
+    mapx, mapy, mapw = coord.x, coord.y, coord.w
+
+    signalStrengthNodes = signalStrength.getAvgSignalNodes(samples=3, tsleep=0.15)
+    signalStrengthStr = ";".join([str(node) for node in signalStrengthNodes])
+    
+    #XXX: Using this method until the server api gets fixed. I know it is REALLY BAD - Julian    
+    global lastSignalStrengthString
+    lastSignalStrengthString = signalStrengthStr
+
+    dictSend = {'username':getuser(), 'placename':placename,'mapx':mapx,'mapy':mapy, 'mapw':mapw, 'data':signalStrengthStr}
     dictSend['platform'] = __getPlatform()
         
-    retStatus, result = data_connections.sendToServer('train.php', dictSend)
+    retStatus, result = sendToServer('train.php', dictSend)
     print dictSend
     if not retStatus:
         print 'Error:', result
