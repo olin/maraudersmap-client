@@ -29,33 +29,48 @@ class AdvancedPrefs(QtGui.QWidget):
         self.setLayout(mainLayout)
 
 class LocationWorker(QtCore.QObject):
-
+    #TODO: Implement some kind of queue of tasks to prevent freezing/long shutdown time
     # A signal sent by the LocationWorker whenever the location is reported by the server
     locationUpdatedSignal = QtCore.Signal(list)
 
+    def __init__(self):
+        super(LocationWorker, self).__init__()
+        self.canWork = True        
+
     @QtCore.Slot()
-    def getLocation(self):  
-        print "Getting location"
-        responseTuple = api.getLocation()
-        self.locationUpdatedSignal.emit(responseTuple)
-        flag, response = responseTuple
-        if flag:
-            locations = response
-            print locations
-            api.weakPostLocation(locations[0].encodedName)
+    def getLocation(self):
+        if self.canWork:
+            print "Getting location"
+            responseTuple = api.getLocation()
+            self.locationUpdatedSignal.emit(responseTuple)
+            flag, response = responseTuple
+            if flag:
+                locations = response
+                print locations
+                api.weakPostLocation(locations[0].encodedName)
+        else:
+            print "Location getting/posting disabled"
 
     @QtCore.Slot(str)
     def postLocation(self, loc):  
-        # Should only be invoked directly by a user specifying the correct location
-        print "Posting User-Specified Location:", loc.getReadableName()
-        api.do_train(loc.encodedName, loc.coordinate)
-        api.weakPostLocation(loc.encodedName)
+        # Should only be invoked directly by a user specifying the correct location    
+        if self.canWork:        
+            print "Posting User-Specified Location:", loc.getReadableName()
+            api.do_train(loc.encodedName, loc.coordinate)
+            api.weakPostLocation(loc.encodedName)
+
+    @QtCore.Slot()
+    def stopWorking(self):
+        # Called when user goes offline (or program about to shut down?)
+        self.canWork = False
 
 class PreferencesWindow(QtGui.QDialog):
     
     # A signal that can be sent to the LocationWorker to tell it
     # to get the user's new location    
     updateSignal = QtCore.Signal()
+    
+    offlineSignal = QtCore.Signal()
 
     postSignal = QtCore.Signal(api.Location)
 
@@ -118,7 +133,7 @@ class PreferencesWindow(QtGui.QDialog):
         self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)
         self.correctLocationAction = QtGui.QAction("&Correct My Location", self, enabled=False)
         self.otherLocationAction = QtGui.QAction("Other...", self)
-        self.offlineAction = QtGui.QAction("&Go Offline", self)
+        self.offlineAction = QtGui.QAction("&Go Offline", self, triggered=self.sysTrayGoOffline)
         self.prefsAction = QtGui.QAction("&Preferences...", self, triggered=self.display)
         self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.sysTrayQuitAction)
 
@@ -167,6 +182,7 @@ class PreferencesWindow(QtGui.QDialog):
         self.locationWorker.locationUpdatedSignal.connect(self.locationSlot)
         self.updateSignal.connect(self.locationWorker.getLocation)
         self.postSignal.connect(self.locationWorker.postLocation)
+        self.offlineSignal.connect(self.locationWorker.stopWorking)
         self.locationWorker.moveToThread(self.bgThread)
 
     def display(self):
@@ -213,16 +229,21 @@ class PreferencesWindow(QtGui.QDialog):
         '''
         Cleans up and quits the application.
         '''
-        # On Ubuntu 10.10, a Python fatal error is encountered if the
-        # window is not hidden before the application exits
+
+        self.offlineSignal.emit()        
         self.bgThread.quit()
         while not self.bgThread.isFinished():
             continue # Wait until thread done 
+        # On Ubuntu 10.10 (at least), a Python fatal error is encountered if the
+        # window is not hidden before the application exits
         self.hide()
         QtGui.qApp.quit()
 
     def sysTrayInitiateLocationRefresh(self):
         self.refreshLocation()
+
+    def sysTrayGoOffline(self):
+        self.offlineSignal.emit()
 
     # Background actions
     @QtCore.Slot(tuple)
