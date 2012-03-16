@@ -1,4 +1,0 @@
-API
-***
-.. automodule:: api
-   :members:
