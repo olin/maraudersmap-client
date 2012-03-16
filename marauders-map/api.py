@@ -6,14 +6,27 @@ import signalStrength
 from getpass import getuser
 
 class Location(object):
+    """An object to represent the combination of a place name and a coordinate.
+
+    :param encodedName: The server-side representation of the name of the place. **Ex:** *WH,in,rm309*
+    :type encodedName: str
+    :param coordinate: The x,y,w coordinate of the place.
+    :type coordinate: :class:`Coordinate`
+    
+    """
     def __init__(self, encodedName, coordinate):
         self.coordinate = coordinate
         self.encodedName = encodedName
 
     def getReadableName(self):
-        #XXX: This Doesn't work properly; from original code
-        #TODO: Rewrite!
+        """Parses the encodedName and converts it into a human-readable string.
+        This is useful for menu entries, for example.
 
+        :returns:  str -- the readable name
+        
+        .. warning::
+            This doesn't work properly; it is from the original code.
+        """
         # location strings look like WH,in,rm309
         location = self.encodedName.replace("OC", "MH") # Once upon a time, Milas hall was called Olin Center
         # XXX: Should be changed on server, probably
@@ -63,8 +76,32 @@ class Location(object):
         return location
 
 class Coordinate(object):
+    """An optimized way of representing an x,y,w location and (optionally) a distance.
+
+    :param x: x coordinate in pixels, on image w
+    :type x: int
+    :param y: y coordinate in pixels, on image w 
+    :type y: int
+    :param w: There are two images of maps in the original marauder's map. This attribute specifies to which map the x,y coordinates refer, 1 or 2. 
+    :type w: int
+
+    .. warning::
+        It is not possible to add attributes to this object
+    
+    """
+
     __slots__ = ('x','y','w','distance')
     def __init__(self, x, y, w, distance=0):
+        """
+
+        Args:
+            x: x coordinate, in px
+            y: y coordinate, in px
+            w: which image map the coordinate is for
+        Kwargs:
+            bar (str): Really, same as foo.
+        
+        """
         self.x = x
         self.y = y
         self.w = w # Which map the coord refers to (1 or 2)
@@ -77,16 +114,15 @@ lastSignalStrengthString = None
 
 def openMap():
     """
-    Brings up the marauder's map in a web browser
+    Opens the Marauder's Map user interface in the default web browser.
     """
     webbrowser.open(Settings.WEB_ADDRESS)
 
 def sendToServer(strPHPScript, dictParams):
-    '''
-    Uses urllib to send a dictionary to a PHP script on the server specified in configuration.py 
+    """Uses urllib to send a dictionary to a PHP script on the server specified in configuration.py 
 
-    Returns a tuple (successBOOL, responseSTR/explanation_of_failureSTR)
-    '''
+    :returns: a tuple ``(successBOOL, responseSTR/explanation_of_failureSTR)``
+    """
 
     # Construct url with the parameters specified in the dictionary
     strUrl = "%s/%s?%s" % (Settings.SERVER_ADDRESS, strPHPScript, urllib.urlencode(dictParams))
@@ -106,9 +142,9 @@ def sendToServer(strPHPScript, dictParams):
         return True, ret[len('success:'):]
 
 def __update(username, currPlaceName = None, status=None, refresh=True):
-    """
-    Update can tell you where you are or tell the server where you are, without affecting
+    """Update can tell you where you are or tell the server where you are, without affecting
     the database.
+
     """
 
     #XXX: Using this method until the server api gets fixed. I know it is REALLY BAD - Julian
@@ -150,22 +186,21 @@ def __update(username, currPlaceName = None, status=None, refresh=True):
 
 
 def getLocation():
-    '''
-    Get location from server.
+    """Get location from server.
     
-    Returns a list of potential locations, 
-    sorted from most to least likely.
-    '''
+    :returns: a list of potential :class:`Location`s, sorted from most to least likely.
+    """
     
     return __update(getuser())
 
 def postLocation(placeName):
-    '''
-    Post encoded location to server, without changing the database.
+    """Post encoded location to server, without changing the database.
     
-    Returns a list of potential locations, 
-    sorted from most to least likely.
-    '''
+    Args:
+        placename (str): location to post to the server, in encoded server format
+
+    :returns: a list of potential :class:`Location`s, sorted from most to least likely.
+    """
 
     print "Name to post:", placeName
     
