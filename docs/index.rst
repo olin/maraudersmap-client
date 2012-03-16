@@ -11,13 +11,21 @@ The client is a laptop application that broadcasts the signal strength of nearby
 to the Marauder's Map Server, which maps the set of signal strengths to a physical coordinate and updates a map
 that displays the locations of users.
 
-  
+
+Getting Started
+---------------
+.. toctree::
+   :maxdepth: 2
+
+   overview 
+
 Contents
 --------
 .. toctree::
    :maxdepth: 2
 
-   api 
+   api
+   signal_strength
 
 Indices and tables
 ------------------
