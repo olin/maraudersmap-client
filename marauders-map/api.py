@@ -17,9 +17,15 @@ class Location(object):
     def __init__(self, encodedName, coordinate):
         self.coordinate = coordinate
         self.encodedName = encodedName
+        self.__readableName = self.getReadableName()
+    
+    @property
+    def readableName(self):
+        return self.__readableName
 
     def getReadableName(self):
         """Parses the encodedName and converts it into a human-readable string.
+
         This is useful for menu entries, for example.
 
         :returns:  str -- the readable name
@@ -83,6 +89,8 @@ class Coordinate(object):
     :param y: y coordinate in pixels, on image w 
     :type y: int
     :param w: There are two images of maps in the original marauder's map. This attribute specifies to which map the x,y coordinates refer, 1 or 2. 
+    :param distance: Not entirely sure what this is for...
+    :type distance: int
     :type w: int
 
     .. warning::
@@ -92,16 +100,6 @@ class Coordinate(object):
 
     __slots__ = ('x','y','w','distance')
     def __init__(self, x, y, w, distance=0):
-        """
-
-        Args:
-            x: x coordinate, in px
-            y: y coordinate, in px
-            w: which image map the coordinate is for
-        Kwargs:
-            bar (str): Really, same as foo.
-        
-        """
         self.x = x
         self.y = y
         self.w = w # Which map the coord refers to (1 or 2)
@@ -113,8 +111,8 @@ global lastSignalStrengthString
 lastSignalStrengthString = None 
 
 def openMap():
-    """
-    Opens the Marauder's Map user interface in the default web browser.
+    """Opens the Marauder's Map user interface in the default web browser.
+
     """
     webbrowser.open(Settings.WEB_ADDRESS)
 
@@ -142,8 +140,23 @@ def sendToServer(strPHPScript, dictParams):
         return True, ret[len('success:'):]
 
 def __update(username, currPlaceName = None, status=None, refresh=True):
-    """Update can tell you where you are or tell the server where you are, without affecting
-    the database.
+    """Update can tell you where you are or tell the server where you are. 
+
+    Update gets a list of potential locations where the user might be.
+    If currPlaceName is specified, it will tell the server to display the user at the location specified. Otherwise, the map will not be affected.
+    
+    :param username: The user name of the user to update
+    :type username: str
+    :param currPlaceName: Encoded string representing the location to post to the server. If this is passed in, the user will show up on the map there.
+    :type currPlaceName: str
+    :param status: We haven't been able to figure out what this is for...
+    :type status: str
+    :param refresh: If true, the function will recompute the signal strength of the nearby access points and send that data rather than the last known data.
+    :type refresh: bool
+
+    :returns: list of :class:`Location` objects, sorted from most to least likely. 
+
+    .. note: __update never affects the database on the server.
 
     """
 
@@ -188,18 +201,21 @@ def __update(username, currPlaceName = None, status=None, refresh=True):
 def getLocation():
     """Get location from server.
     
-    :returns: a list of potential :class:`Location`s, sorted from most to least likely.
+    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.
     """
     
     return __update(getuser())
 
 def postLocation(placeName):
     """Post encoded location to server, without changing the database.
-    
+   
+    :param currPlaceName: Encoded string representing the location to post to the server. The user will show up on the map there.
+    :type currPlaceName: str
+
     Args:
         placename (str): location to post to the server, in encoded server format
 
-    :returns: a list of potential :class:`Location`s, sorted from most to least likely.
+    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.
     """
 
     print "Name to post:", placeName
@@ -209,9 +225,12 @@ def postLocation(placeName):
 def weakPostLocation(placeName):
     '''
     Post encoded location to server, without changing the database and without refreshing signal strength.
+
+    :param currPlaceName: Encoded string representing the location to post to the server. The user will show up on the map there.
+    :type currPlaceName: str
     
-    Returns a list of potential locations, 
-    sorted from most to least likely.
+    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.
+
     '''
 
     print "Name to post:", placeName
@@ -219,8 +238,9 @@ def weakPostLocation(placeName):
     return __update(getuser(), currPlaceName=placeName, refresh=False)
 
 def __getPlatform():
-    '''
-    Return a standard readable string based on the operating system.
+    '''Return a standard readable string based on the operating system.
+
+    :returns: A string; generally one of 'mac', 'win', 'linux'. In other cases, returns sys.platform
     '''
     import sys
     if sys.platform.startswith('darwin'):
@@ -232,12 +252,15 @@ def __getPlatform():
     return sys.platform # non-standard platform
 
 def do_train(placename, coord):
-    #XXX: UNTESTED
-    '''
-    Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and
-    encoded placename string.
-    This actually changes the database and can be used to create novel locations or improve the
-    database entry for existing locations.
+    '''Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and encoded placename string.
+    
+    :params placename: Encoded string representing the location to post to the server.
+    :type placename: str
+    :params coord: x,y,w coordinate to post
+    :type coord: :class:`Coordinate`
+
+    .. warning: This actually modifies the database on the server and can create novel locations or improve the database entry for existing locations. Try to avoid call this without user interaction. 
+
     '''
 
     mapx, mapy, mapw = coord.x, coord.y, coord.w
