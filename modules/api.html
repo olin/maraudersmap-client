@@ -68,9 +68,15 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encodedName</span><span class="p">,</span> <span class="n">coordinate</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinate</span> <span class="o">=</span> <span class="n">coordinate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">encodedName</span> <span class="o">=</span> <span class="n">encodedName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__readableName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getReadableName</span><span class="p">()</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">readableName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__readableName</span> 
 
 <div class="viewcode-block" id="Location.getReadableName"><a class="viewcode-back" href="../api.html#api.Location.getReadableName">[docs]</a>    <span class="k">def</span> <span class="nf">getReadableName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Parses the encodedName and converts it into a human-readable string.</span>
+
 <span class="sd">        This is useful for menu entries, for example.</span>
 
 <span class="sd">        :returns:  str -- the readable name</span>
@@ -124,6 +130,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">location</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">inside</span><span class="p">,</span><span class="n">building</span><span class="p">,</span><span class="n">floor</span><span class="p">,</span><span class="n">description</span><span class="p">)</span>
         
+        <span class="bp">self</span><span class="o">.</span><span class="n">__readableName</span> <span class="o">=</span> <span class="n">location</span>
+
         <span class="k">return</span> <span class="n">location</span>
 </div></div>
 <div class="viewcode-block" id="Coordinate"><a class="viewcode-back" href="../api.html#api.Coordinate">[docs]</a><span class="k">class</span> <span class="nc">Coordinate</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -134,25 +142,17 @@
 <span class="sd">    :param y: y coordinate in pixels, on image w </span>
 <span class="sd">    :type y: int</span>
 <span class="sd">    :param w: There are two images of maps in the original marauder&#39;s map. This attribute specifies to which map the x,y coordinates refer, 1 or 2. </span>
+<span class="sd">    :param distance: Not entirely sure what this is for...</span>
+<span class="sd">    :type distance: int</span>
 <span class="sd">    :type w: int</span>
 
-<span class="sd">    .. warning::</span>
+<span class="sd">    .. note::</span>
 <span class="sd">        It is not possible to add attributes to this object</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;x&#39;</span><span class="p">,</span><span class="s">&#39;y&#39;</span><span class="p">,</span><span class="s">&#39;w&#39;</span><span class="p">,</span><span class="s">&#39;distance&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            x: x coordinate, in px</span>
-<span class="sd">            y: y coordinate, in px</span>
-<span class="sd">            w: which image map the coordinate is for</span>
-<span class="sd">        Kwargs:</span>
-<span class="sd">            bar (str): Really, same as foo.</span>
-<span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">w</span> <span class="c"># Which map the coord refers to (1 or 2)</span>
@@ -164,13 +164,18 @@
 <span class="n">lastSignalStrengthString</span> <span class="o">=</span> <span class="bp">None</span> 
 
 <div class="viewcode-block" id="openMap"><a class="viewcode-back" href="../api.html#api.openMap">[docs]</a><span class="k">def</span> <span class="nf">openMap</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Opens the Marauder&#39;s Map user interface in the default web browser.</span>
+    <span class="sd">&quot;&quot;&quot;Opens the Marauder&#39;s Map user interface in the default web browser.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">webbrowser</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">WEB_ADDRESS</span><span class="p">)</span>
 </div>
 <div class="viewcode-block" id="sendToServer"><a class="viewcode-back" href="../api.html#api.sendToServer">[docs]</a><span class="k">def</span> <span class="nf">sendToServer</span><span class="p">(</span><span class="n">strPHPScript</span><span class="p">,</span> <span class="n">dictParams</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Uses urllib to send a dictionary to a PHP script on the server specified in configuration.py </span>
+
+<span class="sd">    :param strPHPScript: name of the php script to invoke on the server. **Ex:** *&#39;update.php&#39;*</span>
+<span class="sd">    :type strPHPScript: str</span>
+<span class="sd">    :param dictParams: dictionary of parameters to send to the server.</span>
+<span class="sd">    :type dictParams: dict</span>
 
 <span class="sd">    :returns: a tuple ``(successBOOL, responseSTR/explanation_of_failureSTR)``</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -193,8 +198,23 @@
         <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">ret</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s">&#39;success:&#39;</span><span class="p">):]</span>
 </div>
 <span class="k">def</span> <span class="nf">__update</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">currPlaceName</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Update can tell you where you are or tell the server where you are, without affecting</span>
-<span class="sd">    the database.</span>
+    <span class="sd">&quot;&quot;&quot;Update can tell you where you are or tell the server where you are. </span>
+
+<span class="sd">    Update gets a list of potential locations where the user might be.</span>
+<span class="sd">    If currPlaceName is specified, it will tell the server to display the user at the location specified. Otherwise, the map will not be affected.</span>
+<span class="sd">    </span>
+<span class="sd">    :param username: The user name of the user to update</span>
+<span class="sd">    :type username: str</span>
+<span class="sd">    :param currPlaceName: Encoded string representing the location to post to the server. If this is passed in, the user will show up on the map there.</span>
+<span class="sd">    :type currPlaceName: str</span>
+<span class="sd">    :param status: We haven&#39;t been able to figure out what this is for...</span>
+<span class="sd">    :type status: str</span>
+<span class="sd">    :param refresh: If true, the function will recompute the signal strength of the nearby access points and send that data rather than the last known data.</span>
+<span class="sd">    :type refresh: bool</span>
+
+<span class="sd">    :returns: list of :class:`Location` objects, sorted from most to least likely. </span>
+
+<span class="sd">    .. note: __update never affects the database on the server.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -239,18 +259,21 @@
 <div class="viewcode-block" id="getLocation"><a class="viewcode-back" href="../api.html#api.getLocation">[docs]</a><span class="k">def</span> <span class="nf">getLocation</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Get location from server.</span>
 <span class="sd">    </span>
-<span class="sd">    :returns: a list of potential :class:`Location` s, sorted from most to least likely.</span>
+<span class="sd">    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="k">return</span> <span class="n">__update</span><span class="p">(</span><span class="n">getuser</span><span class="p">())</span>
 </div>
 <div class="viewcode-block" id="postLocation"><a class="viewcode-back" href="../api.html#api.postLocation">[docs]</a><span class="k">def</span> <span class="nf">postLocation</span><span class="p">(</span><span class="n">placeName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Post encoded location to server, without changing the database.</span>
-<span class="sd">    </span>
+<span class="sd">   </span>
+<span class="sd">    :param currPlaceName: Encoded string representing the location to post to the server. The user will show up on the map there.</span>
+<span class="sd">    :type currPlaceName: str</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        placename (str): location to post to the server, in encoded server format</span>
 
-<span class="sd">    :returns: a list of potential :class:`Location`s, sorted from most to least likely.</span>
+<span class="sd">    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">print</span> <span class="s">&quot;Name to post:&quot;</span><span class="p">,</span> <span class="n">placeName</span>
@@ -260,9 +283,12 @@
 <div class="viewcode-block" id="weakPostLocation"><a class="viewcode-back" href="../api.html#api.weakPostLocation">[docs]</a><span class="k">def</span> <span class="nf">weakPostLocation</span><span class="p">(</span><span class="n">placeName</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Post encoded location to server, without changing the database and without refreshing signal strength.</span>
+
+<span class="sd">    :param currPlaceName: Encoded string representing the location to post to the server. The user will show up on the map there.</span>
+<span class="sd">    :type currPlaceName: str</span>
 <span class="sd">    </span>
-<span class="sd">    Returns a list of potential locations, </span>
-<span class="sd">    sorted from most to least likely.</span>
+<span class="sd">    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.</span>
+
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">print</span> <span class="s">&quot;Name to post:&quot;</span><span class="p">,</span> <span class="n">placeName</span>
@@ -270,8 +296,9 @@
     <span class="k">return</span> <span class="n">__update</span><span class="p">(</span><span class="n">getuser</span><span class="p">(),</span> <span class="n">currPlaceName</span><span class="o">=</span><span class="n">placeName</span><span class="p">,</span> <span class="n">refresh</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 </div>
 <span class="k">def</span> <span class="nf">__getPlatform</span><span class="p">():</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Return a standard readable string based on the operating system.</span>
+    <span class="sd">&#39;&#39;&#39;Return a standard readable string based on the operating system.</span>
+
+<span class="sd">    :returns: A string; generally one of &#39;mac&#39;, &#39;win&#39;, &#39;linux&#39;. In other cases, returns sys.platform</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="kn">import</span> <span class="nn">sys</span>
     <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;darwin&#39;</span><span class="p">):</span>
@@ -283,12 +310,17 @@
     <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="c"># non-standard platform</span>
 
 <div class="viewcode-block" id="do_train"><a class="viewcode-back" href="../api.html#api.do_train">[docs]</a><span class="k">def</span> <span class="nf">do_train</span><span class="p">(</span><span class="n">placename</span><span class="p">,</span> <span class="n">coord</span><span class="p">):</span>
-    <span class="c">#XXX: UNTESTED</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and</span>
-<span class="sd">    encoded placename string.</span>
-<span class="sd">    This actually changes the database and can be used to create novel locations or improve the</span>
-<span class="sd">    database entry for existing locations.</span>
+    <span class="sd">&#39;&#39;&#39;Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and encoded placename string.</span>
+<span class="sd">    </span>
+<span class="sd">    :param placename: Encoded string representing the location to post to the server.</span>
+<span class="sd">    :type placename: str</span>
+<span class="sd">    :param coord: x,y,w coordinate to post</span>
+<span class="sd">    :type coord: :class:`Coordinate`</span>
+
+<span class="sd">    :returns: Unknown, TODO</span>
+
+<span class="sd">    .. warning: This actually modifies the database on the server and can create novel locations or improve the database entry for existing locations. Try to avoid call this without user interaction. </span>
+
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="n">mapx</span><span class="p">,</span> <span class="n">mapy</span><span class="p">,</span> <span class="n">mapw</span> <span class="o">=</span> <span class="n">coord</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">coord</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">coord</span><span class="o">.</span><span class="n">w</span>
@@ -311,11 +343,13 @@
         
     <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">result</span>
 </div>
-<div class="viewcode-block" id="unserializePersonData"><a class="viewcode-back" href="../api.html#api.unserializePersonData">[docs]</a><span class="k">def</span> <span class="nf">unserializePersonData</span><span class="p">(</span><span class="n">serverResponseString</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Takes in a pipe-separated string and </span>
-<span class="sd">    outputs a dictionary with the keys</span>
-<span class="sd">    &#39;username&#39;, &#39;placename&#39;, &#39;status&#39;, and &#39;lastupdate&#39;</span>
+<span class="k">def</span> <span class="nf">__unserializePersonData</span><span class="p">(</span><span class="n">serverResponseString</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Parses a server-generated pipe-separated string and returns a dictionary of user information.</span>
+<span class="sd">    </span>
+<span class="sd">    :param serverResponseString: The response to parse.</span>
+<span class="sd">    :type: serverResponseString: str</span>
+
+<span class="sd">    :returns: dict ``{&#39;username&#39;:str, &#39;placename&#39;:str, &#39;status&#39;:str, &#39;lastupdate&#39;:str}``</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">personData</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">serverResponseString</span> <span class="o">==</span> <span class="s">&#39;nobody&#39;</span><span class="p">:</span> 
@@ -326,28 +360,33 @@
     <span class="n">personData</span><span class="p">[</span><span class="s">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serverResponseArray</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="n">personData</span><span class="p">[</span><span class="s">&#39;lastupdate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serverResponseArray</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">personData</span>
-</div>
+
 <div class="viewcode-block" id="do_query"><a class="viewcode-back" href="../api.html#api.do_query">[docs]</a><span class="k">def</span> <span class="nf">do_query</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
     <span class="c">#XXX: UNTESTED</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Get a dictionary containing</span>
-<span class="sd">    username, placename, status, and lastupdate</span>
-<span class="sd">    of person with username</span>
+    <span class="sd">&#39;&#39;&#39;Get a dictionary containing username, placename, status, and lastupdate of person with given username</span>
+
+<span class="sd">    :param username: Username of user to get information about.</span>
+<span class="sd">    :type username: str</span>
+
+<span class="sd">    :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">flag</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="n">sendToServer</span><span class="p">(</span><span class="s">&#39;query.php&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">:</span><span class="n">username</span><span class="p">})</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">&#39;Error:&#39;</span><span class="p">,</span> <span class="n">result</span>
         <span class="k">return</span> <span class="n">flag</span><span class="p">,</span> <span class="n">result</span>
     
-    <span class="n">result</span> <span class="o">=</span> <span class="n">unserializePersonData</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">__unserializePersonData</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="n">result</span>
 </div>
-<div class="viewcode-block" id="do_datapointexistence"><a class="viewcode-back" href="../api.html#api.do_datapointexistence">[docs]</a><span class="k">def</span> <span class="nf">do_datapointexistence</span><span class="p">(</span><span class="n">placename</span><span class="p">):</span>
-    <span class="c">#XXX: UNTESTED</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Check if a point with a specific encoded placename exists</span>
+<div class="viewcode-block" id="do_datapointexistence"><a class="viewcode-back" href="../api.html#api.do_datapointexistence">[docs]</a><span class="k">def</span> <span class="nf">do_datapointexistence</span><span class="p">(</span><span class="n">placeName</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Check if a point with a specific encoded placeName exists.</span>
+
+<span class="sd">    :param placeName: Encoded string representing the location to post to the server.</span>
+<span class="sd">    :type placeName: str</span>
+
+<span class="sd">    :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">flag</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="n">data_connections</span><span class="o">.</span><span class="n">sendToServer</span><span class="p">(</span><span class="s">&#39;pointexistence.php&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;placename&#39;</span><span class="p">:</span><span class="n">placename</span><span class="p">})</span>
+    <span class="n">flag</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="n">sendToServer</span><span class="p">(</span><span class="s">&#39;pointexistence.php&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;placename&#39;</span><span class="p">:</span><span class="n">placeName</span><span class="p">})</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">&#39;Error:&#39;</span><span class="p">,</span> <span class="n">result</span>
         <span class="k">return</span> <span class="n">flag</span><span class="p">,</span> <span class="n">result</span>
@@ -356,11 +395,15 @@
     <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span>
 </div>
 <div class="viewcode-block" id="do_cloak"><a class="viewcode-back" href="../api.html#api.do_cloak">[docs]</a><span class="k">def</span> <span class="nf">do_cloak</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
-    <span class="c">#XXX: UNTESTED</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Tell the server to stop displaying a user with username on the map.</span>
+    <span class="sd">&#39;&#39;&#39;Tell the server to stop displaying a user with username on the map. If an Update</span>
+<span class="sd">    happens, the user will reappear on the map again.</span>
 
-<span class="sd">    This is kind of sketchy and probably shoudn&#39;t be possible?</span>
+<span class="sd">    This should require authentication and should only be possible for the active user.</span>
+
+<span class="sd">    :param username: Username of user to conceal on the map.</span>
+<span class="sd">    :type username: str</span>
+
+<span class="sd">    :returns: a tuple ``(serverSuceededBOOL,serverResponseSTR)``</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">flag</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="n">sendToServer</span><span class="p">(</span><span class="s">&#39;cloak.php&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">:</span><span class="n">username</span><span class="p">})</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
@@ -411,7 +454,7 @@
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, Tim Ryan.
+        &copy; Copyright 2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, and Tim Ryan.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

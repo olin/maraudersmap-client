@@ -178,6 +178,18 @@ div.admonition p.admonition-title + p {
     display: inline;
 }
 
+div.admonition { //style from Twitter Bootstrap
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    padding: 8px 35px 8px 14px;
+    margin-bottom: 18px;    
+    font-size: 13px;
+    line-height: 18px;
+    border: 1px solid;        
+    text-shadow: 0 1px 0 #FFF;    
+}
+
 div.admonition p {
     margin-bottom: 5px;
 }
@@ -190,9 +202,10 @@ div.admonition ul, div.admonition ol {
     margin-bottom: 5px;
 }
 
-div.note {
-    background-color: #eee;
-    border: 1px solid #ccc;
+div.note { //style from Twitter Bootstrap
+    border-color: #EED3D7;
+    color: #C09853;
+    background-color: #FCF8E3;    
 }
 
 div.seealso {
@@ -204,9 +217,10 @@ div.topic {
     background-color: #eee;
 }
 
-div.warning {
-    background-color: #ffe4e4;
-    border: 1px solid #f66;
+div.warning { //style from Twitter Bootstrap
+    border-color: #EED3D7;
+    color: #B94A48;
+    background-color: #F2DEDE;
 }
 
 p.admonition-title {
@@ -233,8 +247,8 @@ tt {
     font-size: 0.95em;
 }
 
+
 th {
-    background-color: #ede;
 }
 
 .warning tt {
