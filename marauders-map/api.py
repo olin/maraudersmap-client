@@ -21,7 +21,7 @@ class Location(object):
     
     @property
     def readableName(self):
-        return self.__readableName
+        return self.__readableName 
 
     def getReadableName(self):
         """Parses the encodedName and converts it into a human-readable string.
@@ -79,6 +79,8 @@ class Location(object):
             else:
                 location = '%s %s (%s) %s' % (inside,building,floor,description)
         
+        self.__readableName = location
+
         return location
 
 class Coordinate(object):
@@ -118,6 +120,11 @@ def openMap():
 
 def sendToServer(strPHPScript, dictParams):
     """Uses urllib to send a dictionary to a PHP script on the server specified in configuration.py 
+
+    :param strPHPScript: name of the php script to invoke on the server. **Ex:** *'update.php'*
+    :type strPHPScript: str
+    :param dictParams: dictionary of parameters to send to the server.
+    :type dictParams: dict
 
     :returns: a tuple ``(successBOOL, responseSTR/explanation_of_failureSTR)``
     """
@@ -259,6 +266,8 @@ def do_train(placename, coord):
     :params coord: x,y,w coordinate to post
     :type coord: :class:`Coordinate`
 
+    :returns: Unknown, TODO
+
     .. warning: This actually modifies the database on the server and can create novel locations or improve the database entry for existing locations. Try to avoid call this without user interaction. 
 
     '''
@@ -283,11 +292,13 @@ def do_train(placename, coord):
         
     return True, result
 
-def unserializePersonData(serverResponseString):
-    '''
-    Takes in a pipe-separated string and 
-    outputs a dictionary with the keys
-    'username', 'placename', 'status', and 'lastupdate'
+def __unserializePersonData(serverResponseString):
+    '''Parses a server-generated pipe-separated string and returns a dictionary of user information.
+    
+    :params serverResponseString: The response to parse.
+    :type: serverResponseString: str
+
+    :returns: dict ``{'username':str, 'placename':str, 'status':str, 'lastupdate':str}``
     '''
     personData = dict()
     if serverResponseString == 'nobody': 
@@ -301,25 +312,30 @@ def unserializePersonData(serverResponseString):
 
 def do_query(username):
     #XXX: UNTESTED
-    '''
-    Get a dictionary containing
-    username, placename, status, and lastupdate
-    of person with username
+    '''Get a dictionary containing username, placename, status, and lastupdate of person with given username
+
+    :params username: Username of user to get information about.
+    :type username: str
+
+    :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``
     '''
     flag, result = sendToServer('query.php', {'username':username})
     if not flag:
         print 'Error:', result
         return flag, result
     
-    result = unserializePersonData(result)
+    result = __unserializePersonData(result)
     return True, result
 
-def do_datapointexistence(placename):
-    #XXX: UNTESTED
+def do_datapointexistence(placeName):
+    '''Check if a point with a specific encoded placeName exists.
+
+    :params placeName: Encoded string representing the location to post to the server.
+    :type placeName: str
+
+    :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``
     '''
-    Check if a point with a specific encoded placename exists
-    '''
-    flag, result = data_connections.sendToServer('pointexistence.php', {'placename':placename})
+    flag, result = sendToServer('pointexistence.php', {'placename':placeName})
     if not flag:
         print 'Error:', result
         return flag, result
@@ -328,11 +344,15 @@ def do_datapointexistence(placename):
     else: return True, False
 
 def do_cloak(username):
-    #XXX: UNTESTED
-    '''
-    Tell the server to stop displaying a user with username on the map.
+    '''Tell the server to stop displaying a user with username on the map. If an Update
+    happens, the user will reappear on the map again.
 
-    This is kind of sketchy and probably shoudn't be possible?
+    This should require authentication and should only be possible for the active user.
+
+    :param username: Username of user to conceal on the map.
+    :type username: str
+
+    :returns: a tuple ``(serverSuceededBOOL,serverResponseSTR)``
     '''
     flag, result = sendToServer('cloak.php', {'username':username})
     if not flag:
