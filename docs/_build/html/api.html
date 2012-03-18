@@ -99,8 +99,8 @@
 <dl class="method">
 <dt id="api.Location.getReadableName">
 <tt class="descname">getReadableName</tt><big>(</big><big>)</big><a class="reference internal" href="modules/api.html#Location.getReadableName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Location.getReadableName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses the encodedName and converts it into a human-readable string.
-This is useful for menu entries, for example.</p>
+<dd><p>Parses the encodedName and converts it into a human-readable string.</p>
+<p>This is useful for menu entries, for example.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -120,31 +120,72 @@ This is useful for menu entries, for example.</p>
 <dl class="function">
 <dt id="api.do_cloak">
 <tt class="descclassname">api.</tt><tt class="descname">do_cloak</tt><big>(</big><em>username</em><big>)</big><a class="reference internal" href="modules/api.html#do_cloak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_cloak" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tell the server to stop displaying a user with username on the map.</p>
-<p>This is kind of sketchy and probably shoudn&#8217;t be possible?</p>
+<dd><p>Tell the server to stop displaying a user with username on the map. If an Update
+happens, the user will reappear on the map again.</p>
+<p>This should require authentication and should only be possible for the active user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>username</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Username of user to conceal on the map.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(serverSuceededBOOL,serverResponseSTR)</span></tt></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="api.do_datapointexistence">
-<tt class="descclassname">api.</tt><tt class="descname">do_datapointexistence</tt><big>(</big><em>placename</em><big>)</big><a class="reference internal" href="modules/api.html#do_datapointexistence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_datapointexistence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if a point with a specific encoded placename exists</p>
+<tt class="descclassname">api.</tt><tt class="descname">do_datapointexistence</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#do_datapointexistence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_datapointexistence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a point with a specific encoded placeName exists.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params placeName:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Encoded string representing the location to post to the server.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)</span></tt></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="api.do_query">
 <tt class="descclassname">api.</tt><tt class="descname">do_query</tt><big>(</big><em>username</em><big>)</big><a class="reference internal" href="modules/api.html#do_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_query" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a dictionary containing
-username, placename, status, and lastupdate
-of person with username</p>
+<dd><p>Get a dictionary containing username, placename, status, and lastupdate of person with given username</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params username:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Username of user to get information about.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)</span></tt></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="api.do_train">
 <tt class="descclassname">api.</tt><tt class="descname">do_train</tt><big>(</big><em>placename</em>, <em>coord</em><big>)</big><a class="reference internal" href="modules/api.html#do_train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and
-encoded placename string.
-This actually changes the database and can be used to create novel locations or improve the
-database entry for existing locations.</p>
+<dd><p>Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and encoded placename string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Params placename:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body">Encoded string representing the location to post to the server.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Params coord:</th><td class="field-body">x,y,w coordinate to post</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Unknown, TODO</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -171,6 +212,14 @@ database entry for existing locations.</p>
 <dt id="api.postLocation">
 <tt class="descclassname">api.</tt><tt class="descname">postLocation</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#postLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.postLocation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post encoded location to server, without changing the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>currPlaceName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server. The user will show up on the map there.</td>
+</tr>
+</tbody>
+</table>
 <dl class="docutils">
 <dt>Args:</dt>
 <dd>placename (str): location to post to the server, in encoded server format</dd>
@@ -193,26 +242,33 @@ database entry for existing locations.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(successBOOL,</span> <span class="pre">responseSTR/explanation_of_failureSTR)</span></tt></td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>strPHPScript</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name of the php script to invoke on the server. <strong>Ex:</strong> <em>&#8216;update.php&#8217;</em></li>
+<li><strong>dictParams</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; dictionary of parameters to send to the server.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a tuple <tt class="docutils literal"><span class="pre">(successBOOL,</span> <span class="pre">responseSTR/explanation_of_failureSTR)</span></tt></p>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="api.unserializePersonData">
-<tt class="descclassname">api.</tt><tt class="descname">unserializePersonData</tt><big>(</big><em>serverResponseString</em><big>)</big><a class="reference internal" href="modules/api.html#unserializePersonData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.unserializePersonData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes in a pipe-separated string and 
-outputs a dictionary with the keys
-&#8216;username&#8217;, &#8216;placename&#8217;, &#8216;status&#8217;, and &#8216;lastupdate&#8217;</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="api.weakPostLocation">
 <tt class="descclassname">api.</tt><tt class="descname">weakPostLocation</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#weakPostLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.weakPostLocation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post encoded location to server, without changing the database and without refreshing signal strength.</p>
-<p>Returns a list of potential locations, 
-sorted from most to least likely.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>currPlaceName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server. The user will show up on the map there.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects, sorted from most to least likely.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
