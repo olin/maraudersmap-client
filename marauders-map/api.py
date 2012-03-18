@@ -95,7 +95,7 @@ class Coordinate(object):
     :type distance: int
     :type w: int
 
-    .. warning::
+    .. note::
         It is not possible to add attributes to this object
     
     """
@@ -261,9 +261,9 @@ def __getPlatform():
 def do_train(placename, coord):
     '''Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and encoded placename string.
     
-    :params placename: Encoded string representing the location to post to the server.
+    :param placename: Encoded string representing the location to post to the server.
     :type placename: str
-    :params coord: x,y,w coordinate to post
+    :param coord: x,y,w coordinate to post
     :type coord: :class:`Coordinate`
 
     :returns: Unknown, TODO
@@ -295,7 +295,7 @@ def do_train(placename, coord):
 def __unserializePersonData(serverResponseString):
     '''Parses a server-generated pipe-separated string and returns a dictionary of user information.
     
-    :params serverResponseString: The response to parse.
+    :param serverResponseString: The response to parse.
     :type: serverResponseString: str
 
     :returns: dict ``{'username':str, 'placename':str, 'status':str, 'lastupdate':str}``
@@ -314,7 +314,7 @@ def do_query(username):
     #XXX: UNTESTED
     '''Get a dictionary containing username, placename, status, and lastupdate of person with given username
 
-    :params username: Username of user to get information about.
+    :param username: Username of user to get information about.
     :type username: str
 
     :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``
@@ -330,7 +330,7 @@ def do_query(username):
 def do_datapointexistence(placeName):
     '''Check if a point with a specific encoded placeName exists.
 
-    :params placeName: Encoded string representing the location to post to the server.
+    :param placeName: Encoded string representing the location to post to the server.
     :type placeName: str
 
     :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``

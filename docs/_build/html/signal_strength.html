@@ -60,17 +60,36 @@ associated with a node. It is hashable, so it can be a key in a dict
 or an element in a set.</p>
 <p>MACAddress and name are immutable once the instance is created,
 but signalStrength can be changed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>MACAddress</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; BSSID of the access point.</li>
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; SSID of the access point</li>
+<li><strong>signalStrength</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Access point signal strength, as measured from the user&#8217;s machine.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="attribute">
 <dt id="signalStrength.SignalNode.MACAddress">
 <tt class="descname">MACAddress</tt><a class="reference internal" href="modules/signalStrength.html#SignalNode.MACAddress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode.MACAddress" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the name of the node, as a string.</p>
-<p>Example: OLIN_WH</p>
+<dd><p>BSSID of the access point, as a string (MAC address)</p>
+<p>Example: &#8216;00:20:D8:2D:2C:C1&#8217;</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="signalStrength.SignalNode.identifier">
+<tt class="descname">identifier</tt><a class="reference internal" href="modules/signalStrength.html#SignalNode.identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode.identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique string identifier for the access point (independent of signalStrength)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="signalStrength.SignalNode.name">
 <tt class="descname">name</tt><a class="reference internal" href="modules/signalStrength.html#SignalNode.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the name of the node, as a string.</p>
+<dd><p>Name of the node, as a string.</p>
 <p>Example: OLIN_WH</p>
 </dd></dl>
 
@@ -79,27 +98,45 @@ but signalStrength can be changed</p>
 <dl class="function">
 <dt id="signalStrength.getAvgSignalNodes">
 <tt class="descclassname">signalStrength.</tt><tt class="descname">getAvgSignalNodes</tt><big>(</big><em>samples=3</em>, <em>tsleep=0.15</em><big>)</big><a class="reference internal" href="modules/signalStrength.html#getAvgSignalNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.getAvgSignalNodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns list of signal nodes</p>
+<dd><p>Gets the average signal strength of the nearby nodes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>samples</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Number of measurements to make &amp; average</li>
+<li><strong>tsleep</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Number of seconds to wait between measurements 
+(although it will take a bit longer since getCoords() takes a while to execute)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="#signalStrength.SignalNode" title="signalStrength.SignalNode"><tt class="xref py py-class docutils literal"><span class="pre">SignalNode</span></tt></a> objects</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="signalStrength.getAvgSignalNodesDict">
 <tt class="descclassname">signalStrength.</tt><tt class="descname">getAvgSignalNodesDict</tt><big>(</big><em>samples=3</em>, <em>tsleep=0.15</em><big>)</big><a class="reference internal" href="modules/signalStrength.html#getAvgSignalNodesDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.getAvgSignalNodesDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the average signal strength from samples samples, at intervals of tsleep seconds
-(although it will take a bit longer since getCoords() takes a while to execute)</p>
-<p>Returns a dictionary with key : value pairs of the form
-MAC_Address : [Signal_Strength, Network_Name]
-Example:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>{</dt>
-<dd>&#8216;00:20:D8:2D:2C:C1&#8217;: [14, &#8216;OLIN_CC&#8217;],
-&#8216;00:20:D8:2D:B3:C0&#8217;: [12, &#8216;OLIN_CC&#8217;],
-&#8216;00:20:D8:2D:65:02&#8217;: [12, &#8216;OLIN_WH&#8217;],
-&#8216;00:20:D8:2D:85:40&#8217;: [38, &#8216;OLIN_CC&#8217;]</dd>
-</dl>
-<p>}</p>
-</div></blockquote>
+<dd><p>Gets the average signal strength of the nearby nodes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>samples</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Number of measurements to make &amp; average</li>
+<li><strong>tsleep</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Number of seconds to wait between measurements 
+(although it will take a bit longer since getCoords() takes a while to execute)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict of the form {MAC_AddressSTR : <a class="reference internal" href="#signalStrength.SignalNode" title="signalStrength.SignalNode"><tt class="xref py py-class docutils literal"><span class="pre">SignalNode</span></tt></a>}</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -121,11 +158,6 @@ Returns a dict mapping SignalNode identifiers to SignalNodes</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="api.html"
                         title="previous chapter">API</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="sources/signal_strength.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -159,7 +191,7 @@ Returns a dict mapping SignalNode identifiers to SignalNodes</p>
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, Tim Ryan.
+        &copy; Copyright 2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, and Tim Ryan.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>

@@ -5,7 +5,7 @@
 
 Marauder's Map Client documentation
 ====================================
-Welcome! This is the documentation for the Marauder's Map Client, last updated March 16, 2012.
+Welcome! This is the documentation for the Marauder's Map Client, last updated |today|.
 
 The client is a laptop application that broadcasts the signal strength of nearby wireless network nodes
 to the Marauder's Map Server, which maps the set of signal strengths to a physical coordinate and updates a map

@@ -4,13 +4,19 @@ import subprocess
 import json
 
 class SignalNode(object):
-    '''
-    A highly optimized object to keep track of the signal strength
+    '''A highly optimized object to keep track of the signal strength
     associated with a node. It is hashable, so it can be a key in a dict
     or an element in a set.
 
     MACAddress and name are immutable once the instance is created,
     but signalStrength can be changed
+
+    :param MACAddress: BSSID of the access point.
+    :type MACAddress: str
+    :param name: SSID of the access point
+    :type name: str
+    :param signalStrength: Access point signal strength, as measured from the user's machine.
+    :type signalStrength: int
     '''
 
     __slots__ = ('__MACAddress', '__name', 'signalStrength')
@@ -21,21 +27,22 @@ class SignalNode(object):
 
     @property
     def identifier(self):
+        """Unique string identifier for the access point (independent of signalStrength)
+
+        """
         return self.__MACAddress + self.__name
 
     @property
     def MACAddress(self):
-        '''
-        Get the name of the node, as a string.
+        '''BSSID of the access point, as a string (MAC address)
 
-        Example: OLIN_WH
+        Example: '00:20:D8:2D:2C:C1'
         '''
         return self.__MACAddress
 
     @property
     def name(self):
-        '''
-        Get the name of the node, as a string.
+        '''Name of the node, as a string.
 
         Example: OLIN_WH
         '''
@@ -55,26 +62,29 @@ class SignalNode(object):
 
 
 def getAvgSignalNodes(samples=3, tsleep=0.15):
-    '''
-    Returns list of signal nodes
-    '''
+    """Gets the average signal strength of the nearby nodes.
+
+    :param samples: Number of measurements to make & average
+    :type samples: int
+    :param tsleep: Number of seconds to wait between measurements 
+        (although it will take a bit longer since getCoords() takes a while to execute)
+    :type tsleep: float
+
+    :returns: list of :class:`SignalNode` objects
+    """
     return getAvgSignalNodesDict(samples=samples, tsleep=tsleep).values()
     
 def getAvgSignalNodesDict(samples=3, tsleep=0.15):
-    ''' 
-    Get the average signal strength from samples samples, at intervals of tsleep seconds
-    (although it will take a bit longer since getCoords() takes a while to execute)
+    """Gets the average signal strength of the nearby nodes.
 
-    Returns a dictionary with key : value pairs of the form
-    MAC_Address : [Signal_Strength, Network_Name]
-    Example:
-     {
-       '00:20:D8:2D:2C:C1': [14, 'OLIN_CC'],
-       '00:20:D8:2D:B3:C0': [12, 'OLIN_CC'],
-       '00:20:D8:2D:65:02': [12, 'OLIN_WH'],
-       '00:20:D8:2D:85:40': [38, 'OLIN_CC']
-     }
-    '''
+    :param samples: Number of measurements to make & average
+    :type samples: int
+    :param tsleep: Number of seconds to wait between measurements 
+        (although it will take a bit longer since getCoords() takes a while to execute)
+    :type tsleep: float
+
+    :returns: dict of the form {MAC_AddressSTR : :class:`SignalNode`\ }
+    """
     import time
     allSurroundingNodes = dict() 
 

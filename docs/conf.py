@@ -29,7 +29,7 @@ sys.path.insert(0, os.path.abspath('../marauders-map/'))
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode', 'sphinxtogithub']
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+#templates_path = ['.']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Marauder\'s Map Client'
-copyright = u'2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, Tim Ryan'
+copyright = u'2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, and Tim Ryan'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -92,7 +92,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+#html_theme = 'default'
+html_theme = 'maraudersmap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -100,7 +101,7 @@ html_theme = 'default'
 #html_theme_options = {"collapsiblesidebar":"true"}
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = ['templates']
+html_theme_path = ['_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -148,7 +149,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True
