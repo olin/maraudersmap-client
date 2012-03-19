@@ -27,7 +27,7 @@
     <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Marauder&#39;s Map Client 2.0.1a documentation" href="index.html" />
     <link rel="next" title="Signal Strength" href="signal_strength.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="prev" title="Map Client" href="mapclient.html" /> 
   </head>
   <body>
     <div class="related">
@@ -43,7 +43,7 @@
           <a href="signal_strength.html" title="Signal Strength"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="overview.html" title="Overview"
+          <a href="mapclient.html" title="Map Client"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Marauder&#39;s Map Client 2.0.1a documentation</a> &raquo;</li> 
       </ul>
@@ -211,24 +211,15 @@ happens, the user will reappear on the map again.</p>
 <dl class="function">
 <dt id="api.postLocation">
 <tt class="descclassname">api.</tt><tt class="descname">postLocation</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#postLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.postLocation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post encoded location to server, without changing the database.</p>
+<dd><p>Post encoded location to server after measuring the signal strength 
+agin, without changing the database.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>currPlaceName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server. The user will show up on the map there.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>placeName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server. The user will show up on the map there.</td>
 </tr>
-</tbody>
-</table>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>placename (str): location to post to the server, in encoded server format</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects, sorted from most to least likely.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects, sorted from most to least likely.</td>
 </tr>
 </tbody>
 </table>
@@ -280,8 +271,8 @@ happens, the user will reappear on the map again.</p>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="overview.html"
-                        title="previous chapter">Overview</a></p>
+  <p class="topless"><a href="mapclient.html"
+                        title="previous chapter">Map Client</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="signal_strength.html"
                         title="next chapter">Signal Strength</a></p>
@@ -315,7 +306,7 @@ happens, the user will reappear on the map again.</p>
           <a href="signal_strength.html" title="Signal Strength"
              >next</a> |</li>
         <li class="right" >
-          <a href="overview.html" title="Overview"
+          <a href="mapclient.html" title="Map Client"
              >previous</a> |</li>
         <li><a href="index.html">Marauder&#39;s Map Client 2.0.1a documentation</a> &raquo;</li> 
       </ul>

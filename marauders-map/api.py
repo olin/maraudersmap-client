@@ -214,15 +214,14 @@ def getLocation():
     return __update(getuser())
 
 def postLocation(placeName):
-    """Post encoded location to server, without changing the database.
+    """Post encoded location to server after measuring the signal strength 
+    agin, without changing the database.
    
-    :param currPlaceName: Encoded string representing the location to post to the server. The user will show up on the map there.
-    :type currPlaceName: str
-
-    Args:
-        placename (str): location to post to the server, in encoded server format
+    :param placeName: Encoded string representing the location to post to the server. The user will show up on the map there.
+    :type placeName: str
 
     :returns: a list of potential :class:`Location` objects, sorted from most to least likely.
+
     """
 
     print "Name to post:", placeName

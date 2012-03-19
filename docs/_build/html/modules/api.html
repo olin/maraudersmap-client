@@ -265,15 +265,14 @@
     <span class="k">return</span> <span class="n">__update</span><span class="p">(</span><span class="n">getuser</span><span class="p">())</span>
 </div>
 <div class="viewcode-block" id="postLocation"><a class="viewcode-back" href="../api.html#api.postLocation">[docs]</a><span class="k">def</span> <span class="nf">postLocation</span><span class="p">(</span><span class="n">placeName</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Post encoded location to server, without changing the database.</span>
+    <span class="sd">&quot;&quot;&quot;Post encoded location to server after measuring the signal strength </span>
+<span class="sd">    agin, without changing the database.</span>
 <span class="sd">   </span>
-<span class="sd">    :param currPlaceName: Encoded string representing the location to post to the server. The user will show up on the map there.</span>
-<span class="sd">    :type currPlaceName: str</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        placename (str): location to post to the server, in encoded server format</span>
+<span class="sd">    :param placeName: Encoded string representing the location to post to the server. The user will show up on the map there.</span>
+<span class="sd">    :type placeName: str</span>
 
 <span class="sd">    :returns: a list of potential :class:`Location` objects, sorted from most to least likely.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">print</span> <span class="s">&quot;Name to post:&quot;</span><span class="p">,</span> <span class="n">placeName</span>

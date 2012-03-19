@@ -26,7 +26,7 @@
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Marauder&#39;s Map Client 2.0.1a documentation" href="index.html" />
-    <link rel="next" title="API" href="api.html" />
+    <link rel="next" title="Configuration" href="configuration.html" />
     <link rel="prev" title="Marauder’s Map Client documentation" href="index.html" /> 
   </head>
   <body>
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API"
+          <a href="configuration.html" title="Configuration"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Marauder’s Map Client documentation"
@@ -56,18 +56,35 @@
             
   <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="theory">
+<h2>Theory<a class="headerlink" href="#theory" title="Permalink to this headline">¶</a></h2>
+<p>Large institutions like universities and businesses often have multiple wireless access points (<em>AP</em>s) with overlapping areas of influence:</p>
+<img alt="images/ap_demo.png" class="align-center" src="images/ap_demo.png" />
+<p>In this example, a laptop is surrounded by three wireless access points, each identified with a unique
+MAC address (<em>BSSID</em>) of the form <tt class="docutils literal"><span class="pre">xx:xx:xx:xx:xx:xx</span></tt>. The black numbers next to the lines connecting the laptop in the diagram represent the
+<em>signal strength</em> of each access point. This value is affected by the distance between the laptop and an access point as well as obstacles
+between the devices, wireless interference, the type of wireless card in the laptop, and a variety of other factors. Nonetheless, with enough
+nearby access points and a database of past signal strengths and locations, we can convert a set of signal strength measurements into an <tt class="docutils literal"><span class="pre">x,y</span></tt>
+coordinate on a map.</p>
+<p>The marauder&#8217;s map client is a simple piece of software that periodically broadcasts the set of nearby access points and their corresponding
+access points to a central server, which is then able to display the location of every user of the system on the marauder&#8217;s map ui. It also
+allows users to explicitly <em>bind</em> a set of signal strengths to a manually specified location. Every time a user does this, the accuracy of the
+system improves.</p>
+</div>
+<div class="section" id="how-stuff-fits-together">
+<h2>How Stuff Fits Together<a class="headerlink" href="#how-stuff-fits-together" title="Permalink to this headline">¶</a></h2>
 <p>The Marauder&#8217;s Map client currently consists of 4 files:</p>
 <blockquote>
 <div><ul>
 <li><dl class="first docutils">
-<dt><tt class="xref doc docutils literal"><span class="pre">mapclient.py</span></tt></dt>
+<dt><a class="reference internal" href="mapclient.html"><em>mapclient.py</em></a></dt>
 <dd><p class="first last">The master file, which sets up the graphical user interface and makes calls to the
 api as appropriate.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><tt class="xref doc docutils literal"><span class="pre">configuration.py</span></tt></dt>
+<dt><a class="reference internal" href="configuration.html"><em>configuration.py</em></a></dt>
 <dd><p class="first last">Defines global settings for the client api, such as which server to use and the
 web address of the map.</p>
 </dd>
@@ -75,7 +92,9 @@ web address of the map.</p>
 </li>
 <li><dl class="first docutils">
 <dt><a class="reference internal" href="api.html"><em>api.py</em></a></dt>
-<dd><p class="first last">The client api that makes calls to the server and obtains signal strength data.</p>
+<dd><p class="first last">The client api that makes calls to the server and obtains signal strength data via <a class="reference internal" href="signal_strength.html"><em>signalStrength.py</em></a>.
+For example, the methods <a class="reference internal" href="api.html#api.postLocation" title="api.postLocation"><tt class="xref py py-meth docutils literal"><span class="pre">api.postLocation()</span></tt></a> and <a class="reference internal" href="api.html#api.weakPostLocation" title="api.weakPostLocation"><tt class="xref py py-meth docutils literal"><span class="pre">api.weakPostLocation()</span></tt></a> communicate with the server
+in order to update a user&#8217;s location on the map.</p>
 </dd>
 </dl>
 </li>
@@ -88,6 +107,7 @@ web address of the map.</p>
 </ul>
 </div></blockquote>
 </div>
+</div>
 
 
           </div>
@@ -95,12 +115,21 @@ web address of the map.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Overview</a><ul>
+<li><a class="reference internal" href="#theory">Theory</a></li>
+<li><a class="reference internal" href="#how-stuff-fits-together">How Stuff Fits Together</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Marauder&#8217;s Map Client documentation</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="api.html"
-                        title="next chapter">API</a></p>
+  <p class="topless"><a href="configuration.html"
+                        title="next chapter">Configuration</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -128,7 +157,7 @@ web address of the map.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API"
+          <a href="configuration.html" title="Configuration"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Marauder’s Map Client documentation"

@@ -24,6 +24,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   configuration
+   mapclient
    api
    signal_strength
 

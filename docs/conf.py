@@ -288,4 +288,4 @@ epub_copyright = u'2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+intersphinx_mapping = {'http://docs.python.org/': None, 'http://www.pyside.org/docs/pyside/':None}

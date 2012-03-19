@@ -29,6 +29,9 @@ class AdvancedPrefs(QtGui.QWidget):
         self.setLayout(mainLayout)
 
 class LocationWorker(QtCore.QObject):
+    """A worker object that runs in the background. It does nothing unless it gets a signal
+    from the :class:`PreferencesWindow`
+    """
     #TODO: Implement some kind of queue of tasks to prevent freezing/long shutdown time
     # A signal sent by the LocationWorker whenever the location is reported by the server
     locationUpdatedSignal = QtCore.Signal(list)
@@ -51,7 +54,7 @@ class LocationWorker(QtCore.QObject):
         else:
             print "Location getting/posting disabled"
 
-    @QtCore.Slot(str)
+    @QtCore.Slot(api.Location)
     def postLocation(self, loc):  
         # Should only be invoked directly by a user specifying the correct location    
         if self.canWork:        
@@ -65,13 +68,23 @@ class LocationWorker(QtCore.QObject):
         self.canWork = False
 
 class PreferencesWindow(QtGui.QDialog):
-    
-    # A signal that can be sent to the LocationWorker to tell it
-    # to get the user's new location    
-    updateSignal = QtCore.Signal()
-    
-    offlineSignal = QtCore.Signal()
+    """The preferences window is the owner of everything else in the program.
+    It should not be instantiated more than once.
 
+    :class attributes:
+        * **updateSignal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), 
+            tells the LocationWorker to get the user's new location (:meth:`LocationWorker.getLocation`)
+        * **offlineSignal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), 
+            tells the LocationWorker to stop sending stuff to the server (:meth:`LocationWorker.stopWorking`)
+        * **postSignal** (PySide.QtCore.Signal(:class:`api.Location`)) -- When emitted 
+            (see :py:meth:`PySide.QtCore.Signal.emit`) with a :class:`api.Location` instance, tells the
+            :class:`LocationWorker` to bind the current signal strength to the passed-in location and to 
+            update the user's location on the map (:meth:`LocationWorker.postLocation`)
+
+    """
+    
+    updateSignal = QtCore.Signal()
+    offlineSignal = QtCore.Signal()
     postSignal = QtCore.Signal(api.Location)
 
     def __init__(self):
@@ -279,22 +292,26 @@ class PreferencesWindow(QtGui.QDialog):
             self.correctLocationAction.setEnabled(False)
             
 def setupWindow():
-    '''
-    Create and return the preferences window,
-    which owns every other element
-    '''
+    """Create and return the Preferences window,
+    which owns every other element.
+
+    :returns: instance of :class:`PreferencesWindow`
+
+    .. warning:: The window must have a pointer to it, or it will get garbage collected and
+        the application won't run
+
+    """
     QtGui.QApplication.setQuitOnLastWindowClosed(False)
     preferencesWindow = PreferencesWindow()
     #preferencesWindow.display()
     return preferencesWindow
 
 def canLaunch():
-    '''
-    Checks if the application is unable to launch because of missing
+    """Checks if the application is unable to launch because of missing
     system features.
 
     Returns CanLaunch_BOOL, Reason_STR
-    '''
+    """
     if not QtGui.QSystemTrayIcon.isSystemTrayAvailable():
         return False, "Failed to detect presence of system tray"
     else:
