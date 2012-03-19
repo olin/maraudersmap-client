@@ -50,45 +50,45 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-signalStrength">
-<span id="signal-strength"></span><h1>Signal Strength<a class="headerlink" href="#module-signalStrength" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-signal_strength">
+<span id="signal-strength"></span><h1>Signal Strength<a class="headerlink" href="#module-signal_strength" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="signalStrength.SignalNode">
-<em class="property">class </em><tt class="descclassname">signalStrength.</tt><tt class="descname">SignalNode</tt><big>(</big><em>MACAddress</em>, <em>name</em>, <em>signalStrength</em><big>)</big><a class="reference internal" href="modules/signalStrength.html#SignalNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode" title="Permalink to this definition">¶</a></dt>
+<dt id="signal_strength.SignalNode">
+<em class="property">class </em><tt class="descclassname">signal_strength.</tt><tt class="descname">SignalNode</tt><big>(</big><em>MAC_address</em>, <em>name</em>, <em>signal_strength</em><big>)</big><a class="reference internal" href="modules/signal_strength.html#SignalNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.SignalNode" title="Permalink to this definition">¶</a></dt>
 <dd><p>A highly optimized object to keep track of the signal strength
 associated with a node. It is hashable, so it can be a key in a dict
 or an element in a set.</p>
-<p>MACAddress and name are immutable once the instance is created,
-but signalStrength can be changed</p>
+<p>MAC_address and name are immutable once the instance is created,
+but signal_strength can be changed</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>MACAddress</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; BSSID of the access point.</li>
+<li><strong>MAC_address</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; BSSID of the access point.</li>
 <li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; SSID of the access point</li>
-<li><strong>signalStrength</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Access point signal strength, as measured from the user&#8217;s machine.</li>
+<li><strong>signal_strength</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Access point signal strength, as measured from the user&#8217;s machine.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
 <dl class="attribute">
-<dt id="signalStrength.SignalNode.MACAddress">
-<tt class="descname">MACAddress</tt><a class="reference internal" href="modules/signalStrength.html#SignalNode.MACAddress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode.MACAddress" title="Permalink to this definition">¶</a></dt>
+<dt id="signal_strength.SignalNode.MAC_address">
+<tt class="descname">MAC_address</tt><a class="reference internal" href="modules/signal_strength.html#SignalNode.MAC_address"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.SignalNode.MAC_address" title="Permalink to this definition">¶</a></dt>
 <dd><p>BSSID of the access point, as a string (MAC address)</p>
 <p>Example: &#8216;00:20:D8:2D:2C:C1&#8217;</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="signalStrength.SignalNode.identifier">
-<tt class="descname">identifier</tt><a class="reference internal" href="modules/signalStrength.html#SignalNode.identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode.identifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Unique string identifier for the access point (independent of signalStrength)</p>
+<dt id="signal_strength.SignalNode.identifier">
+<tt class="descname">identifier</tt><a class="reference internal" href="modules/signal_strength.html#SignalNode.identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.SignalNode.identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique string identifier for the access point (independent of signal_strength)</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="signalStrength.SignalNode.name">
-<tt class="descname">name</tt><a class="reference internal" href="modules/signalStrength.html#SignalNode.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.SignalNode.name" title="Permalink to this definition">¶</a></dt>
+<dt id="signal_strength.SignalNode.name">
+<tt class="descname">name</tt><a class="reference internal" href="modules/signal_strength.html#SignalNode.name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.SignalNode.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of the node, as a string.</p>
 <p>Example: OLIN_WH</p>
 </dd></dl>
@@ -96,8 +96,8 @@ but signalStrength can be changed</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="signalStrength.getAvgSignalNodes">
-<tt class="descclassname">signalStrength.</tt><tt class="descname">getAvgSignalNodes</tt><big>(</big><em>samples=3</em>, <em>tsleep=0.15</em><big>)</big><a class="reference internal" href="modules/signalStrength.html#getAvgSignalNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.getAvgSignalNodes" title="Permalink to this definition">¶</a></dt>
+<dt id="signal_strength.get_avg_signal_nodes">
+<tt class="descclassname">signal_strength.</tt><tt class="descname">get_avg_signal_nodes</tt><big>(</big><em>samples=3</em>, <em>tsleep=0.15</em><big>)</big><a class="reference internal" href="modules/signal_strength.html#get_avg_signal_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.get_avg_signal_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the average signal strength of the nearby nodes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -110,7 +110,7 @@ but signalStrength can be changed</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="#signalStrength.SignalNode" title="signalStrength.SignalNode"><tt class="xref py py-class docutils literal"><span class="pre">SignalNode</span></tt></a> objects</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">list of <a class="reference internal" href="#signal_strength.SignalNode" title="signal_strength.SignalNode"><tt class="xref py py-class docutils literal"><span class="pre">SignalNode</span></tt></a> objects</p>
 </td>
 </tr>
 </tbody>
@@ -118,8 +118,8 @@ but signalStrength can be changed</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="signalStrength.getAvgSignalNodesDict">
-<tt class="descclassname">signalStrength.</tt><tt class="descname">getAvgSignalNodesDict</tt><big>(</big><em>samples=3</em>, <em>tsleep=0.15</em><big>)</big><a class="reference internal" href="modules/signalStrength.html#getAvgSignalNodesDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.getAvgSignalNodesDict" title="Permalink to this definition">¶</a></dt>
+<dt id="signal_strength.get_avg_signal_nodes_dict">
+<tt class="descclassname">signal_strength.</tt><tt class="descname">get_avg_signal_nodes_dict</tt><big>(</big><em>samples=3</em>, <em>tsleep=0.15</em><big>)</big><a class="reference internal" href="modules/signal_strength.html#get_avg_signal_nodes_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.get_avg_signal_nodes_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the average signal strength of the nearby nodes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -132,7 +132,7 @@ but signalStrength can be changed</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict of the form {MAC_AddressSTR : <a class="reference internal" href="#signalStrength.SignalNode" title="signalStrength.SignalNode"><tt class="xref py py-class docutils literal"><span class="pre">SignalNode</span></tt></a>}</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict of the form {MAC_AddressSTR : <a class="reference internal" href="#signal_strength.SignalNode" title="signal_strength.SignalNode"><tt class="xref py py-class docutils literal"><span class="pre">SignalNode</span></tt></a>}</p>
 </td>
 </tr>
 </tbody>
@@ -140,8 +140,8 @@ but signalStrength can be changed</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="signalStrength.getSignalNodeDict">
-<tt class="descclassname">signalStrength.</tt><tt class="descname">getSignalNodeDict</tt><big>(</big><big>)</big><a class="reference internal" href="modules/signalStrength.html#getSignalNodeDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signalStrength.getSignalNodeDict" title="Permalink to this definition">¶</a></dt>
+<dt id="signal_strength.get_signal_node_dict">
+<tt class="descclassname">signal_strength.</tt><tt class="descname">get_signal_node_dict</tt><big>(</big><big>)</big><a class="reference internal" href="modules/signal_strength.html#get_signal_node_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#signal_strength.get_signal_node_dict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scans (or gets cached versions, on some systems) of wireless signal strengths around the computer,
 using platform-dependent methods.
 Returns a dict mapping SignalNode identifiers to SignalNodes</p>

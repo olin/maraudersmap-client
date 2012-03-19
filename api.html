@@ -27,7 +27,7 @@
     <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Marauder&#39;s Map Client 2.0.1a documentation" href="index.html" />
     <link rel="next" title="Signal Strength" href="signal_strength.html" />
-    <link rel="prev" title="Overview" href="overview.html" /> 
+    <link rel="prev" title="Map Client" href="mapclient.html" /> 
   </head>
   <body>
     <div class="related">
@@ -43,7 +43,7 @@
           <a href="signal_strength.html" title="Signal Strength"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="overview.html" title="Overview"
+          <a href="mapclient.html" title="Map Client"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Marauder&#39;s Map Client 2.0.1a documentation</a> &raquo;</li> 
       </ul>
@@ -59,7 +59,8 @@
 <dl class="class">
 <dt id="api.Coordinate">
 <em class="property">class </em><tt class="descclassname">api.</tt><tt class="descname">Coordinate</tt><big>(</big><em>x</em>, <em>y</em>, <em>w</em>, <em>distance=0</em><big>)</big><a class="reference internal" href="modules/api.html#Coordinate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Coordinate" title="Permalink to this definition">¶</a></dt>
-<dd><p>An optimized way of representing an x,y,w location and (optionally) a distance.</p>
+<dd><p>An optimized way of representing an x,y,w location and (optionally)
+a distance.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -67,7 +68,9 @@
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>x</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; x coordinate in pixels, on image w</li>
 <li><strong>y</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; y coordinate in pixels, on image w</li>
-<li><strong>w</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; There are two images of maps in the original marauder&#8217;s map. This attribute specifies to which map the x,y coordinates refer, 1 or 2.</li>
+<li><strong>w</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; There are two images of maps in the original marauder&#8217;s map.
+This parameter specifies to which map the x,y coordinates
+refer, 1 or 2.</li>
 <li><strong>distance</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; Not entirely sure what this is for...</li>
 </ul>
 </td>
@@ -82,14 +85,15 @@
 
 <dl class="class">
 <dt id="api.Location">
-<em class="property">class </em><tt class="descclassname">api.</tt><tt class="descname">Location</tt><big>(</big><em>encodedName</em>, <em>coordinate</em><big>)</big><a class="reference internal" href="modules/api.html#Location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Location" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">api.</tt><tt class="descname">Location</tt><big>(</big><em>encoded_name</em>, <em>coordinate</em><big>)</big><a class="reference internal" href="modules/api.html#Location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Location" title="Permalink to this definition">¶</a></dt>
 <dd><p>An object to represent the combination of a place name and a coordinate.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>encodedName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The server-side representation of the name of the place. <strong>Ex:</strong> <em>WH,in,rm309</em></li>
+<li><strong>encoded_name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The server-side representation of the name
+of the place. <strong>Ex:</strong> <em>WH,in,rm309</em></li>
 <li><strong>coordinate</strong> (<a class="reference internal" href="#api.Coordinate" title="api.Coordinate"><tt class="xref py py-class docutils literal"><span class="pre">Coordinate</span></tt></a>) &#8211; The x,y,w coordinate of the place.</li>
 </ul>
 </td>
@@ -97,9 +101,10 @@
 </tbody>
 </table>
 <dl class="method">
-<dt id="api.Location.getReadableName">
-<tt class="descname">getReadableName</tt><big>(</big><big>)</big><a class="reference internal" href="modules/api.html#Location.getReadableName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Location.getReadableName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses the encodedName and converts it into a human-readable string.</p>
+<dt id="api.Location.get_readable_name">
+<tt class="descname">get_readable_name</tt><big>(</big><big>)</big><a class="headerlink" href="#api.Location.get_readable_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the encoded_name and converts it into a
+human-readable string.</p>
 <p>This is useful for menu entries, for example.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -120,9 +125,10 @@
 <dl class="function">
 <dt id="api.do_cloak">
 <tt class="descclassname">api.</tt><tt class="descname">do_cloak</tt><big>(</big><em>username</em><big>)</big><a class="reference internal" href="modules/api.html#do_cloak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_cloak" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tell the server to stop displaying a user with username on the map. If an Update
-happens, the user will reappear on the map again.</p>
-<p>This should require authentication and should only be possible for the active user.</p>
+<dd><p>Tell the server to stop displaying a user with username on the map.
+If an Update happens, the user will reappear on the map again.</p>
+<p>This should require authentication and should only be possible for
+the active user.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -137,13 +143,14 @@ happens, the user will reappear on the map again.</p>
 
 <dl class="function">
 <dt id="api.do_datapointexistence">
-<tt class="descclassname">api.</tt><tt class="descname">do_datapointexistence</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#do_datapointexistence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_datapointexistence" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if a point with a specific encoded placeName exists.</p>
+<tt class="descclassname">api.</tt><tt class="descname">do_datapointexistence</tt><big>(</big><em>place_name</em><big>)</big><a class="reference internal" href="modules/api.html#do_datapointexistence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_datapointexistence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a point with a specific encoded place_name exists.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>placeName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>place_name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to
+post to the server.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)</span></tt></td>
 </tr>
@@ -154,7 +161,8 @@ happens, the user will reappear on the map again.</p>
 <dl class="function">
 <dt id="api.do_query">
 <tt class="descclassname">api.</tt><tt class="descname">do_query</tt><big>(</big><em>username</em><big>)</big><a class="reference internal" href="modules/api.html#do_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_query" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a dictionary containing username, placename, status, and lastupdate of person with given username</p>
+<dd><p>Get a dictionary containing username, placename, status, and
+lastupdate of person with given username</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -170,13 +178,15 @@ happens, the user will reappear on the map again.</p>
 <dl class="function">
 <dt id="api.do_train">
 <tt class="descclassname">api.</tt><tt class="descname">do_train</tt><big>(</big><em>placename</em>, <em>coord</em><big>)</big><a class="reference internal" href="modules/api.html#do_train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_train" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tell server that a location in x,y,w space maps to a certain signal strength dictionary (data) and encoded placename string.</p>
+<dd><p>Tell server that a location in x,y,w space maps to a certain
+signal strength dictionary (data) and encoded placename string.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>placename</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server.</li>
+<li><strong>placename</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to
+post to the server.</li>
 <li><strong>coord</strong> (<a class="reference internal" href="#api.Coordinate" title="api.Coordinate"><tt class="xref py py-class docutils literal"><span class="pre">Coordinate</span></tt></a>) &#8211; x,y,w coordinate to post</li>
 </ul>
 </td>
@@ -196,54 +206,50 @@ happens, the user will reappear on the map again.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects, sorted from most to least likely.</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects,
+sorted from most to least likely.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="api.openMap">
-<tt class="descclassname">api.</tt><tt class="descname">openMap</tt><big>(</big><big>)</big><a class="reference internal" href="modules/api.html#openMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.openMap" title="Permalink to this definition">¶</a></dt>
+<dt id="api.open_map">
+<tt class="descclassname">api.</tt><tt class="descname">open_map</tt><big>(</big><big>)</big><a class="headerlink" href="#api.open_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opens the Marauder&#8217;s Map user interface in the default web browser.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="api.postLocation">
-<tt class="descclassname">api.</tt><tt class="descname">postLocation</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#postLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.postLocation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post encoded location to server, without changing the database.</p>
+<dt id="api.post_location">
+<tt class="descclassname">api.</tt><tt class="descname">post_location</tt><big>(</big><em>place_name</em><big>)</big><a class="headerlink" href="#api.post_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post encoded location to server after measuring the signal strength
+agin, without changing the database.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>currPlaceName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server. The user will show up on the map there.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>place_name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to
+the server. The user will show up on the map there.</td>
 </tr>
-</tbody>
-</table>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>placename (str): location to post to the server, in encoded server format</dd>
-</dl>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects, sorted from most to least likely.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects,
+sorted from most to least likely.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="api.sendToServer">
-<tt class="descclassname">api.</tt><tt class="descname">sendToServer</tt><big>(</big><em>strPHPScript</em>, <em>dictParams</em><big>)</big><a class="reference internal" href="modules/api.html#sendToServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.sendToServer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Uses urllib to send a dictionary to a PHP script on the server specified in configuration.py</p>
+<dt id="api.send_to_server">
+<tt class="descclassname">api.</tt><tt class="descname">send_to_server</tt><big>(</big><em>strPHPScript</em>, <em>dictParams</em><big>)</big><a class="headerlink" href="#api.send_to_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses urllib to send a dictionary to a PHP script on the server
+specified in configuration.py</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>strPHPScript</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name of the php script to invoke on the server. <strong>Ex:</strong> <em>&#8216;update.php&#8217;</em></li>
+<li><strong>strPHPScript</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; name of the php script to invoke on the server.
+<strong>Ex:</strong> <em>&#8216;update.php&#8217;</em></li>
 <li><strong>dictParams</strong> (<a class="reference external" href="http://docs.python.org/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; dictionary of parameters to send to the server.</li>
 </ul>
 </td>
@@ -256,16 +262,21 @@ happens, the user will reappear on the map again.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="api.weakPostLocation">
-<tt class="descclassname">api.</tt><tt class="descname">weakPostLocation</tt><big>(</big><em>placeName</em><big>)</big><a class="reference internal" href="modules/api.html#weakPostLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.weakPostLocation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post encoded location to server, without changing the database and without refreshing signal strength.</p>
+<dt id="api.weak_post_location">
+<tt class="descclassname">api.</tt><tt class="descname">weak_post_location</tt><big>(</big><em>place_name</em><big>)</big><a class="headerlink" href="#api.weak_post_location" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Post encoded location to server, without changing the database and without</dt>
+<dd>refreshing signal strength.</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>currPlaceName</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to the server. The user will show up on the map there.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>place_name</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Encoded string representing the location to post to
+the server. The user will show up on the map there.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects, sorted from most to least likely.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a list of potential <a class="reference internal" href="#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">Location</span></tt></a> objects,
+sorted from most to least likely.</td>
 </tr>
 </tbody>
 </table>
@@ -280,8 +291,8 @@ happens, the user will reappear on the map again.</p>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="overview.html"
-                        title="previous chapter">Overview</a></p>
+  <p class="topless"><a href="mapclient.html"
+                        title="previous chapter">Map Client</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="signal_strength.html"
                         title="next chapter">Signal Strength</a></p>
@@ -315,7 +326,7 @@ happens, the user will reappear on the map again.</p>
           <a href="signal_strength.html" title="Signal Strength"
              >next</a> |</li>
         <li class="right" >
-          <a href="overview.html" title="Overview"
+          <a href="mapclient.html" title="Map Client"
              >previous</a> |</li>
         <li><a href="index.html">Marauder&#39;s Map Client 2.0.1a documentation</a> &raquo;</li> 
       </ul>
