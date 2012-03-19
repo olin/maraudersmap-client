@@ -1,4 +1,4 @@
-# playground branch
+# development branch
 
 Welcome to the development branch. This is where *real* stuff happens. It may be a bit unstable, but that is no
 excuse for writing sloppy code; if you want a place to mess around without worrying about style, you should work in
