@@ -32,11 +32,11 @@ The Marauder's Map client currently consists of 4 files:
         web address of the map.
 
     * :doc:`api.py </api>`
-        The client api that makes calls to the server and obtains signal strength data via :doc:`signalStrength.py </signal_strength>`.
-        For example, the methods :py:meth:`api.postLocation` and :py:meth:`api.weakPostLocation` communicate with the server 
+        The client api that makes calls to the server and obtains signal strength data via :doc:`signal_strength.py </signal_strength>`.
+        For example, the methods :py:meth:`api.post_location` and :py:meth:`api.weak_post_location` communicate with the server 
         in order to update a user's location on the map.
 
-    * :doc:`signalStrength.py </signal_strength>`
+    * :doc:`signal_strength.py </signal_strength>`
         Defines operating system independent calls to get signal strength data.
 
 

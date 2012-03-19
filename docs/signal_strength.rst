@@ -1,5 +1,5 @@
 Signal Strength
 ****************
-.. automodule:: signalStrength
+.. automodule:: signal_strength
    :members:
 

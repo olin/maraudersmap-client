@@ -14,189 +14,203 @@ from PySide import QtGui
 
 import api
 
+
 class GeneralPrefs(QtGui.QWidget):
+    """Tab for general preferences in the :class:`PreferencesWindow`.
+
+    """
+
     def __init__(self):
         super(GeneralPrefs, self).__init__()
-        mainLayout = QtGui.QVBoxLayout()
-        mainLayout.addWidget(QtGui.QLabel("You will be able to configure basic stuff here."))
-        self.setLayout(mainLayout)
+        main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(QtGui.QLabel("You will be able to configure basic stuff here."))
+        self.setLayout(main_layout)
+
 
 class AdvancedPrefs(QtGui.QWidget):
+    """Tab for advanced preferences in the :class:`PreferencesWindow`.
+
+    """
+
     def __init__(self):
         super(AdvancedPrefs, self).__init__()
-        mainLayout = QtGui.QVBoxLayout()
-        mainLayout.addWidget(QtGui.QLabel("You will be able to configure advanced stuff here."))
-        self.setLayout(mainLayout)
+        main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(QtGui.QLabel("You will be able to configure advanced stuff here."))
+        self.setLayout(main_layout)
+
 
 class LocationWorker(QtCore.QObject):
     """A worker object that runs in the background. It does nothing unless it gets a signal
     from the :class:`PreferencesWindow`
+
     """
+
     #TODO: Implement some kind of queue of tasks to prevent freezing/long shutdown time
     # A signal sent by the LocationWorker whenever the location is reported by the server
-    locationUpdatedSignal = QtCore.Signal(list)
+    location_updated_signal = QtCore.Signal(list)
 
     def __init__(self):
         super(LocationWorker, self).__init__()
-        self.canWork = True        
+        self.can_work = True        
 
     @QtCore.Slot()
-    def getLocation(self):
-        if self.canWork:
+    def get_location(self):
+        if self.can_work:
             print "Getting location"
-            responseTuple = api.getLocation()
-            self.locationUpdatedSignal.emit(responseTuple)
-            flag, response = responseTuple
+            response_tuple = api.get_location()
+            self.location_updated_signal.emit(response_tuple)
+            flag, response = response_tuple
             if flag:
                 locations = response
                 print locations
-                api.weakPostLocation(locations[0].encodedName)
+                api.weak_post_location(locations[0].encoded_name)
         else:
             print "Location getting/posting disabled"
 
     @QtCore.Slot(api.Location)
-    def postLocation(self, loc):  
+    def post_location(self, loc):  
         # Should only be invoked directly by a user specifying the correct location    
-        if self.canWork:        
-            print "Posting User-Specified Location:", loc.getReadableName()
-            api.do_train(loc.encodedName, loc.coordinate)
-            api.weakPostLocation(loc.encodedName)
+        if self.can_work:        
+            print "Posting User-Specified Location:", loc.readable_name
+            api.do_train(loc.encoded_name, loc.coordinate)
+            api.weak_post_location(loc.encoded_name)
 
     @QtCore.Slot()
-    def stopWorking(self):
+    def stop_working(self):
         # Called when user goes offline (or program about to shut down?)
-        self.canWork = False
+        self.can_work = False
+
 
 class PreferencesWindow(QtGui.QDialog):
     """The preferences window is the owner of everything else in the program.
     It should not be instantiated more than once.
 
     :class attributes:
-        * **updateSignal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), 
-            tells the LocationWorker to get the user's new location (:meth:`LocationWorker.getLocation`)
-        * **offlineSignal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), 
-            tells the LocationWorker to stop sending stuff to the server (:meth:`LocationWorker.stopWorking`)
-        * **postSignal** (PySide.QtCore.Signal(:class:`api.Location`)) -- When emitted 
+        * **update_signal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), 
+            tells the LocationWorker to get the user's new location (:meth:`LocationWorker.get_location`)
+        * **offline_signal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), 
+            tells the LocationWorker to stop sending stuff to the server (:meth:`LocationWorker.stop_working`)
+        * **post_signal** (PySide.QtCore.Signal(:class:`api.Location`)) -- When emitted 
             (see :py:meth:`PySide.QtCore.Signal.emit`) with a :class:`api.Location` instance, tells the
             :class:`LocationWorker` to bind the current signal strength to the passed-in location and to 
-            update the user's location on the map (:meth:`LocationWorker.postLocation`)
+            update the user's location on the map (:meth:`LocationWorker.post_location`)
 
     """
     
-    updateSignal = QtCore.Signal()
-    offlineSignal = QtCore.Signal()
-    postSignal = QtCore.Signal(api.Location)
+    update_signal = QtCore.Signal()
+    offline_signal = QtCore.Signal()
+    post_signal = QtCore.Signal(api.Location)
 
     def __init__(self):
         super(PreferencesWindow, self).__init__()
         self.setup()
 
     def setup(self):
-        mainLayout = QtGui.QVBoxLayout()
-        mainLayout.addWidget(self.createTabPane())
-        self.setLayout(mainLayout)
+        main_layout = QtGui.QVBoxLayout()
+        main_layout.addWidget(self.create_tab_pane())
+        self.setLayout(main_layout)
         
-        self.setSize(500,200)
+        self.set_size(500,200)
 
         self.setWindowTitle("Marauder's Map @ Olin Preferences") 
 
-        self.createSystemTray()
-        self.setupBackgroundThread()
-        self.startRefreshTimer()
+        self.create_system_tray()
+        self.setup_background_thread()
+        self.start_refresh_timer()
 
-    def setSize(self, width, height):
+    def set_size(self, width, height):
         self.setMinimumWidth(width)        
         self.setMaximumWidth(width)                
         self.setMinimumHeight(height)
         self.setMaximumHeight(height)
 
-    def createTabPane(self):
+    def create_tab_pane(self):
         '''
         Create and return a tab pane with the options
         General, Advanced
 
         This pane is like the one used in the Mac OS X preferences dialog
         '''
-        tabPane = QtGui.QTabWidget()
-        tabPane.addTab(GeneralPrefs(), "General")
-        tabPane.addTab(AdvancedPrefs(), "Advanced")
-        return tabPane
+        tab_pane = QtGui.QTabWidget()
+        tab_pane.addTab(GeneralPrefs(), "General")
+        tab_pane.addTab(AdvancedPrefs(), "Advanced")
+        return tab_pane
 
-    def createSystemTray(self):
+    def create_system_tray(self):
         '''
         
         '''
-        self.sysTrayIconDefault = QtGui.QIcon("demoIcon.png")
-        self.sysTrayIconClicked = QtGui.QIcon("demoIconWhite.png")        
-        self.sysTray = QtGui.QSystemTrayIcon(self, icon=self.sysTrayIconDefault)
-        self.sysTray.setToolTip("Marauder's Map")
+        self.sys_tray_icon_default = QtGui.QIcon("demoIcon.png")
+        self.sys_tray_icon_clicked = QtGui.QIcon("demoIconWhite.png")        
+        self.sys_tray = QtGui.QSystemTrayIcon(self, icon=self.sys_tray_icon_default)
+        self.sys_tray.setToolTip("Marauder's Map")
 
-        self.sysTray.activated.connect(self.sysTrayMenuClicked)
-        self.createSystemTrayActions()
-        self.sysTrayMenu = self.createSystemTrayMenu()
-        self.sysTray.setContextMenu(self.sysTrayMenu)
-        self.sysTrayMenu.aboutToHide.connect(self.sysTrayMenuClosed) # XXX: NEVER GETS TRIGGERED ON MAC OS X!?!
+        self.sys_tray.activated.connect(self.sys_tray_menu_clicked)
+        self.create_system_tray_actions()
+        self.sys_tray_menu = self.create_system_tray_menu()
+        self.sys_tray.setContextMenu(self.sys_tray_menu)
+        self.sys_tray_menu.aboutToHide.connect(self.sys_tray_menu_closed) # XXX: NEVER GETS TRIGGERED ON MAC OS X!?!
         # I expected this to emit on menu close when no action is selected
 
-        self.sysTray.show()
+        self.sys_tray.show()
 
-    def createSystemTrayActions(self):
-        self.openAction = QtGui.QAction("&Open Map", self, triggered=api.openMap)
-        self.refreshAction = QtGui.QAction("&Refresh My Location", self, triggered=self.sysTrayInitiateLocationRefresh)
-        self.locationIndicator = QtGui.QAction("Location: Unknown", self, enabled=False)
-        self.correctLocationAction = QtGui.QAction("&Correct My Location", self, enabled=False)
-        self.otherLocationAction = QtGui.QAction("Other...", self)
-        self.offlineAction = QtGui.QAction("&Go Offline", self, triggered=self.sysTrayGoOffline)
-        self.prefsAction = QtGui.QAction("&Preferences...", self, triggered=self.display)
-        self.quitAction = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.sysTrayQuitAction)
+    def create_system_tray_actions(self):
+        self.open_action = QtGui.QAction("&Open Map", self, triggered=api.open_map)
+        self.refresh_action = QtGui.QAction("&Refresh My Location", self, triggered=self.sys_tray_initiate_location_refresh)
+        self.location_indicator = QtGui.QAction("Location: Unknown", self, enabled=False)
+        self.correct_location_action = QtGui.QAction("&Correct My Location", self, enabled=False)
+        self.other_location_action = QtGui.QAction("Other...", self)
+        self.offline_action = QtGui.QAction("&Go Offline", self, triggered=self.sys_tray_go_offline)
+        self.prefs_action = QtGui.QAction("&Preferences...", self, triggered=self.display)
+        self.quit_action = QtGui.QAction("&Quit Marauder's Map", self, triggered=self.sys_tray_quit_action)
 
-    def createSystemTrayMenu(self):
-        sysTrayMenu = QtGui.QMenu(self)
-        sysTrayMenu.addAction(self.openAction)
+    def create_system_tray_menu(self):
+        sys_tray_menu = QtGui.QMenu(self)
+        sys_tray_menu.addAction(self.open_action)
         
-        sysTrayMenu.addSeparator()
-        sysTrayMenu.addAction(self.refreshAction)
-        sysTrayMenu.addSeparator()
-        sysTrayMenu.addAction(self.locationIndicator)
-        sysTrayMenu.addAction(self.correctLocationAction)        
-        sysTrayMenu.addSeparator()
-        sysTrayMenu.addAction(self.offlineAction)
-        sysTrayMenu.addAction(self.prefsAction)
-        sysTrayMenu.addSeparator()
-        sysTrayMenu.addAction(self.quitAction)
+        sys_tray_menu.addSeparator()
+        sys_tray_menu.addAction(self.refresh_action)
+        sys_tray_menu.addSeparator()
+        sys_tray_menu.addAction(self.location_indicator)
+        sys_tray_menu.addAction(self.correct_location_action)        
+        sys_tray_menu.addSeparator()
+        sys_tray_menu.addAction(self.offline_action)
+        sys_tray_menu.addAction(self.prefs_action)
+        sys_tray_menu.addSeparator()
+        sys_tray_menu.addAction(self.quit_action)
         
-        return sysTrayMenu
+        return sys_tray_menu
         
-    def startRefreshTimer(self):
-        self.bgThread.start()        
+    def start_refresh_timer(self):
+        self.bg_thread.start()        
         self.refreshTimer = QtCore.QTimer(self)
-        self.refreshTimer.timeout.connect(self.refreshLocation)
+        self.refreshTimer.timeout.connect(self.refresh_location)
         self.refreshTimer.start(10000)
 
-    def refreshLocation(self):
+    def refresh_location(self):
         '''
-        Sends a signal to the LocationWorker in bgThread
+        Sends a signal to the LocationWorker in bg_thread
         to get the location
         '''
-        self.sysTray.showMessage("Updating", "Determining Location...")
-        self.updateSignal.emit()
+        self.sys_tray.showMessage("Updating", "Determining Location...")
+        self.update_signal.emit()
 
-    def postLocation(self, loc):
+    def post_location(self, loc):
         '''
-        Sends a signal to the LocationWorker in bgThread
+        Sends a signal to the LocationWorker in bg_thread
         to post a specified location
         '''
-        self.postSignal.emit(loc)
-        self.locationIndicator.setText(loc.getReadableName())
+        self.post_signal.emit(loc)
+        self.location_indicator.setText(loc.get_readable_name())
 
-    def setupBackgroundThread(self):
-        self.bgThread = QtCore.QThread()
-        self.locationWorker = LocationWorker()
-        self.locationWorker.locationUpdatedSignal.connect(self.locationSlot)
-        self.updateSignal.connect(self.locationWorker.getLocation)
-        self.postSignal.connect(self.locationWorker.postLocation)
-        self.offlineSignal.connect(self.locationWorker.stopWorking)
-        self.locationWorker.moveToThread(self.bgThread)
+    def setup_background_thread(self):
+        self.bg_thread = QtCore.QThread()
+        self.location_worker = LocationWorker()
+        self.location_worker.location_updated_signal.connect(self.locationSlot)
+        self.update_signal.connect(self.location_worker.get_location)
+        self.post_signal.connect(self.location_worker.post_location)
+        self.offline_signal.connect(self.location_worker.stop_working)
+        self.location_worker.moveToThread(self.bg_thread)
 
     def display(self):
         '''
@@ -212,51 +226,52 @@ class PreferencesWindow(QtGui.QDialog):
         When the close button is pressed on the preferences window,
         hide it; don't close or minimize it.
 
-        Note: Don't call this function manually!
+        .. note:: Don't call this function manually!
+            This function overrides the default QT close behavior
         '''
         self.hide()
         event.ignore()
 
     # System Tray Actions:
     @QtCore.Slot(QtGui.QSystemTrayIcon.ActivationReason)
-    def sysTrayMenuClicked(self, reason):
+    def sys_tray_menu_clicked(self, reason):
         '''
         Connected to the 'activated' signal of the system tray.
         Changes the icon to look good when clicked
         '''
         if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
             #Single Click to open menu
-            self.sysTray.setIcon(self.sysTrayIconClicked)
+            self.sys_tray.setIcon(self.sys_tray_icon_clicked)
         # NOTE: Below commented because unused. Can use later if we want
         #elif reason == QtGui.QSystemTrayIcon.ActivationReason.DoubleClick:
         #    # Double click
         #    pass
 
     @QtCore.Slot()
-    def sysTrayMenuClosed(self):  
+    def sys_tray_menu_closed(self):  
         print "Closed Menu"
         # XXX: NEVER GETS TRIGGERED on Mac OsX
-        self.sysTray.setIcon(self.sysTrayIconDefault)
+        self.sys_tray.setIcon(self.sys_tray_icon_default)
 
-    def sysTrayQuitAction(self):
+    def sys_tray_quit_action(self):
         '''
         Cleans up and quits the application.
         '''
 
-        self.offlineSignal.emit()        
-        self.bgThread.quit()
-        while not self.bgThread.isFinished():
+        self.offline_signal.emit()        
+        self.bg_thread.quit()
+        while not self.bg_thread.isFinished():
             continue # Wait until thread done 
         # On Ubuntu 10.10 (at least), a Python fatal error is encountered if the
         # window is not hidden before the application exits
         self.hide()
         QtGui.qApp.quit()
 
-    def sysTrayInitiateLocationRefresh(self):
-        self.refreshLocation()
+    def sys_tray_initiate_location_refresh(self):
+        self.refresh_location()
 
-    def sysTrayGoOffline(self):
-        self.offlineSignal.emit()
+    def sys_tray_go_offline(self):
+        self.offline_signal.emit()
 
     # Background actions
     @QtCore.Slot(tuple)
@@ -267,31 +282,31 @@ class PreferencesWindow(QtGui.QDialog):
         '''
         flag, response = flagResponseTuple
         if flag:
-            potLocs = response
-            subMenu = QtGui.QMenu("Correct Location Submenu", self)
-            for potLoc in potLocs:
-                def correctLocation(realLoc):
+            pot_locs = response
+            sub_menu = QtGui.QMenu("Correct Location Submenu", self)
+            for potLoc in pot_locs:
+                def correct_location(realLoc):
                     def postFunction():
-                        self.postLocation(realLoc)
+                        self.post_location(realLoc)
                     return postFunction
                 
-                subAction = QtGui.QAction(potLoc.getReadableName(), self, triggered=correctLocation(potLoc))
-                subMenu.addAction(subAction)
-            subMenu.addSeparator()            
-            subMenu.addAction(self.otherLocationAction)
-            self.correctLocationAction.setMenu(subMenu)
-            self.correctLocationAction.setEnabled(True)
+                subAction = QtGui.QAction(potLoc.readable_name, self, triggered=correct_location(potLoc))
+                sub_menu.addAction(subAction)
+            sub_menu.addSeparator()            
+            sub_menu.addAction(self.otherLocationAction)
+            self.correct_location_action.setMenu(sub_menu)
+            self.correct_location_action.setEnabled(True)
 
-            self.mostLikelyLoc = potLocs[0]
-            self.locationIndicator.setText(self.mostLikelyLoc.getReadableName())
+            self.most_likely_loc = pot_locs[0]
+            self.location_indicator.setText(self.most_likely_loc.readable_name)
 
-            self.sysTray.showMessage("Location: %s" % self.mostLikelyLoc.getReadableName(), "Click here to fix the location.")
+            self.sys_tray.showMessage("Location: %s" % self.most_likely_loc.readable_name, "Click here to fix the location.")
 
         else:
-            self.locationIndicator.setText("Unable to Connect to Server")
-            self.correctLocationAction.setEnabled(False)
+            self.location_indicator.setText("Unable to Connect to Server")
+            self.correct_location_action.setEnabled(False)
             
-def setupWindow():
+def setup_window():
     """Create and return the Preferences window,
     which owns every other element.
 
@@ -302,11 +317,11 @@ def setupWindow():
 
     """
     QtGui.QApplication.setQuitOnLastWindowClosed(False)
-    preferencesWindow = PreferencesWindow()
+    preferences_window = PreferencesWindow()
     #preferencesWindow.display()
-    return preferencesWindow
+    return preferences_window
 
-def canLaunch():
+def can_launch():
     """Checks if the application is unable to launch because of missing
     system features.
 
@@ -321,13 +336,13 @@ if __name__ == '__main__':
     import sys
     
     app = QtGui.QApplication(sys.argv)
-    ableToLaunch, reason = canLaunch()
+    able_to_launch, reason = can_launch()
     
-    if not ableToLaunch:
+    if not able_to_launch:
         print "ERROR: Unable to launch Marauder's Map!"
         print reason
         sys.exit(1)
     else:
         # Note: we have to retain a reference to the window so that it isn't killed
-        preferencesWindow = setupWindow()
+        preferences_window = setup_window()
         sys.exit(app.exec_())
