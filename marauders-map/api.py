@@ -81,10 +81,10 @@ class Location(object):
             location = '%s %s%s' % (inside, building, description)
         else:
             if (floor != "LL"):
-                location = '%s %s %s floor%s' %
+                location = '%s %s %s floor%s' % \
                 (inside, building, floor, description)
             else:
-                location = '%s %s (%s) %s' %
+                location = '%s %s (%s) %s' % \
                 (inside, building, floor, description)
 
         self.__readable_name = location
@@ -151,7 +151,7 @@ def send_to_server(strPHPScript, dictParams):
     """
 
     # Construct url with the parameters specified in the dictionary
-    strUrl = "%s/%s?%s" %
+    strUrl = "%s/%s?%s" % \
     (Settings.SERVER_ADDRESS, strPHPScript, urllib.urlencode(dictParams))
 
     print strUrl
