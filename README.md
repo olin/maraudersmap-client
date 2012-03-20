@@ -34,3 +34,6 @@ and/or restarted relatively easily
 * **playground** -- This is where we try out crazy new ideas, don't follow standards, and write unstable code.
 * **gh-pages** -- This is the documentation branch. Never edit files in this branch manually; use 
                   ``make html`` in ``docs`` to generate updated documentation.
+
+## Documentation
+[HTML docs](http://ohack.github.com/maraudersmap-client/)
