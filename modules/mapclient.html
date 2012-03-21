@@ -65,181 +65,203 @@
 
 <span class="kn">import</span> <span class="nn">api</span>
 
+
 <div class="viewcode-block" id="GeneralPrefs"><a class="viewcode-back" href="../mapclient.html#mapclient.GeneralPrefs">[docs]</a><span class="k">class</span> <span class="nc">GeneralPrefs</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tab for general preferences in the :class:`PreferencesWindow`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">GeneralPrefs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
-        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;You will be able to configure basic stuff here.&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span>
+        <span class="n">main_layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">main_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;You will be able to configure basic stuff here.&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">main_layout</span><span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="AdvancedPrefs"><a class="viewcode-back" href="../mapclient.html#mapclient.AdvancedPrefs">[docs]</a><span class="k">class</span> <span class="nc">AdvancedPrefs</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tab for advanced preferences in the :class:`PreferencesWindow`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">AdvancedPrefs</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
-        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;You will be able to configure advanced stuff here.&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span>
+        <span class="n">main_layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">main_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;You will be able to configure advanced stuff here.&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">main_layout</span><span class="p">)</span>
+
 </div>
 <div class="viewcode-block" id="LocationWorker"><a class="viewcode-back" href="../mapclient.html#mapclient.LocationWorker">[docs]</a><span class="k">class</span> <span class="nc">LocationWorker</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A worker object that runs in the background. It does nothing unless it gets a signal</span>
+<span class="sd">    from the :class:`PreferencesWindow`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="c">#TODO: Implement some kind of queue of tasks to prevent freezing/long shutdown time</span>
     <span class="c"># A signal sent by the LocationWorker whenever the location is reported by the server</span>
-    <span class="n">locationUpdatedSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">location_updated_signal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">LocationWorker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">canWork</span> <span class="o">=</span> <span class="bp">True</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_work</span> <span class="o">=</span> <span class="bp">True</span>        
 
     <span class="nd">@QtCore.Slot</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">getLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canWork</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_work</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;Getting location&quot;</span>
-            <span class="n">responseTuple</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">getLocation</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">locationUpdatedSignal</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">responseTuple</span><span class="p">)</span>
-            <span class="n">flag</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="n">responseTuple</span>
+            <span class="n">response_tuple</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">get_location</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location_updated_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">response_tuple</span><span class="p">)</span>
+            <span class="n">flag</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="n">response_tuple</span>
             <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
                 <span class="n">locations</span> <span class="o">=</span> <span class="n">response</span>
                 <span class="k">print</span> <span class="n">locations</span>
-                <span class="n">api</span><span class="o">.</span><span class="n">weakPostLocation</span><span class="p">(</span><span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encodedName</span><span class="p">)</span>
+                <span class="n">api</span><span class="o">.</span><span class="n">weak_post_location</span><span class="p">(</span><span class="n">locations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoded_name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;Location getting/posting disabled&quot;</span>
 
-    <span class="nd">@QtCore.Slot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">postLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">):</span>  
+    <span class="nd">@QtCore.Slot</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">Location</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">post_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">):</span>  
         <span class="c"># Should only be invoked directly by a user specifying the correct location    </span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">canWork</span><span class="p">:</span>        
-            <span class="k">print</span> <span class="s">&quot;Posting User-Specified Location:&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">getReadableName</span><span class="p">()</span>
-            <span class="n">api</span><span class="o">.</span><span class="n">do_train</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">encodedName</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">coordinate</span><span class="p">)</span>
-            <span class="n">api</span><span class="o">.</span><span class="n">weakPostLocation</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">encodedName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_work</span><span class="p">:</span>        
+            <span class="k">print</span> <span class="s">&quot;Posting User-Specified Location:&quot;</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">readable_name</span>
+            <span class="n">api</span><span class="o">.</span><span class="n">do_train</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">encoded_name</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">coordinate</span><span class="p">)</span>
+            <span class="n">api</span><span class="o">.</span><span class="n">weak_post_location</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">encoded_name</span><span class="p">)</span>
 
     <span class="nd">@QtCore.Slot</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">stopWorking</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">stop_working</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c"># Called when user goes offline (or program about to shut down?)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">canWork</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">can_work</span> <span class="o">=</span> <span class="bp">False</span>
+
 </div>
 <div class="viewcode-block" id="PreferencesWindow"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow">[docs]</a><span class="k">class</span> <span class="nc">PreferencesWindow</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The preferences window is the owner of everything else in the program.</span>
 <span class="sd">    It should not be instantiated more than once.</span>
 
 <span class="sd">    :class attributes:</span>
-<span class="sd">        * **updateSignal** (:pyside:class:`QtCore.Signal`) -- When emitted, tells the LocationWorker to get the user&#39;s new location</span>
-<span class="sd">        * **offlineSignal** (QtCore.Signal) -- When emitted, tells the LocationWorker to stop sending stuff to the server</span>
-<span class="sd">        * postSignal</span>
-<span class="sd">            DoesStuff</span>
+<span class="sd">        * **update_signal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), </span>
+<span class="sd">            tells the LocationWorker to get the user&#39;s new location (:meth:`LocationWorker.get_location`)</span>
+<span class="sd">        * **offline_signal** (PySide.QtCore.Signal) -- When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), </span>
+<span class="sd">            tells the LocationWorker to stop sending stuff to the server (:meth:`LocationWorker.stop_working`)</span>
+<span class="sd">        * **post_signal** (PySide.QtCore.Signal(:class:`api.Location`)) -- When emitted </span>
+<span class="sd">            (see :py:meth:`PySide.QtCore.Signal.emit`) with a :class:`api.Location` instance, tells the</span>
+<span class="sd">            :class:`LocationWorker` to bind the current signal strength to the passed-in location and to </span>
+<span class="sd">            update the user&#39;s location on the map (:meth:`LocationWorker.post_location`)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="n">updateSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
-    <span class="n">offlineSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
-    <span class="n">postSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">Location</span><span class="p">)</span>
+    <span class="n">update_signal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+    <span class="n">offline_signal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">()</span>
+    <span class="n">post_signal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Signal</span><span class="p">(</span><span class="n">api</span><span class="o">.</span><span class="n">Location</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">PreferencesWindow</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
-        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createTabPane</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">mainLayout</span><span class="p">)</span>
+        <span class="n">main_layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="n">main_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">create_tab_pane</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">main_layout</span><span class="p">)</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">setSize</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_size</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&quot;Marauder&#39;s Map @ Olin Preferences&quot;</span><span class="p">)</span> 
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">createSystemTray</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">setupBackgroundThread</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">startRefreshTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_system_tray</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setup_background_thread</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_refresh_timer</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">setSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">set_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>                
         <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="n">height</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PreferencesWindow.createTabPane"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.createTabPane">[docs]</a>    <span class="k">def</span> <span class="nf">createTabPane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesWindow.create_tab_pane"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.create_tab_pane">[docs]</a>    <span class="k">def</span> <span class="nf">create_tab_pane</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create and return a tab pane with the options</span>
 <span class="sd">        General, Advanced</span>
 
 <span class="sd">        This pane is like the one used in the Mac OS X preferences dialog</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">tabPane</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
-        <span class="n">tabPane</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">GeneralPrefs</span><span class="p">(),</span> <span class="s">&quot;General&quot;</span><span class="p">)</span>
-        <span class="n">tabPane</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">AdvancedPrefs</span><span class="p">(),</span> <span class="s">&quot;Advanced&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">tabPane</span>
+        <span class="n">tab_pane</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
+        <span class="n">tab_pane</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">GeneralPrefs</span><span class="p">(),</span> <span class="s">&quot;General&quot;</span><span class="p">)</span>
+        <span class="n">tab_pane</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">AdvancedPrefs</span><span class="p">(),</span> <span class="s">&quot;Advanced&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tab_pane</span>
 </div>
-<div class="viewcode-block" id="PreferencesWindow.createSystemTray"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.createSystemTray">[docs]</a>    <span class="k">def</span> <span class="nf">createSystemTray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesWindow.create_system_tray"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.create_system_tray">[docs]</a>    <span class="k">def</span> <span class="nf">create_system_tray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        </span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTrayIconDefault</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;demoIcon.png&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTrayIconClicked</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;demoIconWhite.png&quot;</span><span class="p">)</span>        
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSystemTrayIcon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayIconDefault</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s">&quot;Marauder&#39;s Map&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_icon_default</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;demoIcon.png&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_icon_clicked</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;demoIconWhite.png&quot;</span><span class="p">)</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSystemTrayIcon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_icon_default</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s">&quot;Marauder&#39;s Map&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayMenuClicked</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">createSystemTrayActions</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTrayMenu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSystemTrayMenu</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">setContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayMenu</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">aboutToHide</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayMenuClosed</span><span class="p">)</span> <span class="c"># XXX: NEVER GETS TRIGGERED ON MAC OS X!?!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">activated</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_menu_clicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_system_tray_actions</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_menu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_system_tray_menu</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">setContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_menu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">aboutToHide</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_menu_closed</span><span class="p">)</span> <span class="c"># XXX: NEVER GETS TRIGGERED ON MAC OS X!?!</span>
         <span class="c"># I expected this to emit on menu close when no action is selected</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </div>
-    <span class="k">def</span> <span class="nf">createSystemTrayActions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">openAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Open Map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="n">api</span><span class="o">.</span><span class="n">openMap</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">refreshAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Refresh My Location&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayInitiateLocationRefresh</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">locationIndicator</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Location: Unknown&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">correctLocationAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Correct My Location&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">otherLocationAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Other...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offlineAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Go Offline&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayGoOffline</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prefsAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Preferences...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">quitAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Quit Marauder&#39;s Map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayQuitAction</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_system_tray_actions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">open_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Open Map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="n">api</span><span class="o">.</span><span class="n">open_map</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Refresh My Location&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_initiate_location_refresh</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_indicator</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Location: Unknown&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">correct_location_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Correct My Location&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">other_location_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;Other...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offline_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Go Offline&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_go_offline</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prefs_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Preferences...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">display</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">quit_action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s">&quot;&amp;Quit Marauder&#39;s Map&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_quit_action</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">createSystemTrayMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">sysTrayMenu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openAction</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">create_system_tray_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sys_tray_menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">open_action</span><span class="p">)</span>
         
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refreshAction</span><span class="p">)</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locationIndicator</span><span class="p">)</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correctLocationAction</span><span class="p">)</span>        
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offlineAction</span><span class="p">)</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefsAction</span><span class="p">)</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
-        <span class="n">sysTrayMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quitAction</span><span class="p">)</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refresh_action</span><span class="p">)</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_indicator</span><span class="p">)</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correct_location_action</span><span class="p">)</span>        
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">offline_action</span><span class="p">)</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefs_action</span><span class="p">)</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        <span class="n">sys_tray_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quit_action</span><span class="p">)</span>
         
-        <span class="k">return</span> <span class="n">sysTrayMenu</span>
+        <span class="k">return</span> <span class="n">sys_tray_menu</span>
         
-    <span class="k">def</span> <span class="nf">startRefreshTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bgThread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>        
+    <span class="k">def</span> <span class="nf">start_refresh_timer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bg_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">refreshTimer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">refreshTimer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refreshLocation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refreshTimer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refresh_location</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">refreshTimer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PreferencesWindow.refreshLocation"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.refreshLocation">[docs]</a>    <span class="k">def</span> <span class="nf">refreshLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesWindow.refresh_location"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.refresh_location">[docs]</a>    <span class="k">def</span> <span class="nf">refresh_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Sends a signal to the LocationWorker in bgThread</span>
+<span class="sd">        Sends a signal to the LocationWorker in bg_thread</span>
 <span class="sd">        to get the location</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&quot;Updating&quot;</span><span class="p">,</span> <span class="s">&quot;Determining Location...&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">updateSignal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&quot;Updating&quot;</span><span class="p">,</span> <span class="s">&quot;Determining Location...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 </div>
-<div class="viewcode-block" id="PreferencesWindow.postLocation"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.postLocation">[docs]</a>    <span class="k">def</span> <span class="nf">postLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesWindow.post_location"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.post_location">[docs]</a>    <span class="k">def</span> <span class="nf">post_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Sends a signal to the LocationWorker in bgThread</span>
+<span class="sd">        Sends a signal to the LocationWorker in bg_thread</span>
 <span class="sd">        to post a specified location</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">postSignal</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">locationIndicator</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">getReadableName</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_indicator</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">get_readable_name</span><span class="p">())</span>
 </div>
-    <span class="k">def</span> <span class="nf">setupBackgroundThread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bgThread</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">locationWorker</span> <span class="o">=</span> <span class="n">LocationWorker</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">locationWorker</span><span class="o">.</span><span class="n">locationUpdatedSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locationSlot</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">updateSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locationWorker</span><span class="o">.</span><span class="n">getLocation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">postSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locationWorker</span><span class="o">.</span><span class="n">postLocation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offlineSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locationWorker</span><span class="o">.</span><span class="n">stopWorking</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">locationWorker</span><span class="o">.</span><span class="n">moveToThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bgThread</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">setup_background_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bg_thread</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_worker</span> <span class="o">=</span> <span class="n">LocationWorker</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_worker</span><span class="o">.</span><span class="n">location_updated_signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locationSlot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_worker</span><span class="o">.</span><span class="n">get_location</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_worker</span><span class="o">.</span><span class="n">post_location</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offline_signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">location_worker</span><span class="o">.</span><span class="n">stop_working</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">location_worker</span><span class="o">.</span><span class="n">moveToThread</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bg_thread</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PreferencesWindow.display"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -255,51 +277,52 @@
 <span class="sd">        When the close button is pressed on the preferences window,</span>
 <span class="sd">        hide it; don&#39;t close or minimize it.</span>
 
-<span class="sd">        Note: Don&#39;t call this function manually!</span>
+<span class="sd">        .. note:: Don&#39;t call this function manually!</span>
+<span class="sd">            This function overrides the default QT close behavior</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
 
     <span class="c"># System Tray Actions:</span></div>
     <span class="nd">@QtCore.Slot</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSystemTrayIcon</span><span class="o">.</span><span class="n">ActivationReason</span><span class="p">)</span>
-<div class="viewcode-block" id="PreferencesWindow.sysTrayMenuClicked"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.sysTrayMenuClicked">[docs]</a>    <span class="k">def</span> <span class="nf">sysTrayMenuClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesWindow.sys_tray_menu_clicked"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.sys_tray_menu_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">sys_tray_menu_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Connected to the &#39;activated&#39; signal of the system tray.</span>
 <span class="sd">        Changes the icon to look good when clicked</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">reason</span> <span class="o">==</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSystemTrayIcon</span><span class="o">.</span><span class="n">ActivationReason</span><span class="o">.</span><span class="n">Trigger</span><span class="p">:</span>
             <span class="c">#Single Click to open menu</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayIconClicked</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_icon_clicked</span><span class="p">)</span>
         <span class="c"># NOTE: Below commented because unused. Can use later if we want</span>
         <span class="c">#elif reason == QtGui.QSystemTrayIcon.ActivationReason.DoubleClick:</span>
         <span class="c">#    # Double click</span>
         <span class="c">#    pass</span>
 </div>
     <span class="nd">@QtCore.Slot</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">sysTrayMenuClosed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+    <span class="k">def</span> <span class="nf">sys_tray_menu_closed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
         <span class="k">print</span> <span class="s">&quot;Closed Menu&quot;</span>
         <span class="c"># XXX: NEVER GETS TRIGGERED on Mac OsX</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sysTrayIconDefault</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_tray_icon_default</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PreferencesWindow.sysTrayQuitAction"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.sysTrayQuitAction">[docs]</a>    <span class="k">def</span> <span class="nf">sysTrayQuitAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PreferencesWindow.sys_tray_quit_action"><a class="viewcode-back" href="../mapclient.html#mapclient.PreferencesWindow.sys_tray_quit_action">[docs]</a>    <span class="k">def</span> <span class="nf">sys_tray_quit_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Cleans up and quits the application.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">offlineSignal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>        
-        <span class="bp">self</span><span class="o">.</span><span class="n">bgThread</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
-        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bgThread</span><span class="o">.</span><span class="n">isFinished</span><span class="p">():</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offline_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">bg_thread</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bg_thread</span><span class="o">.</span><span class="n">isFinished</span><span class="p">():</span>
             <span class="k">continue</span> <span class="c"># Wait until thread done </span>
         <span class="c"># On Ubuntu 10.10 (at least), a Python fatal error is encountered if the</span>
         <span class="c"># window is not hidden before the application exits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
         <span class="n">QtGui</span><span class="o">.</span><span class="n">qApp</span><span class="o">.</span><span class="n">quit</span><span class="p">()</span>
 </div>
-    <span class="k">def</span> <span class="nf">sysTrayInitiateLocationRefresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">refreshLocation</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">sys_tray_initiate_location_refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refresh_location</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">sysTrayGoOffline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">offlineSignal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">sys_tray_go_offline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">offline_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
     <span class="c"># Background actions</span>
     <span class="nd">@QtCore.Slot</span><span class="p">(</span><span class="nb">tuple</span><span class="p">)</span>
@@ -310,31 +333,31 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="n">flag</span><span class="p">,</span> <span class="n">response</span> <span class="o">=</span> <span class="n">flagResponseTuple</span>
         <span class="k">if</span> <span class="n">flag</span><span class="p">:</span>
-            <span class="n">potLocs</span> <span class="o">=</span> <span class="n">response</span>
-            <span class="n">subMenu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;Correct Location Submenu&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">potLoc</span> <span class="ow">in</span> <span class="n">potLocs</span><span class="p">:</span>
-                <span class="k">def</span> <span class="nf">correctLocation</span><span class="p">(</span><span class="n">realLoc</span><span class="p">):</span>
+            <span class="n">pot_locs</span> <span class="o">=</span> <span class="n">response</span>
+            <span class="n">sub_menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="s">&quot;Correct Location Submenu&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">potLoc</span> <span class="ow">in</span> <span class="n">pot_locs</span><span class="p">:</span>
+                <span class="k">def</span> <span class="nf">correct_location</span><span class="p">(</span><span class="n">realLoc</span><span class="p">):</span>
                     <span class="k">def</span> <span class="nf">postFunction</span><span class="p">():</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">postLocation</span><span class="p">(</span><span class="n">realLoc</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">post_location</span><span class="p">(</span><span class="n">realLoc</span><span class="p">)</span>
                     <span class="k">return</span> <span class="n">postFunction</span>
                 
-                <span class="n">subAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">potLoc</span><span class="o">.</span><span class="n">getReadableName</span><span class="p">(),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="n">correctLocation</span><span class="p">(</span><span class="n">potLoc</span><span class="p">))</span>
-                <span class="n">subMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">subAction</span><span class="p">)</span>
-            <span class="n">subMenu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>            
-            <span class="n">subMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">otherLocationAction</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">correctLocationAction</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="n">subMenu</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">correctLocationAction</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">subAction</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">potLoc</span><span class="o">.</span><span class="n">readable_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">triggered</span><span class="o">=</span><span class="n">correct_location</span><span class="p">(</span><span class="n">potLoc</span><span class="p">))</span>
+                <span class="n">sub_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">subAction</span><span class="p">)</span>
+            <span class="n">sub_menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>            
+            <span class="n">sub_menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">otherLocationAction</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">correct_location_action</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="n">sub_menu</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">correct_location_action</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">mostLikelyLoc</span> <span class="o">=</span> <span class="n">potLocs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">locationIndicator</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mostLikelyLoc</span><span class="o">.</span><span class="n">getReadableName</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">most_likely_loc</span> <span class="o">=</span> <span class="n">pot_locs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location_indicator</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">most_likely_loc</span><span class="o">.</span><span class="n">readable_name</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">sysTray</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&quot;Location: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">mostLikelyLoc</span><span class="o">.</span><span class="n">getReadableName</span><span class="p">(),</span> <span class="s">&quot;Click here to fix the location.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sys_tray</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&quot;Location: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">most_likely_loc</span><span class="o">.</span><span class="n">readable_name</span><span class="p">,</span> <span class="s">&quot;Click here to fix the location.&quot;</span><span class="p">)</span>
 
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">locationIndicator</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Unable to Connect to Server&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">correctLocationAction</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">location_indicator</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Unable to Connect to Server&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">correct_location_action</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
             </div></div>
-<div class="viewcode-block" id="setupWindow"><a class="viewcode-back" href="../mapclient.html#mapclient.setupWindow">[docs]</a><span class="k">def</span> <span class="nf">setupWindow</span><span class="p">():</span>
+<div class="viewcode-block" id="setup_window"><a class="viewcode-back" href="../mapclient.html#mapclient.setup_window">[docs]</a><span class="k">def</span> <span class="nf">setup_window</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Create and return the Preferences window,</span>
 <span class="sd">    which owns every other element.</span>
 
@@ -345,11 +368,11 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">setQuitOnLastWindowClosed</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-    <span class="n">preferencesWindow</span> <span class="o">=</span> <span class="n">PreferencesWindow</span><span class="p">()</span>
+    <span class="n">preferences_window</span> <span class="o">=</span> <span class="n">PreferencesWindow</span><span class="p">()</span>
     <span class="c">#preferencesWindow.display()</span>
-    <span class="k">return</span> <span class="n">preferencesWindow</span>
+    <span class="k">return</span> <span class="n">preferences_window</span>
 </div>
-<div class="viewcode-block" id="canLaunch"><a class="viewcode-back" href="../mapclient.html#mapclient.canLaunch">[docs]</a><span class="k">def</span> <span class="nf">canLaunch</span><span class="p">():</span>
+<div class="viewcode-block" id="can_launch"><a class="viewcode-back" href="../mapclient.html#mapclient.can_launch">[docs]</a><span class="k">def</span> <span class="nf">can_launch</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Checks if the application is unable to launch because of missing</span>
 <span class="sd">    system features.</span>
 
@@ -364,15 +387,15 @@
     <span class="kn">import</span> <span class="nn">sys</span>
     
     <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
-    <span class="n">ableToLaunch</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">canLaunch</span><span class="p">()</span>
+    <span class="n">able_to_launch</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">can_launch</span><span class="p">()</span>
     
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">ableToLaunch</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">able_to_launch</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">&quot;ERROR: Unable to launch Marauder&#39;s Map!&quot;</span>
         <span class="k">print</span> <span class="n">reason</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c"># Note: we have to retain a reference to the window so that it isn&#39;t killed</span>
-        <span class="n">preferencesWindow</span> <span class="o">=</span> <span class="n">setupWindow</span><span class="p">()</span>
+        <span class="n">preferences_window</span> <span class="o">=</span> <span class="n">setup_window</span><span class="p">()</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
 </pre></div>
 

@@ -56,6 +56,29 @@
             
   <div class="section" id="module-api">
 <span id="api"></span><h1>API<a class="headerlink" href="#module-api" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="api.APIError">
+<em class="property">exception </em><tt class="descclassname">api.</tt><tt class="descname">APIError</tt><a class="reference internal" href="modules/api.html#APIError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.APIError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for errors involving the API</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.BadServerResponseError">
+<em class="property">exception </em><tt class="descclassname">api.</tt><tt class="descname">BadServerResponseError</tt><big>(</big><em>response</em><big>)</big><a class="reference internal" href="modules/api.html#BadServerResponseError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.BadServerResponseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception to be thrown when the server response does not involve
+success.</p>
+<p>This could happen, for example, when an invalid request is made to 
+the server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>response</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Server response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="class">
 <dt id="api.Coordinate">
 <em class="property">class </em><tt class="descclassname">api.</tt><tt class="descname">Coordinate</tt><big>(</big><em>x</em>, <em>y</em>, <em>w</em>, <em>distance=0</em><big>)</big><a class="reference internal" href="modules/api.html#Coordinate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Coordinate" title="Permalink to this definition">¶</a></dt>
@@ -102,7 +125,7 @@ of the place. <strong>Ex:</strong> <em>WH,in,rm309</em></li>
 </table>
 <dl class="method">
 <dt id="api.Location.get_readable_name">
-<tt class="descname">get_readable_name</tt><big>(</big><big>)</big><a class="headerlink" href="#api.Location.get_readable_name" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get_readable_name</tt><big>(</big><big>)</big><a class="reference internal" href="modules/api.html#Location.get_readable_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.Location.get_readable_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses the encoded_name and converts it into a
 human-readable string.</p>
 <p>This is useful for menu entries, for example.</p>
@@ -120,6 +143,14 @@ human-readable string.</p>
 </div>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="exception">
+<dt id="api.UnableToConnectToServerError">
+<em class="property">exception </em><tt class="descclassname">api.</tt><tt class="descname">UnableToConnectToServerError</tt><a class="reference internal" href="modules/api.html#UnableToConnectToServerError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.UnableToConnectToServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>An exception to be thrown when no connection can be made to the server.</p>
+<p>This could mean that the server is down or that the user is not 
+connected to the network on which the server resides.</p>
 </dd></dl>
 
 <dl class="function">
@@ -162,14 +193,15 @@ post to the server.</td>
 <dt id="api.do_query">
 <tt class="descclassname">api.</tt><tt class="descname">do_query</tt><big>(</big><em>username</em><big>)</big><a class="reference internal" href="modules/api.html#do_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.do_query" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a dictionary containing username, placename, status, and
-lastupdate of person with given username</p>
+lastupdate of person with given username.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>username</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Username of user to get information about.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)</span></tt></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple <tt class="docutils literal"><span class="pre">(serverSuceededBOOL,reasonFailedStr/dictOfTheForm</span>
+<span class="pre">{'username':str,</span> <span class="pre">'placename':str,</span> <span class="pre">'status':str,</span> <span class="pre">'lastupdate':str})</span></tt></td>
 </tr>
 </tbody>
 </table>
@@ -215,13 +247,13 @@ sorted from most to least likely.</td>
 
 <dl class="function">
 <dt id="api.open_map">
-<tt class="descclassname">api.</tt><tt class="descname">open_map</tt><big>(</big><big>)</big><a class="headerlink" href="#api.open_map" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">api.</tt><tt class="descname">open_map</tt><big>(</big><big>)</big><a class="reference internal" href="modules/api.html#open_map"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.open_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opens the Marauder&#8217;s Map user interface in the default web browser.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="api.post_location">
-<tt class="descclassname">api.</tt><tt class="descname">post_location</tt><big>(</big><em>place_name</em><big>)</big><a class="headerlink" href="#api.post_location" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">api.</tt><tt class="descname">post_location</tt><big>(</big><em>place_name</em><big>)</big><a class="reference internal" href="modules/api.html#post_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.post_location" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post encoded location to server after measuring the signal strength
 agin, without changing the database.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -240,7 +272,7 @@ sorted from most to least likely.</td>
 
 <dl class="function">
 <dt id="api.send_to_server">
-<tt class="descclassname">api.</tt><tt class="descname">send_to_server</tt><big>(</big><em>strPHPScript</em>, <em>dictParams</em><big>)</big><a class="headerlink" href="#api.send_to_server" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">api.</tt><tt class="descname">send_to_server</tt><big>(</big><em>strPHPScript</em>, <em>dictParams</em><big>)</big><a class="reference internal" href="modules/api.html#send_to_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.send_to_server" title="Permalink to this definition">¶</a></dt>
 <dd><p>Uses urllib to send a dictionary to a PHP script on the server
 specified in configuration.py</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -263,11 +295,9 @@ specified in configuration.py</p>
 
 <dl class="function">
 <dt id="api.weak_post_location">
-<tt class="descclassname">api.</tt><tt class="descname">weak_post_location</tt><big>(</big><em>place_name</em><big>)</big><a class="headerlink" href="#api.weak_post_location" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>Post encoded location to server, without changing the database and without</dt>
-<dd>refreshing signal strength.</dd>
-</dl>
+<tt class="descclassname">api.</tt><tt class="descname">weak_post_location</tt><big>(</big><em>place_name</em><big>)</big><a class="reference internal" href="modules/api.html#weak_post_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#api.weak_post_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post encoded location to server, without changing the database and without
+refreshing signal strength.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

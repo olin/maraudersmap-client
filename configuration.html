@@ -56,6 +56,112 @@
             
   <div class="section" id="module-configuration">
 <span id="configuration"></span><h1>Configuration<a class="headerlink" href="#module-configuration" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="configuration.PreferenceCreationError">
+<em class="property">exception </em><tt class="descclassname">configuration.</tt><tt class="descname">PreferenceCreationError</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="modules/configuration.html#PreferenceCreationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#configuration.PreferenceCreationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Error to be thrown when prefs could not be created.</p>
+<p>This could be thrown when the directory or the file could not
+be created.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Path that could not be created</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="configuration.Settings">
+<em class="property">class </em><tt class="descclassname">configuration.</tt><tt class="descname">Settings</tt><a class="reference internal" href="modules/configuration.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#configuration.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to manipulate application settings.</p>
+<p>Use it like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">configuration</span> <span class="kn">import</span> <span class="n">Settings</span>
+<span class="n">Settings</span><span class="o">.</span><span class="n">init</span><span class="p">()</span> <span class="c"># Make it possible to use Settings</span>
+<span class="c"># Read settings from file</span>
+<span class="k">print</span> <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span>
+<span class="c"># Change the settings and write those changes to file</span>
+<span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span> <span class="o">=</span> <span class="s">&quot;http://somewebsite.blah&quot;</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Never create a settings instance!</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Class attributes:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last">
+<li><dl class="first docutils">
+<dt><strong>SERVER_ADDRESS</strong> (str) - Where to post server requests</dt>
+<dd><p class="first last">Default: <tt class="docutils literal"><span class="pre">http://apps.olin.edu</span></tt></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>WEB_ADDRESS</strong> (str) - Web address of the map; used when</dt>
+<dd><p class="first">&#8220;Open Map&#8221; is clicked</p>
+<p class="last">Default: <tt class="docutils literal"><span class="pre">http://apps.olin.edu/ui/mapui.php</span></tt></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>REFRESH_FREQ</strong> (int) - How often to refresh the location, in</dt>
+<dd><p class="first">seconds</p>
+<p class="last">Default: <tt class="docutils literal"><span class="pre">300</span></tt></p>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="classmethod">
+<dt id="configuration.Settings.init">
+<em class="property">classmethod </em><tt class="descname">init</tt><big>(</big><big>)</big><a class="reference internal" href="modules/configuration.html#Settings.init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#configuration.Settings.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this before using Settings. Calling it multiple times
+should be harmless.</p>
+<p>Creates preferences directory &amp; file in the appropriate location for
+the current OS if it doesn&#8217;t exist and sets up the class attributes
+with appropriate values.
+The file is called <tt class="docutils literal"><span class="pre">config.txt</span></tt>.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">A limitation of the ConfigParser module that we are 
+using is that it strips out comments from the config file, which 
+is annoying in cases where the user wants to make changes 
+manually. If we want to remove this limitation, we should use 
+configobj: <a class="reference external" href="http://www.voidspace.org.uk/python/configobj.html">http://www.voidspace.org.uk/python/configobj.html</a></p>
+</div>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="configuration.Settings.read_prefs_from_file">
+<em class="property">classmethod </em><tt class="descname">read_prefs_from_file</tt><big>(</big><big>)</big><a class="headerlink" href="#configuration.Settings.read_prefs_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads preferences from file. You shouldn&#8217;t need to call this
+manually because it gets called on <a class="reference internal" href="#configuration.Settings.init" title="configuration.Settings.init"><tt class="xref py py-meth docutils literal"><span class="pre">Settings.init()</span></tt></a> unless you
+want to support users who modify the file while the application is
+running.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="configuration.Settings.write_prefs_to_file">
+<em class="property">classmethod </em><tt class="descname">write_prefs_to_file</tt><big>(</big><big>)</big><a class="reference internal" href="modules/configuration.html#Settings.write_prefs_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#configuration.Settings.write_prefs_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes preferences to file. You shouldn&#8217;t need to call this
+manually because it gets called every time a setting is changed.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Every time this method is called, all comments in the
+file will be overwritten (with rare exceptions)</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
