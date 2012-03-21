@@ -4,7 +4,7 @@ from getpass import getuser
 
 import signal_strength
 from configuration import Settings
-Setings.init()
+Settings.init()
 
 class APIError(Exception):
     """Base class for errors involving the API"""
