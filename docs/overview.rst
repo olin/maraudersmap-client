@@ -8,7 +8,7 @@ Large institutions like universities and businesses often have multiple wireless
 .. image:: _static/ap_demo.png
   :align: center
 In this example, a laptop is surrounded by three wireless access points, each identified with a unique
-MAC address (\ *BSSID*\ ) of the form ``xx:xx:xx:xx:xx:xx``. The black numbers next to the lines connecting the laptop in the diagram represent the
+MAC address (\ *BSSID*\ ) of the form ``xx:xx:xx:xx:xx:xx``. The black numbers next to the lines connecting the laptop to the APs in the diagram represent the
 *signal strength* of each access point. This value is affected by the distance between the laptop and an access point as well as obstacles
 between the devices, wireless interference, the type of wireless card in the laptop, and a variety of other factors. Nonetheless, with enough
 nearby access points and a database of past signal strengths and locations, we can convert a set of signal strength measurements into an ``x,y``

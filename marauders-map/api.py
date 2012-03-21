@@ -1,10 +1,44 @@
 import urllib
-
 import webbrowser
-from configuration import Settings
-import signal_strength
 from getpass import getuser
 
+import signal_strength
+from configuration import Settings
+Setings.init()
+
+class APIError(Exception):
+    """Base class for errors involving the API"""
+
+class UnableToConnectToServerError(APIError):
+    """An exception to be thrown when no connection can be made to the server.
+
+    This could mean that the server is down or that the user is not 
+    connected to the network on which the server resides.
+    """
+
+class UnableToConnectToServerError(APIError):
+    """An exception to be thrown when no connection can be made to the server.
+
+    This could mean that the server is down or that the user is not 
+    connected to the network on which the server resides.
+    """
+
+
+class BadServerResponseError(APIError):
+    """An exception to be thrown when the server response does not involve
+    success.
+
+    This could happen, for example, when an invalid request is made to 
+    the server.
+
+    :param response: Server response
+    :type response: str
+    """
+    def __init__(self, response):
+        self.response = response
+
+    def __str__(self):
+        return repr(self.response)
 
 class Location(object):
     """An object to represent the combination of a place name and a coordinate.
@@ -28,7 +62,7 @@ class Location(object):
 
     def get_readable_name(self):
         """Parses the encoded_name and converts it into a
-            human-readable string.
+        human-readable string.
 
         This is useful for menu entries, for example.
 
@@ -40,8 +74,8 @@ class Location(object):
         """
         # location strings look like WH,in,rm309
         location = self.encoded_name.replace("OC", "MH")  # Once upon a time,
-                                                         # Milas hall was
-                                                         # called Olin Center
+                                                          # Milas hall was
+                                                          # called Olin Center
         # XXX: Should be changed on server, probably
 
         try:
@@ -271,7 +305,7 @@ def post_location(place_name):
 def weak_post_location(place_name):
     """
     Post encoded location to server, without changing the database and without
-        refreshing signal strength.
+    refreshing signal strength.
 
     :param place_name: Encoded string representing the location to post to
         the server. The user will show up on the map there.
@@ -307,7 +341,7 @@ def __getPlatform():
 
 def do_train(placename, coord):
     """Tell server that a location in x,y,w space maps to a certain
-        signal strength dictionary (data) and encoded placename string.
+    signal strength dictionary (data) and encoded placename string.
 
     :param placename: Encoded string representing the location to
         post to the server.
@@ -356,7 +390,7 @@ def do_train(placename, coord):
 
 def __unserialize_person_data(server_response_string):
     """Parses a server-generated pipe-separated string and returns a
-        dictionary of user information.
+    dictionary of user information.
 
     :param server_response_string: The response to parse.
     :type: server_response_string: str
@@ -380,12 +414,13 @@ def __unserialize_person_data(server_response_string):
 def do_query(username):
     #XXX: UNTESTED
     """Get a dictionary containing username, placename, status, and
-        lastupdate of person with given username
+    lastupdate of person with given username.
 
     :param username: Username of user to get information about.
     :type username: str
 
-    :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/pointExistsBOOL)``
+    :returns: a tuple ``(serverSuceededBOOL,reasonFailedStr/dictOfTheForm
+        {'username':str, 'placename':str, 'status':str, 'lastupdate':str})``
 
     """
 
@@ -423,7 +458,7 @@ def do_datapointexistence(place_name):
 
 def do_cloak(username):
     """Tell the server to stop displaying a user with username on the map.
-        If an Update happens, the user will reappear on the map again.
+    If an Update happens, the user will reappear on the map again.
 
     This should require authentication and should only be possible for
     the active user.
