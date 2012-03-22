@@ -12,14 +12,15 @@ associated with it to match those changes; **"Comments that contradict the code 
 * Take the appropriate TODO item off the following list when it is implemented
 
 ## TODO (in no particular order)
-* Conform existing code to PEP8 wherever possible (QT uses ``mixedCase``, we are using ``lower_case_with_underscores``)
+* Conform existing code to PEP8 wherever possible (QT uses ``mixedCase``, we are using ``lower_case_with_underscores``) - **in progress**
 * Write unittests for everything
 * Make the threading system in the UI utilize some kind of queue to avoid periodic lockups
 * Switch to the client-side api from the server repository
 * Make ``Go Offline`` work properly
-* Load/Save the preferences from/to a file in an appropriate location (will vary by OS)
 * Make it possible to set the full user name in general preferences
 * Make it possible to configure the update frequency in advanced preferences
 * Make it possible to configure the server location in advanced preferneces
 * Make it possible to define custom locations (this will involve a web ui launched using a specific call to the server)
 
+## Done
+* Load/Save the preferences from/to a file in an appropriate location (will vary by OS) - works for now; may need to be ported to ConfigObj
