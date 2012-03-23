@@ -12,14 +12,14 @@ class APIError(Exception):
 class UnableToConnectToServerError(APIError):
     """An exception to be thrown when no connection can be made to the server.
 
-    This could mean that the server is down or that the user is not 
+    This could mean that the server is down or that the user is not
     connected to the network on which the server resides.
     """
 
 class UnableToConnectToServerError(APIError):
     """An exception to be thrown when no connection can be made to the server.
 
-    This could mean that the server is down or that the user is not 
+    This could mean that the server is down or that the user is not
     connected to the network on which the server resides.
     """
 
@@ -28,7 +28,7 @@ class BadServerResponseError(APIError):
     """An exception to be thrown when the server response does not involve
     success.
 
-    This could happen, for example, when an invalid request is made to 
+    This could happen, for example, when an invalid request is made to
     the server.
 
     :param response: Server response
@@ -273,7 +273,7 @@ def __update(username, place_name=None, status=None, refresh=True):
     return True, potential_locations
 
 
-def getLocation():
+def get_location():
     """Get location from server.
 
     :returns: a list of potential :class:`Location` objects,
