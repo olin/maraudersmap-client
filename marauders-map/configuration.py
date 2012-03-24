@@ -50,7 +50,7 @@ class Settings(object):
             "Open Map" is clicked
 
             Default: ``http://apps.olin.edu/ui/mapui.php``
-        * **REFRESH_FREQ** (int) - How often to refresh the location, in
+        * **REFRESH_FREQ** (float) - How often to refresh the location, in
             seconds
 
             Default: ``300``
@@ -188,7 +188,7 @@ class Settings(object):
             cls._check_for_init()
             raw_value = cls._config_parser.get('User Defined',
                                                'REFRESH_FREQ')
-            return int(raw_value.split(';')[0].strip())
+            return float(raw_value.split(';')[0].strip())
 
         @REFRESH_FREQ.setter
         def REFRESH_FREQ(cls, value):

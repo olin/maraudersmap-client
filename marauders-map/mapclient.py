@@ -15,6 +15,7 @@ from PySide import QtGui
 import api
 from configuration import Settings
 
+DEBUG_DONT_CHECK = True
 
 class GeneralPrefs(QtGui.QWidget):
     """Tab for general preferences in the :class:`PreferencesWindow`.
@@ -48,12 +49,12 @@ class AdvancedPrefs(QtGui.QWidget):
 
     def add_update_freq(self):
         self.freq_divs = [
-            '10s',
-            '1m',
-            '5m',
-            '10m',
-            '30m',
-            '1hr'
+            (10,'s'),
+            (1,'m'),
+            (5,'m'),
+            (10,'m'),
+            (30,'m'),
+            (1,'hr')
             ]
         self.div_precision = 10
 
@@ -68,7 +69,7 @@ class AdvancedPrefs(QtGui.QWidget):
 
         self.slider = QtGui.QSlider(QtCore.Qt.Orientation.Horizontal)
 
-        self.slider.setRange(0, self.div_precision*len(self.freq_divs))
+        self.slider.setRange(0, self.div_precision*(len(self.freq_divs)-1))
         self.slider.setTickPosition(QtGui.QSlider.TicksBelow)
         self.slider.setTickInterval(self.div_precision)
 
@@ -82,11 +83,13 @@ class AdvancedPrefs(QtGui.QWidget):
         slider_label_layout = QtGui.QBoxLayout(QtGui.QBoxLayout.LeftToRight)
 
         # TODO: Figure out how to space labels properly
-        for label_text in self.freq_divs[:-1]:
+        for label_tuple in self.freq_divs[:-1]:
+            label_text = '%i%s' % label_tuple
             label = QtGui.QLabel(label_text)
             slider_label_layout.addWidget(label)
             slider_label_layout.addStretch()
-        label = QtGui.QLabel(self.freq_divs[-1])
+        label_text = '%i%s' % self.freq_divs[-1]
+        label = QtGui.QLabel(label_text)
         slider_label_layout.addWidget(label)
 
         self.main_layout.addLayout(freq_label_layout)
@@ -112,39 +115,73 @@ class AdvancedPrefs(QtGui.QWidget):
         self.update_hint_label.setText("")
 
     def _gen_str_from_slider_val(self, value):
-        # XXX: This is totally broken
 
-        def is_sec(text):
-            return text.endswith('s')
+        def long_form(value, time_abbr):
+            extended = ''
+            if time_abbr == 's':
+                extended = "second"
+            if time_abbr == 'm':
+                extended = "minute"
+            if time_abbr == 'hr':
+                extended = "hour"
+            # Pluralize
+            if int(value) > 1:
+                extended += "s"
+            return extended
 
-        def is_min(text):
-            return text.endswith('m')
+        def secs_to_real_tuple(secs):
+            if secs >= 3600:
+                hrs = secs/3600
+                return (hrs, long_form(hrs, 'hr'))
+            elif secs >= 60:
+                mins = secs/60
+                return (mins, long_form(mins, 'm'))
+            else:
+                return (secs, long_form(secs, 's'))
 
-        def is_hr(text):
-            return text.endswith('m')
+        real_secs = self._slider_value_to_seconds(value)
 
-        # TODO: Clean this up
-        for i in range(len(self.freq_divs)):
-            cur = self.freq_divs[i]
+        return '%i %s' % secs_to_real_tuple(real_secs)
 
-            if int(value/self.div_precision) == i:
-                if is_sec(cur):
-                    return '%i seconds' % value
-                if is_min(cur):
-                    return '%i minutes' % value
-                if is_hr(cur):
-                    return '%i hours' % value
+    def _time_as_secs(self, time, time_abbr):
+        if time_abbr == 's':
+            return time
+        if time_abbr == 'm':
+            return time * 60
+        if time_abbr == 'hr':
+            return time * 3600
 
-        return '%i unknown units' % value
+    def _slider_value_to_seconds(self, value):
 
+        cur_index = min(int(value/float(self.div_precision)),
+                        len(self.freq_divs)-1)
+        nxt_index = min(int(value/float(self.div_precision)+0.9),
+                        len(self.freq_divs)-1)
+        cur = self.freq_divs[cur_index]
+        nxt = self.freq_divs[nxt_index]
+
+        tween_ratio = (value % self.div_precision)/float(self.div_precision)
+        sec_diff = self._time_as_secs(*nxt) - self._time_as_secs(*cur)
+        real_secs = self._time_as_secs(*cur) + tween_ratio * sec_diff
+
+        return real_secs
 
     def _slider_value_to_settings(self, value):
-        # TODO: Make this work
-        return value
+        return self._slider_value_to_seconds(value)
 
-    def _slider_value_from_settings(self, value):
+    def _slider_value_from_settings(self, secs):
         # TODO: Make this work
-        return value
+
+        for i in range(len(self.freq_divs)-1):
+            cur = self.freq_divs[i]
+            nxt = self.freq_divs[i+1]
+            if self._time_as_secs(*nxt) >= secs:
+                sec_diff = self._time_as_secs(*nxt) - self._time_as_secs(*cur)
+                tween_ratio = (secs - self._time_as_secs(*cur))/sec_diff
+                return self.div_precision * (tween_ratio + i)
+
+        return self.div_precision * len(self.freq_divs)
+
 
 class LocationWorker(QtCore.QObject):
     """A worker object that runs in the background.
@@ -241,8 +278,10 @@ class PreferencesWindow(QtGui.QDialog):
         self.setWindowTitle("Marauder's Map @ Olin Preferences")
 
         self.create_system_tray()
-        self.setup_background_thread()
-        self.start_refresh_timer()
+
+        if not DEBUG_DONT_CHECK:
+            self.setup_background_thread()
+            self.start_refresh_timer()
 
     def set_size(self, width, height):
         self.setMinimumWidth(width)
@@ -418,11 +457,12 @@ class PreferencesWindow(QtGui.QDialog):
         '''
 
         self.offline_signal.emit()
-        self.bg_thread.quit()
-        while not self.bg_thread.isFinished():
-            continue # Wait until thread done
-        # On Ubuntu 10.10 (at least), a Python fatal error is encountered if the
-        # window is not hidden before the application exits
+        if not DEBUG_DONT_CHECK:
+            self.bg_thread.quit()
+            while not self.bg_thread.isFinished():
+                continue # Wait until thread done
+            # On Ubuntu 10.10 (at least), a Python fatal error is encountered if the
+            # window is not hidden before the application exits
         self.hide()
         QtGui.qApp.quit()
 
