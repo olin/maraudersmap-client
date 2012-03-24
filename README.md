@@ -18,7 +18,7 @@ associated with it to match those changes; **"Comments that contradict the code 
 * Switch to the client-side api from the server repository
 * Make ``Go Offline`` work properly
 * Make it possible to set the full user name in general preferences
-* Make it possible to configure the update frequency in advanced preferences
+* Make it possible to configure the update frequency in advanced preferences - **in progress**
 * Make it possible to configure the server location in advanced preferneces
 * Make it possible to define custom locations (this will involve a web ui launched using a specific call to the server)
 
