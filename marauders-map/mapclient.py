@@ -72,11 +72,12 @@ class AdvancedPrefs(QtGui.QWidget):
         self.slider.setTickPosition(QtGui.QSlider.TicksBelow)
         self.slider.setTickInterval(self.div_precision)
 
-        self.slider.sliderChange = self.update_freq_slider_changed
-        self.slider.sliderReleased.connect(self.update_freq_changed)
         self.slider.setValue(
                 self._slider_value_from_settings(Settings.REFRESH_FREQ)
             )
+        self.slider.sliderChange = self.update_freq_slider_changed
+        self.slider.sliderReleased.connect(self.update_freq_changed)
+
 
         slider_label_layout = QtGui.QBoxLayout(QtGui.QBoxLayout.LeftToRight)
 
@@ -105,8 +106,9 @@ class AdvancedPrefs(QtGui.QWidget):
     def update_freq_changed(self):
         # XXX: This is totally broken
         # TODO: Convert to appropriate value in seconds
-        Settings.REFRESH_FREQ =
-            self._slider_value_to_settings(self.slider.value())
+        Settings.REFRESH_FREQ = self._slider_value_to_settings(
+                self.slider.value()
+            )
         self.update_hint_label.setText("")
 
     def _gen_str_from_slider_val(self, value):
