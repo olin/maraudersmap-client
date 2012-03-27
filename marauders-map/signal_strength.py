@@ -4,100 +4,109 @@ import subprocess
 import json
 
 class SignalNode(object):
-    '''
-    A highly optimized object to keep track of the signal strength
+    '''A highly optimized object to keep track of the signal strength
     associated with a node. It is hashable, so it can be a key in a dict
     or an element in a set.
 
-    MACAddress and name are immutable once the instance is created,
-    but signalStrength can be changed
+    MAC_address and name are immutable once the instance is created,
+    but signal_strength can be changed
+
+    :param MAC_address: BSSID of the access point.
+    :type MAC_address: str
+    :param name: SSID of the access point
+    :type name: str
+    :param signal_strength: Access point signal strength, as measured from the user's machine.
+    :type signal_strength: int
     '''
 
-    __slots__ = ('__MACAddress', '__name', 'signalStrength')
-    def __init__(self, MACAddress, name, signalStrength):
-        self.__MACAddress = MACAddress
+    __slots__ = ('__MAC_address', '__name', 'signal_strength')
+    def __init__(self, MAC_address, name, signal_strength):
+        self.__MAC_address = MAC_address
         self.__name = name        
-        self.signalStrength = signalStrength
+        self.signal_strength = signal_strength
 
     @property
     def identifier(self):
-        return self.__MACAddress + self.__name
+        """Unique string identifier for the access point (independent of signal_strength)
+
+        """
+        return self.__MAC_address + self.__name
 
     @property
-    def MACAddress(self):
-        '''
-        Get the name of the node, as a string.
+    def MAC_address(self):
+        '''BSSID of the access point, as a string (MAC address)
 
-        Example: OLIN_WH
+        Example: '00:20:D8:2D:2C:C1'
         '''
-        return self.__MACAddress
+        return self.__MAC_address
 
     @property
     def name(self):
-        '''
-        Get the name of the node, as a string.
+        '''Name of the node, as a string.
 
         Example: OLIN_WH
         '''
         return self.__name
 
     def __str__(self):
-        return "%s,%i" % (self.__MACAddress, self.signalStrength)
+        return "%s,%i" % (self.__MAC_address, self.signal_strength)
 
     def __repr__(self):
         return str(self)
 
     def __hash__(self):
-        return hash(self.__MACAddress + self.__name + str(self.signalStrength))
+        return hash(self.__MAC_address + self.__name + str(self.signal_strength))
 
     def __eq__(self, other):
         return self.__hash__() == other.__hash__()
 
 
-def getAvgSignalNodes(samples=3, tsleep=0.15):
-    '''
-    Returns list of signal nodes
-    '''
-    return getAvgSignalNodesDict(samples=samples, tsleep=tsleep).values()
-    
-def getAvgSignalNodesDict(samples=3, tsleep=0.15):
-    ''' 
-    Get the average signal strength from samples samples, at intervals of tsleep seconds
-    (although it will take a bit longer since getCoords() takes a while to execute)
+def get_avg_signal_nodes(samples=3, tsleep=0.15):
+    """Gets the average signal strength of the nearby nodes.
 
-    Returns a dictionary with key : value pairs of the form
-    MAC_Address : [Signal_Strength, Network_Name]
-    Example:
-     {
-       '00:20:D8:2D:2C:C1': [14, 'OLIN_CC'],
-       '00:20:D8:2D:B3:C0': [12, 'OLIN_CC'],
-       '00:20:D8:2D:65:02': [12, 'OLIN_WH'],
-       '00:20:D8:2D:85:40': [38, 'OLIN_CC']
-     }
-    '''
+    :param samples: Number of measurements to make & average
+    :type samples: int
+    :param tsleep: Number of seconds to wait between measurements 
+        (although it will take a bit longer since getCoords() takes a while to execute)
+    :type tsleep: float
+
+    :returns: list of :class:`SignalNode` objects
+    """
+    return get_avg_signal_nodes_dict(samples=samples, tsleep=tsleep).values()
+    
+def get_avg_signal_nodes_dict(samples=3, tsleep=0.15):
+    """Gets the average signal strength of the nearby nodes.
+
+    :param samples: Number of measurements to make & average
+    :type samples: int
+    :param tsleep: Number of seconds to wait between measurements 
+        (although it will take a bit longer since getCoords() takes a while to execute)
+    :type tsleep: float
+
+    :returns: dict of the form {MAC_AddressSTR : :class:`SignalNode`\ }
+    """
     import time
-    allSurroundingNodes = dict() 
+    all_surrounding_nodes = dict() 
 
     for i in range(samples):
-        print i
-        res = getSignalNodeDict()
-        for nodeIdentifier in res:
-            if nodeIdentifier in allSurroundingNodes:
-                allSurroundingNodes[nodeIdentifier].signalStrength += res[nodeIdentifier].signalStrength
+        res = get_signal_node_dict()
+        for node_identifier in res:
+            if node_identifier in all_surrounding_nodes:
+                all_surrounding_nodes[node_identifier].signal_strength += res[node_identifier].signal_strength
             else:
-                allSurroundingNodes[nodeIdentifier] = res[nodeIdentifier]
+                all_surrounding_nodes[node_identifier] = res[node_identifier]
         time.sleep(tsleep)
     
 
     #TODO: Figure out what to in terms of division if the else statement above is triggered.
 
     # And divide each by sample count
-    for node in allSurroundingNodes.values():
-        node.signalStrength /= float(samples)
+    for node in all_surrounding_nodes.values():
+        node.signal_strength /= float(samples)
 
-    return allSurroundingNodes
+    return all_surrounding_nodes
 
-def getSignalNodeDict():
+def get_signal_node_dict():
     '''
     Scans (or gets cached versions, on some systems) of wireless signal strengths around the computer,
     using platform-dependent methods.
@@ -107,29 +116,29 @@ def getSignalNodeDict():
     # WINDOWS
     if sys.platform.startswith('win'):        
         # Should work on Windows > XP SP3
-        return __getSignalNodesWin()
+        return __get_signal_nodes_win()
     # LINUX
     elif sys.platform.startswith('linux'):
         # This should work on most recent versions of Linux, according to Riley - Julian
         # TODO: Fall back to old method for systems without nm-tool
         # In that case, users will need to run the application as root, however
-        return __getSignalNodesNetworkManager()
+        return __get_signal_nodes_network_manager()
     # MAC OS X
     elif sys.platform.startswith('darwin'):
-        return __getSignalNodesMac()
+        return __get_signal_nodes_mac()
     
-def __interpretDB(signalString):
+def __interpret_DB(signal_string):
     '''
     Most platforms (nm-tool doesn't for some reason) return the Received Signal Strength Indication (RSSI) in dBm units (http://en.wikipedia.org/wiki/DBm)
     The following is a convenient way to indicate, for example, that -85 is weaker than -10
     '''
-    return 100 + int(signalString)
+    return 100 + int(signal_string)
     
 def __getExePath():
     return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
 
-def __getSignalNodesWin():
-    signalNodesDict = dict()
+def __get_signal_nodes_win():
+    signal_nodes_dict = dict()
     # Should work on Windows > XP SP3
     o = subprocess.Popen(os.path.join(__getExePath(), 'Get Wireless Strengths.exe'), stderr=subprocess.PIPE, stdout=subprocess.PIPE,shell=True).stdout#shell=true hides shell
     res = o.read()
@@ -138,11 +147,11 @@ def __getSignalNodesWin():
     for row in data:
         RSSI,SSID,BSSID = row['RSSI'], row['SSID'],row['BSSID']
         if 'OLIN' in SSID and 'GUEST' not in SSID: #Only take into account OLIN wifi and non-guest WIFI
-            currNode = SignalNode(BSSID, SSID, __interpretDB(RSSI))
-            signalNodesDict[currNode.identifier] = currNode
-    return signalNodesDict
+            curr_node = SignalNode(BSSID, SSID, __interpret_DB(RSSI))
+            signal_nodes_dict[curr_node.identifier] = curr_node
+    return signal_nodes_dict
 
-def __getSignalNodesMac():
+def __get_signal_nodes_mac():
     import plistlib
     # '/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport -s -x'
     # This is an undocumented system utility available on Mac OS X
@@ -150,7 +159,7 @@ def __getSignalNodesMac():
     # -s[<arg>] --scan=[<arg>]       Perform a wireless broadcast scan.
     #           Will perform a directed scan if the optional <arg> is provided
     # -x        --xml                Print info as XML
-    signalNodesDict = dict()
+    signal_nodes_dict = dict()
     
     ntwks = list()
     try:
@@ -176,12 +185,11 @@ def __getSignalNodesMac():
                     bssid.append(('0%s' % byte).upper())
                 else:
                     bssid.append(byte.upper())
-            currNode = SignalNode(':'.join(bssid), network['SSID_STR'], __interpretDB(network['RSSI']))
-            print currNode
-            signalNodesDict[currNode.identifier] = currNode
-    return signalNodesDict
+            curr_node = SignalNode(':'.join(bssid), network['SSID_STR'], __interpret_DB(network['RSSI']))
+            signal_nodes_dict[curr_node.identifier] = curr_node
+    return signal_nodes_dict
 
-def __getSignalNodesNetworkManager():
+def __get_signal_nodes_network_manager():
     '''
     Uses nm-tool on Linux to get the signal strength as a dict of SignalNode identifiers -> SignalNodes
     Note: I couldn't find out the signal strength units. Hopefully they are compatible.
@@ -194,22 +202,22 @@ def __getSignalNodesNetworkManager():
     result = p3.communicate()[0].strip().split('\n')
     p1.wait()
     p2.wait()
-    signalNodesDict = dict()
+    signal_nodes_dict = dict()
 
     for line in result:
         # Format is now
         # ['OLIN_GUEST:      Infra', ' 00:26:3E:30:2B:82', ' Freq 2442 MHz', ' Rate 54 Mb/s', ' Strength 25 WPA']
-        accessPtInfo = line.split(',')
-        sepLoc = accessPtInfo[0].find(':')
+        access_pt_info = line.split(',')
+        sepLoc = access_pt_info[0].find(':')
         if sepLoc <= 0: #fail gracefully if we are parsing a line we shouldn't be...
             continue
-        ssid = accessPtInfo[0][:sepLoc]
-        bssid = accessPtInfo[1].strip()
-        strength = int(accessPtInfo[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to __interpretDB's output - Julian
-        currNode = SignalNode(bssid, ssid, strength)
-        signalNodesDict[currNode.identifier] = currNode
-    return signalNodesDict
+        ssid = access_pt_info[0][:sepLoc]
+        bssid = access_pt_info[1].strip()
+        strength = int(access_pt_info[4].strip().split(' ')[1]) - 10 # As far as I can tell, this is the relationship to __interpret_DB's output - Julian
+        curr_node = SignalNode(bssid, ssid, strength)
+        signal_nodes_dict[curr_node.identifier] = curr_node
+    return signal_nodes_dict
 
 if __name__ == '__main__':
     # test code
-    print ";".join([str(node) for node in getAvgSignalNodes(samples=3, tsleep=0.15)])
+    print ";".join([str(node) for node in get_avg_signal_nodes(samples=3, tsleep=0.15)])
