@@ -9,38 +9,50 @@ class _SendableObject(object):
         super(_SendableObject, self).__setattr__('_attrs', attrs)
         super(_SendableObject, self).__setattr__('_d', init)
 
-    def __setitem__(self, key, value):
-        if key == '_attrs':
-           super(_SendableObject, self).__setattr__('_attrs', value)
-        elif key in self._attrs:
+    def __setattr__(self, key, value):
+        if key == '_attrs' or key == '_d':
             super(_SendableObject, self).__setattr__(key, value)
+        elif key in self._attrs:
+            print dir(super(_SendableObject, self))
+            self._d[key] = value
+            #super(_SendableObject, self).__setattr__(key, value)
         else:
             raise KeyError(
                 "%s does not support setting '%s'" %
                 (self.__class__.__name__, key))
 
-    def __getitem__(self, key):
-        if key == '_attrs':
-            return super(_SendableObject, self).__getattr__('_attrs')
+    def __getattr__(self, key):
+        if key == '_attrs' or key == '_d':
+            print dir(self)
+            return getattr(super(_SendableObject, self), key)
         elif key in self._attrs:
-            return super(_SendableObject, self).__getattr__(key)
+            return super(_SendableObject, self).__getattr__('_d')[key]
         raise KeyError(
             "%s does not support setting '%s'" %
             (self.__class__.__name__, key))
 
-    __getattr__ = __getitem__
-    __setattr__ = __setitem__
-
 class User(_SendableObject):
+    """An object that represents a user that can be pulled from and pushed to
+    the server.
 
+    Note: The parameters are all keyword arguments.
+    For example: `User(username='jceipek', alias='Julian Ceipek')`
+
+    :param username: (required) Unique username (i.e. jceipek)
+    :type username: str
+
+    :param alias: (optional) A more readable version of the username
+    :type alias: str
+    """
     _attrs = {'username', 'alias'}
 
     def __init__(self, **kargs):
 
         for key, value in kargs.iteritems():
-            self[key] = value
+            self.__setattr__(key, value)
 
-        if 'username' not in
+        if 'username' not in kargs:
+            raise KeyError("username not specified")
 
     def put(self):
         r = requests.put(
@@ -55,6 +67,11 @@ class Place(_SendableObject):
 
         for key, value in kargs.iteritems():
             self[key] = value
+
+    def put(self):
+        r = requests.post(
+            '%s/places/' % Settings.SERVER_ADDRESS, data=self._d)
+        return json.loads(r.text)['place']
 
 class Bind(_SendableObject):
     _attrs = {'username', 'signals', 'place', 'x', 'y', 'id'}
@@ -89,12 +106,6 @@ def get_user(username):
         '%s/users/%s' % (Settings.SERVER_ADDRESS,username))
     user_dict = json.loads(r.text)['user']
     return User(**user_dict)
-
-def put_user(username, **kargs):
-    kargs['username'] = username
-    r = requests.put(
-        '%s/users/%s' % (Settings.SERVER_ADDRESS, username), data=kargs)
-    return json.loads(r.text)['user']
 
 def patch_user(username, **kargs):
     patch = [{"replace": "/" + k, "value": v} for k, v in kargs.items()]
@@ -196,7 +207,8 @@ Settings.init()
 
 print "USERS:"
 print get_users()
-put_user('jceipek', alias='Julian Ceipek')
+#put_user('jceipek', alias='Julian Ceipek')
+User(username='jceipek', alias='Julian Ceipek').put()
 print get_user('jceipek')
 delete_user('jceipek')
 patch_user('tryan', alias='Timmmmmmmy')
