@@ -4,22 +4,74 @@ import urllib
 
 from configuration import Settings
 
-'''class User(object):
-    def __init__(self, response_dict):
-        pass
+class _SendableObject(object):
+    def __init__(self, init, attrs):
+        super(_SendableObject, self).__setattr__('_attrs', attrs)
+        super(_SendableObject, self).__setattr__('_d', init)
 
+    def __setitem__(self, key, value):
+        if key == '_attrs':
+           super(_SendableObject, self).__setattr__('_attrs', value)
+        elif key in self._attrs:
+            super(_SendableObject, self).__setattr__(key, value)
+        else:
+            raise KeyError(
+                "%s does not support setting '%s'" %
+                (self.__class__.__name__, key))
 
+    def __getitem__(self, key):
+        if key == '_attrs':
+            return super(_SendableObject, self).__getattr__('_attrs')
+        elif key in self._attrs:
+            return super(_SendableObject, self).__getattr__(key)
+        raise KeyError(
+            "%s does not support setting '%s'" %
+            (self.__class__.__name__, key))
 
-    @property
-    def username(self):
-        """
+    __getattr__ = __getitem__
+    __setattr__ = __setitem__
 
-        """
-        return self.d['username']
+class User(_SendableObject):
 
-    def __get_item__(self, item):
-        return self.
-        '''
+    _attrs = {'username', 'alias'}
+
+    def __init__(self, **kargs):
+
+        for key, value in kargs.iteritems():
+            self[key] = value
+
+        if 'username' not in
+
+    def put(self):
+        r = requests.put(
+                '%s/users/%s' %
+                (Settings.SERVER_ADDRESS, self.username), data=self._d)
+
+class Place(_SendableObject):
+
+    _attrs = {'alias', 'floor', 'name', 'id'}
+
+    def __init__(self, **kargs):
+
+        for key, value in kargs.iteritems():
+            self[key] = value
+
+class Bind(_SendableObject):
+    _attrs = {'username', 'signals', 'place', 'x', 'y', 'id'}
+    def __init__(self, **kargs):
+
+        for key, value in kargs.iteritems():
+            self[key] = value
+
+class Position(_SendableObject):
+    _attrs = {'username', 'bind', 'id'}
+    def __init__(self, **kargs):
+
+        for key, value in kargs.iteritems():
+            self[key] = value
+
+# import client_api; a = client_api._SendableObject2({},{'a'}); a.a = 5
+
 
 # returns an array of users that match a given criterion **crit
 # @param(**crit): the criterions. The ** will make crit a dictionary of the
@@ -28,14 +80,15 @@ from configuration import Settings
 def get_users(**crit):
     r = requests.get(
         '%s/users/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
-    return json.loads(r.text)['users']
+    return [User(**user_dict) for user_dict in json.loads(r.text)['users']]
 
 # returns a particular user with the given username
 
 def get_user(username):
     r = requests.get(
         '%s/users/%s' % (Settings.SERVER_ADDRESS,username))
-    return json.loads(r.text)['user']
+    user_dict = json.loads(r.text)['user']
+    return User(**user_dict)
 
 def put_user(username, **kargs):
     kargs['username'] = username
@@ -154,22 +207,22 @@ print
 print "PLACES:"
 print get_places()
 place = post_place(name='Computer Lab', floor='MHLL', alias='Den of Theives')
-patch_place(place['identifier'], alias='Compy 386')
-print get_place(place['identifier'])
-delete_place(place['identifier'])
+patch_place(place['id'], alias='Compy 386')
+print get_place(place['id'])
+delete_place(place['id'])
 print get_places()
 print
 
 print "BINDS:"
 print get_binds()
 bind = post_bind(username='tryan', place=get_places()[0]['id'], signals={'AA:AA:AA:AA:AA:AA': 100}, x=50, y=50)
-print get_bind(bind['identifier'])
-delete_bind(bind['identifier'])
+print get_bind(bind['id'])
+delete_bind(bind['id'])
 print
 
 print "POSITIONS:"
 print get_positions()
 pos = post_position(username='tryan', bind=get_binds()[0]['id'])
-print get_position(pos['identifier'])
-delete_position(pos['identifier'])
+print get_position(pos['id'])
+delete_position(pos['id'])
 print
