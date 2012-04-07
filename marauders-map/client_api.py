@@ -57,10 +57,8 @@ class User(_SendableObject):
 
 class Place(_SendableObject):
 
-    _attrs = {'alias', 'floor', 'name', 'id'}
-
     def __init__(self, **kargs):
-
+        super(User, self).__init__(kargs, {'alias', 'floor', 'name', 'id'})
         for key, value in kargs.iteritems():
             self[key] = value
 
@@ -70,16 +68,16 @@ class Place(_SendableObject):
         return json.loads(r.text)['place']
 
 class Bind(_SendableObject):
-    _attrs = {'username', 'signals', 'place', 'x', 'y', 'id'}
-    def __init__(self, **kargs):
 
+    def __init__(self, **kargs):
+        super(User, self).__init__(kargs, {'username', 'signals', 'place', 'x', 'y', 'id'})
         for key, value in kargs.iteritems():
             self[key] = value
 
 class Position(_SendableObject):
-    _attrs = {'username', 'bind', 'id'}
-    def __init__(self, **kargs):
 
+    def __init__(self, **kargs):
+        super(User, self).__init__(kargs, {'username', 'bind', 'id'})
         for key, value in kargs.iteritems():
             self[key] = value
 
