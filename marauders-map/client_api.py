@@ -76,12 +76,31 @@ class Bind(_SendableObject):
         for key, value in kargs.iteritems():
             self[key] = value
 
+    def put(self):
+
+        #signals = kargs.get('signals', {})
+        #if kargs.has_key('signals'):
+        #    del kargs['signals']
+
+        #for k, v in signals.items():
+        #    kargs['signals[%s]' % k] = v
+
+        r = requests.post(
+            '%s/binds/' % Settings.SERVER_ADDRESS, data=self._d)
+        print r.text
+        return json.loads(r.text)['bind']
+
 class Position(_SendableObject):
     _attrs = {'username', 'bind', 'id'}
     def __init__(self, **kargs):
 
         for key, value in kargs.iteritems():
             self[key] = value
+
+    def put(self):
+        r = requests.post(
+                '%s/positions/' % Settings.SERVER_ADDRESS, data=self._d)
+        return json.loads(r.text)['position']
 
 # import client_api; a = client_api._SendableObject2({},{'a'}); a.a = 5
 
@@ -128,10 +147,7 @@ def get_place(identifier):
         '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier))
     return json.loads(r.text)['place']
 
-def post_place(**kargs):
-    r = requests.post(
-        '%s/places/' % Settings.SERVER_ADDRESS, data=kargs)
-    return json.loads(r.text)['place']
+
 
 def patch_place(identifier, **kargs):
     patch = [{"replace": "/" + k, "value": v} for k, v in kargs.items()]
@@ -158,16 +174,7 @@ def get_bind(identifier):
             '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier))
     return json.loads(r.text)['bind']
 
-def post_bind(**kargs):
-    signals = kargs.get('signals', {})
-    if kargs.has_key('signals'):
-        del kargs['signals']
-    for k, v in signals.items():
-        kargs['signals[%s]' % k] = v
-    r = requests.post(
-        '%s/binds/' % Settings.SERVER_ADDRESS, data=kargs)
-    print r.text
-    return json.loads(r.text)['bind']
+
 
 def delete_bind(identifier):
     r = requests.delete(
@@ -187,10 +194,7 @@ def get_position(identifier):
         '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
     return json.loads(r.text)['position']
 
-def post_position(**kargs):
-    r = requests.post(
-            '%s/positions/' % Settings.SERVER_ADDRESS, data=kargs)
-    return json.loads(r.text)['position']
+
 
 def delete_position(identifier):
     r = requests.delete(
