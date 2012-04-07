@@ -1,3 +1,7 @@
+""" XXX THIS IS BEING DEPRECATED. DO NOT IMPROVE. 
+    SEE client_api.py """
+
+
 import urllib
 import webbrowser
 from getpass import getuser
