@@ -65,7 +65,8 @@ class Place(_SendableObject):
     def put(self):
         r = requests.post(
             '%s/places/' % Settings.SERVER_ADDRESS, data=self._d)
-        return json.loads(r.text)['place']
+        response = json.loads(r.text)['place']
+        self.id = response['id']
 
 class Bind(_SendableObject):
 
@@ -76,6 +77,8 @@ class Bind(_SendableObject):
 
     def put(self):
 
+
+        #XXX: WHY?
         #signals = kargs.get('signals', {})
         #if kargs.has_key('signals'):
         #    del kargs['signals']
@@ -86,7 +89,8 @@ class Bind(_SendableObject):
         r = requests.post(
             '%s/binds/' % Settings.SERVER_ADDRESS, data=self._d)
         print r.text
-        return json.loads(r.text)['bind']
+        response = json.loads(r.text)['bind']
+        self.id = response['id']
 
 class Position(_SendableObject):
 
@@ -98,7 +102,8 @@ class Position(_SendableObject):
     def put(self):
         r = requests.post(
                 '%s/positions/' % Settings.SERVER_ADDRESS, data=self._d)
-        return json.loads(r.text)['position']
+        response = json.loads(r.text)['position']
+        self.id = response['id']
 
 # import client_api; a = client_api._SendableObject2({},{'a'}); a.a = 5
 
@@ -174,8 +179,6 @@ def get_bind(identifier):
     bind_dict = json.loads(r.text)['bind']
     return Bind(**bind_dict)
 
-
-
 def delete_bind(identifier):
     r = requests.delete(
             '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier))
@@ -202,40 +205,45 @@ def delete_position(identifier):
         '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
     return r.text
 
-# Test suite
+if __name__ == '__main__':
 
-Settings.init()
+    # Test suite
 
-print "USERS:"
-print get_users()
-#put_user('jceipek', alias='Julian Ceipek')
-User(username='jceipek', alias='Julian Ceipek').put()
-print get_user('jceipek')
-delete_user('jceipek')
-patch_user('tryan', alias='Timmmmmmmy')
-print get_users()
-patch_user('tryan', alias='Tim Ryan')
-print
+    Settings.init()
 
-print "PLACES:"
-print get_places()
-place = post_place(name='Computer Lab', floor='MHLL', alias='Den of Theives')
-patch_place(place['id'], alias='Compy 386')
-print get_place(place['id'])
-delete_place(place['id'])
-print get_places()
-print
+    print "USERS:"
+    print get_users()
+    User(username='jceipek', alias='Julian Ceipek').put()
+    print get_user('jceipek')
+    delete_user('jceipek')
+    patch_user('tryan', alias='Timmmmmmmy')
+    print get_users()
+    patch_user('tryan', alias='Tim Ryan')
+    print
 
-print "BINDS:"
-print get_binds()
-bind = post_bind(username='tryan', place=get_places()[0].id, signals={'AA:AA:AA:AA:AA:AA': 100}, x=50, y=50)
-print get_bind(bind['id'])
-delete_bind(bind['id'])
-print
+    print "PLACES:"
+    print get_places()
+    place = Place(name='Computer Lab', floor='MHLL', alias='Den of Theives')
+    place.put()
+    patch_place(place.id, alias='Compy 386')
+    print get_place(place.id)
+    delete_place(place.id)
+    print get_places()
+    print
 
-print "POSITIONS:"
-print get_positions()
-pos = post_position(username='tryan', bind=get_binds()[0].id)
-print get_position(pos['id'])
-delete_position(pos['id'])
-print
+    print "BINDS:"
+    print get_binds()
+    #XXX: Looks like this is not working:
+    bind = Bind(username='tryan', place=get_places()[0].id, signals={'AA:AA:AA:AA:AA:AA': 100}, x=50, y=50)
+    bind.put()
+    print get_bind(bind.id)
+    delete_bind(bind.id)
+    print
+
+    print "POSITIONS:"
+    print get_positions()
+    pos = Position(username='tryan', bind=get_binds()[0].id)
+    pos.put()
+    print get_position(pos.id)
+    delete_position(pos.id)
+    print
