@@ -45,7 +45,7 @@ class User(_SendableObject):
     def __init__(self, **kargs):
         super(User, self).__init__(kargs, {'username', 'alias'})
         for key, value in kargs.iteritems():
-            self.__setattr__(key, value)
+            setattr(self, key, value)
 
         if 'username' not in kargs:
             raise KeyError("username not specified")
@@ -58,9 +58,9 @@ class User(_SendableObject):
 class Place(_SendableObject):
 
     def __init__(self, **kargs):
-        super(User, self).__init__(kargs, {'alias', 'floor', 'name', 'id'})
+        super(Place, self).__init__(kargs, {'alias', 'floor', 'name', 'id'})
         for key, value in kargs.iteritems():
-            self[key] = value
+            setattr(self, key, value)
 
     def put(self):
         r = requests.post(
@@ -70,16 +70,16 @@ class Place(_SendableObject):
 class Bind(_SendableObject):
 
     def __init__(self, **kargs):
-        super(User, self).__init__(kargs, {'username', 'signals', 'place', 'x', 'y', 'id'})
+        super(Bind, self).__init__(kargs, {'username', 'signals', 'place', 'x', 'y', 'id'})
         for key, value in kargs.iteritems():
-            self[key] = value
+            setattr(self, key, value)
 
 class Position(_SendableObject):
 
     def __init__(self, **kargs):
-        super(User, self).__init__(kargs, {'username', 'bind', 'id'})
+        super(Position, self).__init__(kargs, {'username', 'bind', 'id'})
         for key, value in kargs.iteritems():
-            self[key] = value
+            setattr(self, key, value)
 
 # import client_api; a = client_api._SendableObject2({},{'a'}); a.a = 5
 
@@ -119,12 +119,13 @@ def delete_user(username):
 def get_places(**crit):
     r = requests.get(
         '%s/places/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
-    return json.loads(r.text)['places']
+    return [Place(**place_dict) for place_dict in json.loads(r.text)['places']]
 
 def get_place(identifier):
     r = requests.get(
         '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier))
-    return json.loads(r.text)['place']
+    place_dict = json.loads(r.text)['place']
+    return Place(**place_dict)
 
 def post_place(**kargs):
     r = requests.post(
@@ -149,12 +150,13 @@ def delete_place(identifier):
 def get_binds(**crit):
     r = requests.get(
         '%s/binds/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
-    return json.loads(r.text)['binds']
+    return [Bind(**bind_dict) for bind_dict in json.loads(r.text)['binds']]
 
 def get_bind(identifier):
     r = requests.get(
             '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier))
-    return json.loads(r.text)['bind']
+    bind_dict = json.loads(r.text)['bind']
+    return Bind(**bind_dict)
 
 def post_bind(**kargs):
     signals = kargs.get('signals', {})
@@ -178,12 +180,13 @@ def get_positions(**crit):
     r = requests.get(
         '%s/positions/?%s' %
         (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
-    return json.loads(r.text)['positions']
+    return [Position(**position_dict) for position_dict in json.loads(r.text)['positions']]
 
 def get_position(identifier):
     r = requests.get(
         '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
-    return json.loads(r.text)['position']
+    position_dict = json.loads(r.text)['position']
+    return Position(**position_dict)
 
 def post_position(**kargs):
     r = requests.post(
@@ -221,14 +224,14 @@ print
 
 print "BINDS:"
 print get_binds()
-bind = post_bind(username='tryan', place=get_places()[0]['id'], signals={'AA:AA:AA:AA:AA:AA': 100}, x=50, y=50)
+bind = post_bind(username='tryan', place=get_places()[0].id, signals={'AA:AA:AA:AA:AA:AA': 100}, x=50, y=50)
 print get_bind(bind['id'])
 delete_bind(bind['id'])
 print
 
 print "POSITIONS:"
 print get_positions()
-pos = post_position(username='tryan', bind=get_binds()[0]['id'])
+pos = post_position(username='tryan', bind=get_binds()[0].id)
 print get_position(pos['id'])
 delete_position(pos['id'])
 print
