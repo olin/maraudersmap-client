@@ -10,10 +10,7 @@ class _SendableObject(object):
         super(_SendableObject, self).__setattr__('_d', init)
 
     def __setattr__(self, key, value):
-        if key == '_attrs' or key == '_d':
-            super(_SendableObject, self).__setattr__(key, value)
-        elif key in self._attrs:
-            print dir(super(_SendableObject, self))
+        if key in self._attrs:
             self._d[key] = value
             #super(_SendableObject, self).__setattr__(key, value)
         else:
@@ -22,14 +19,14 @@ class _SendableObject(object):
                 (self.__class__.__name__, key))
 
     def __getattr__(self, key):
-        if key == '_attrs' or key == '_d':
-            print dir(self)
-            return getattr(super(_SendableObject, self), key)
-        elif key in self._attrs:
-            return super(_SendableObject, self).__getattr__('_d')[key]
+        if key in self._attrs:
+            return getattr(self,'_d')[key]
         raise KeyError(
             "%s does not support setting '%s'" %
             (self.__class__.__name__, key))
+
+    def __repr__(self):
+        return "<%s:%s>" % (self.__class__.__name__, self._d)
 
 class User(_SendableObject):
     """An object that represents a user that can be pulled from and pushed to
@@ -44,10 +41,9 @@ class User(_SendableObject):
     :param alias: (optional) A more readable version of the username
     :type alias: str
     """
-    _attrs = {'username', 'alias'}
 
     def __init__(self, **kargs):
-
+        super(User, self).__init__(kargs, {'username', 'alias'})
         for key, value in kargs.iteritems():
             self.__setattr__(key, value)
 
