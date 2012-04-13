@@ -115,8 +115,13 @@ class Position(_SendableObject):
             setattr(self, key, value)
 
     def post(self):
+        upload_dict = copy(self._d)
+        bind_id = upload_dict['bind'].id
+        del upload_dict['bind']
+        upload_dict['bind'] = bind_id
+
         r = requests.post(
-                '%s/positions/' % Settings.SERVER_ADDRESS, data=self._d)
+                '%s/positions/' % Settings.SERVER_ADDRESS, data=upload_dict)
         response = json.loads(r.text)['position']
         self.id = response['id']
 
