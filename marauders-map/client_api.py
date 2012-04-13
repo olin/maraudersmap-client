@@ -1,6 +1,8 @@
 import requests
 import json
 import urllib
+from copy import copy
+import webbrowser
 
 from configuration import Settings
 
@@ -62,11 +64,16 @@ class Place(_SendableObject):
         for key, value in kargs.iteritems():
             setattr(self, key, value)
 
-    def put(self):
+    def post(self):
         r = requests.post(
             '%s/places/' % Settings.SERVER_ADDRESS, data=self._d)
         response = json.loads(r.text)['place']
         self.id = response['id']
+
+    def put(self):
+        r = requests.put(
+            '%s/places/%s' % (Settings.SERVER_ADDRESS, self.id), data=self._d)
+        response = json.loads(r.text)['place']
 
 class Bind(_SendableObject):
 
@@ -75,31 +82,39 @@ class Bind(_SendableObject):
         for key, value in kargs.iteritems():
             setattr(self, key, value)
 
-    def put(self):
+    def post(self):
 
+        upload_dict = copy(self._d)
+        if 'signals' in self._d:
+            del upload_dict['signals']
 
-        #XXX: WHY?
-        #signals = kargs.get('signals', {})
-        #if kargs.has_key('signals'):
-        #    del kargs['signals']
+        for key, value in self._d.get('signals', dict()).iteritems():
+            upload_dict['signals[%s]' % key] = value
 
-        #for k, v in signals.items():
-        #    kargs['signals[%s]' % k] = v
+        place_id = upload_dict['place'].id
+        del upload_dict['place']
+        upload_dict['place'] = place_id
+
+        # Now upload_dict is the same as _d, but with the 'signals' key
+        # replaced by keys of the form 'signals[MAC_ADDRESS]'
 
         r = requests.post(
-            '%s/binds/' % Settings.SERVER_ADDRESS, data=self._d)
+            '%s/binds/' % Settings.SERVER_ADDRESS, data=upload_dict)
         print r.text
         response = json.loads(r.text)['bind']
         self.id = response['id']
 
 class Position(_SendableObject):
-
+    """
+    To tell the server where a user is, do the following::
+        Position(username='TheUsername', bind=likeliest_bind).put()
+    """
     def __init__(self, **kargs):
         super(Position, self).__init__(kargs, {'username', 'bind', 'id'})
         for key, value in kargs.iteritems():
             setattr(self, key, value)
 
-    def put(self):
+    def post(self):
         r = requests.post(
                 '%s/positions/' % Settings.SERVER_ADDRESS, data=self._d)
         response = json.loads(r.text)['position']
@@ -125,14 +140,6 @@ def get_user(username):
     user_dict = json.loads(r.text)['user']
     return User(**user_dict)
 
-def patch_user(username, **kargs):
-    patch = [{"replace": "/" + k, "value": v} for k, v in kargs.items()]
-    r = requests.patch(
-        '%s/users/%s' % (Settings.SERVER_ADDRESS, username),
-        data=json.dumps(patch),
-        headers={"content-type": "application/json"})
-    return json.loads(r.text)['user']
-
 def delete_user(username):
     r = requests.delete(
         '%s/users/%s' % (Settings.SERVER_ADDRESS, username))
@@ -151,16 +158,6 @@ def get_place(identifier):
     place_dict = json.loads(r.text)['place']
     return Place(**place_dict)
 
-
-
-def patch_place(identifier, **kargs):
-    patch = [{"replace": "/" + k, "value": v} for k, v in kargs.items()]
-    r = requests.patch(
-        '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier),
-        data=json.dumps(patch),
-        headers={"content-type": "application/json"})
-    return json.loads(r.text)['place']
-
 def delete_place(identifier):
     r = requests.delete(
         '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier))
@@ -169,8 +166,32 @@ def delete_place(identifier):
 # Binds
 
 def get_binds(**crit):
+    """Get binds that match a set of criteria.
+    For example, to get the binds nearest to the current user's location::
+       signals = signal_strength.get_avg_signals_dict()
+       nearest_binds = get_binds(nearest=signals)
+    """
+    upload_dict = copy(crit)
+    if 'nearest' in crit:
+        del upload_dict['nearest']
+
+    if 'signals' in crit:
+        del upload_dict['signals']
+
+    for key, value in crit.get('signals', dict()).iteritems():
+        upload_dict['signals[%s]' % key] = value
+
+    # Now upload_dict is the same as crit, but with the 'signals' key
+    # replaced by keys of the form 'signals[MAC_ADDRESS]'
+
+    for key, value in crit.get('nearest', dict()).iteritems():
+        upload_dict['nearest[%s]' % key] = value
+
+    # Now upload_dict is the same as before, but with the 'nearest' key
+    # replaced by keys of the form 'nearest[MAC_ADDRESS]'
+
     r = requests.get(
-        '%s/binds/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
+        '%s/binds/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(upload_dict)))
     return [Bind(**bind_dict) for bind_dict in json.loads(r.text)['binds']]
 
 def get_bind(identifier):
@@ -205,6 +226,12 @@ def delete_position(identifier):
         '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
     return r.text
 
+def open_map():
+    """Opens the Marauder's Map user interface in the default web browser.
+
+    """
+    webbrowser.open(Settings.WEB_ADDRESS)
+
 if __name__ == '__main__':
 
     # Test suite
@@ -216,16 +243,13 @@ if __name__ == '__main__':
     User(username='jceipek', alias='Julian Ceipek').put()
     print get_user('jceipek')
     delete_user('jceipek')
-    patch_user('tryan', alias='Timmmmmmmy')
     print get_users()
-    patch_user('tryan', alias='Tim Ryan')
     print
 
     print "PLACES:"
     print get_places()
     place = Place(name='Computer Lab', floor='MHLL', alias='Den of Theives')
     place.put()
-    patch_place(place.id, alias='Compy 386')
     print get_place(place.id)
     delete_place(place.id)
     print get_places()

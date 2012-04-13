@@ -11,11 +11,12 @@
 
 from PySide import QtCore
 from PySide import QtGui
+from getpass import getuser
 
 import api
+import client_api
 from configuration import Settings
-
-DEBUG_DONT_CHECK = True
+import signal_strength
 
 class GeneralPrefs(QtGui.QWidget):
     """Tab for general preferences in the :class:`PreferencesWindow`.
@@ -205,13 +206,18 @@ class LocationWorker(QtCore.QObject):
     def get_location(self):
         if self.can_work:
             print "Getting location"
-            response_tuple = api.get_location()
-            self.location_updated_signal.emit(response_tuple)
-            flag, response = response_tuple
-            if flag:
-                locations = response
-                print locations
-                api.weak_post_location(locations[0].encoded_name)
+
+            signals = signal_strength.get_avg_signals_dict()
+            nearest_binds = client_api.get_binds(nearest=signals, limit=1)
+
+            if len(nearest_binds) > 0:
+                likeliest_bind = nearest_binds[0]
+                client_api.Position(username=getuser(), bind=likeliest_bind).post()
+
+                self.location_updated_signal.emit([likeliest_bind.place])
+            else:
+                print "No nearest binds found"
+
         else:
             print "Location getting/posting disabled"
 
@@ -279,9 +285,8 @@ class PreferencesWindow(QtGui.QDialog):
 
         self.create_system_tray()
 
-        if not DEBUG_DONT_CHECK:
-            self.setup_background_thread()
-            self.start_refresh_timer()
+        self.setup_background_thread()
+        self.start_refresh_timer()
 
     def set_size(self, width, height):
         self.setMinimumWidth(width)
@@ -325,7 +330,7 @@ class PreferencesWindow(QtGui.QDialog):
         self.open_action = QtGui.QAction(
             "&Open Map",
             self,
-            triggered=api.open_map
+            triggered = client_api.open_map
             )
         self.refresh_action = QtGui.QAction(
             "&Refresh My Location",
@@ -404,7 +409,7 @@ class PreferencesWindow(QtGui.QDialog):
     def setup_background_thread(self):
         self.bg_thread = QtCore.QThread()
         self.location_worker = LocationWorker()
-        self.location_worker.location_updated_signal.connect(self.locationSlot)
+        self.location_worker.location_updated_signal.connect(self.location_slot)
         self.update_signal.connect(self.location_worker.get_location)
         self.post_signal.connect(self.location_worker.post_location)
         self.offline_signal.connect(self.location_worker.stop_working)
@@ -436,10 +441,13 @@ class PreferencesWindow(QtGui.QDialog):
         '''
         Connected to the 'activated' signal of the system tray.
         Changes the icon to look good when clicked
+
+        .. warning:: Deactivated because there is no way to go back
+
         '''
-        if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
-            #Single Click to open menu
-            self.sys_tray.setIcon(self.sys_tray_icon_clicked)
+        #if reason == QtGui.QSystemTrayIcon.ActivationReason.Trigger:
+        #    Single Click to open menu
+        #    self.sys_tray.setIcon(self.sys_tray_icon_clicked)
         # NOTE: Below commented because unused. Can use later if we want
         #elif reason == QtGui.QSystemTrayIcon.ActivationReason.DoubleClick:
         #    # Double click
@@ -449,7 +457,7 @@ class PreferencesWindow(QtGui.QDialog):
     def sys_tray_menu_closed(self):
         print "Closed Menu"
         # XXX: NEVER GETS TRIGGERED on Mac OsX
-        self.sys_tray.setIcon(self.sys_tray_icon_default)
+        # self.sys_tray.setIcon(self.sys_tray_icon_default)
 
     def sys_tray_quit_action(self):
         '''
@@ -457,10 +465,9 @@ class PreferencesWindow(QtGui.QDialog):
         '''
 
         self.offline_signal.emit()
-        if not DEBUG_DONT_CHECK:
-            self.bg_thread.quit()
-            while not self.bg_thread.isFinished():
-                continue # Wait until thread done
+        self.bg_thread.quit()
+        while not self.bg_thread.isFinished():
+            continue # Wait until thread done
             # On Ubuntu 10.10 (at least), a Python fatal error is encountered if the
             # window is not hidden before the application exits
         self.hide()
@@ -473,11 +480,17 @@ class PreferencesWindow(QtGui.QDialog):
         self.offline_signal.emit()
 
     # Background actions
-    @QtCore.Slot(tuple)
-    def locationSlot(self, flagResponseTuple):
+    @QtCore.Slot(list)
+    def location_slot(self, locations):
         '''
         Slot that gets data whenever a location refresh
         happens
+        '''
+        if len(locations) > 0:
+            print "I'm at %s" % locations[0]
+        else:
+            print "No locations found"
+
         '''
         flag, response = flagResponseTuple
         if flag:
@@ -504,6 +517,7 @@ class PreferencesWindow(QtGui.QDialog):
         else:
             self.location_indicator.setText("Unable to Connect to Server")
             self.correct_location_action.setEnabled(False)
+        '''
 
 def setup_window():
     """Create and return the Preferences window,
