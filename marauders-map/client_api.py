@@ -2,7 +2,7 @@ import requests
 import json
 import urllib
 from copy import copy
-import webbrowser
+
 
 from configuration import Settings
 
@@ -231,11 +231,7 @@ def delete_position(identifier):
         '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
     return r.text
 
-def open_map():
-    """Opens the Marauder's Map user interface in the default web browser.
 
-    """
-    webbrowser.open(Settings.WEB_ADDRESS)
 
 if __name__ == '__main__':
 

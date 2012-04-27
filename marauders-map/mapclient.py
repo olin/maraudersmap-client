@@ -12,6 +12,8 @@
 from PySide import QtCore
 from PySide import QtGui
 from getpass import getuser
+import webbrowser
+import urllib
 
 import api
 import client_api
@@ -213,16 +215,16 @@ class LocationWorker(QtCore.QObject):
             if len(nearest_binds) > 0:
                 likeliest_bind = nearest_binds[0]
                 client_api.Position(username=getuser(), bind=likeliest_bind).post()
-
-                self.location_updated_signal.emit([likeliest_bind.place])
+                likeliest_place = client_api.get_place(likeliest_bind.place)
+                self.location_updated_signal.emit([likeliest_place])
             else:
                 print "No nearest binds found"
 
         else:
             print "Location getting/posting disabled"
 
-    @QtCore.Slot(api.Location)
-    def post_location(self, loc):
+    @QtCore.Slot()
+    def new_location(self):
         """Post a user-defined location to the server and update the user's
         position on the map.
 
@@ -233,10 +235,13 @@ class LocationWorker(QtCore.QObject):
             specifying the correct location
 
         """
-        if self.can_work:  # This mechanism doesn't work properly
-            print "Posting User-Specified Location:", loc.readable_name
-            api.do_train(loc.encoded_name, loc.coordinate)
-            api.weak_post_location(loc.encoded_name)
+        signals = signal_strength.get_avg_signals_dict()
+
+        upload_dict = dict()
+        for key, value in signals.iteritems():
+            upload_dict['signals[%s]' % key] = value
+
+        webbrowser.open("%s?action=place&%s" % (Settings.WEB_ADDRESS, urllib.urlencode(upload_dict)))
 
     @QtCore.Slot()
     def stop_working(self):
@@ -257,18 +262,17 @@ class PreferencesWindow(QtGui.QDialog):
             (see :py:meth:`PySide.QtCore.Signal.emit`), tells the
             LocationWorker to stop sending stuff to the server
             (:meth:`LocationWorker.stop_working`)
-        * **post_signal** (PySide.QtCore.Signal(:class:`api.Location`)) --
-            When emitted (see :py:meth:`PySide.QtCore.Signal.emit`) with a
-            :class:`api.Location` instance, tells the :class:`LocationWorker`
-            to bind the current signal strength to the passed-in location and
-            to update the user's location on the map
-            (:meth:`LocationWorker.post_location`)
+        * **new_signal** (PySide.QtCore.Signal) --
+            When emitted (see :py:meth:`PySide.QtCore.Signal.emit`), opens
+            a webbrowser to the new location url, passing in the signal
+            strength data in order to allow the user to generate a new
+            location. (:meth:`LocationWorker.new_location`)
 
     """
 
     update_signal = QtCore.Signal()
     offline_signal = QtCore.Signal()
-    post_signal = QtCore.Signal(api.Location)
+    new_signal = QtCore.Signal()
 
     def __init__(self):
         super(PreferencesWindow, self).__init__()
@@ -327,10 +331,13 @@ class PreferencesWindow(QtGui.QDialog):
         self.sys_tray.show()
 
     def create_system_tray_actions(self):
+        """Opens the Marauder's Map user interface in the default web browser.
+
+        """
         self.open_action = QtGui.QAction(
             "&Open Map",
             self,
-            triggered = client_api.open_map
+            triggered = self.open_webapp
             )
         self.refresh_action = QtGui.QAction(
             "&Refresh My Location",
@@ -345,7 +352,8 @@ class PreferencesWindow(QtGui.QDialog):
         self.correct_location_action = QtGui.QAction(
             "&Correct My Location",
             self,
-            enabled=False
+            enabled=True,
+            triggered=self.new_location
             )
         self.other_location_action = QtGui.QAction(
             "Other...",
@@ -366,6 +374,12 @@ class PreferencesWindow(QtGui.QDialog):
             self,
             triggered=self.sys_tray_quit_action
             )
+
+    def open_webapp(self):
+         webbrowser.open(Settings.WEB_ADDRESS)
+
+    def open_webapp(self):
+         webbrowser.open(Settings.WEB_ADDRESS)
 
     def create_system_tray_menu(self):
         sys_tray_menu = QtGui.QMenu(self)
@@ -398,20 +412,20 @@ class PreferencesWindow(QtGui.QDialog):
         self.sys_tray.showMessage("Updating", "Determining Location...")
         self.update_signal.emit()
 
-    def post_location(self, loc):
+    def new_location(self):
         '''
         Sends a signal to the LocationWorker in bg_thread
-        to post a specified location
+        to allow the user to specify a new location in a webbrowser
         '''
-        self.post_signal.emit(loc)
-        self.location_indicator.setText(loc.get_readable_name())
+        self.new_signal.emit()
+        self.location_indicator.setText("Location: Not Set")
 
     def setup_background_thread(self):
         self.bg_thread = QtCore.QThread()
         self.location_worker = LocationWorker()
         self.location_worker.location_updated_signal.connect(self.location_slot)
         self.update_signal.connect(self.location_worker.get_location)
-        self.post_signal.connect(self.location_worker.post_location)
+        self.new_signal.connect(self.location_worker.new_location)
         self.offline_signal.connect(self.location_worker.stop_working)
         self.location_worker.moveToThread(self.bg_thread)
 
@@ -488,6 +502,7 @@ class PreferencesWindow(QtGui.QDialog):
         '''
         if len(locations) > 0:
             print "I'm at %s" % locations[0]
+            self.location_indicator.setText("Location: %s" % locations[0].alias)
         else:
             print "No locations found"
 
