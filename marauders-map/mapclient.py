@@ -565,6 +565,14 @@ if __name__ == '__main__':
 
     Settings.init()
 
+    # Register username if it doesn't exist: #XXX Will probably fail if no server connection
+    try:
+        client_api.get_user(getuser())
+    except:
+        print "Making User"
+        user = client_api.User(username=getuser(), alias='Unknown User')
+        user.put()
+
     app = QtGui.QApplication(sys.argv)
     able_to_launch, reason = can_launch()
 
