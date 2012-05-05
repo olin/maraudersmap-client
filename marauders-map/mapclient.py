@@ -251,8 +251,11 @@ class LocationWorker(QtCore.QObject):
         for key, value in signals.iteritems():
             upload_dict['signals[%s]' % key] = value
 
-        webbrowser.open("%s?action=place&%s" % 
-                         (Settings.WEB_ADDRESS, urllib.urlencode(upload_dict)))
+        webbrowser.open("%s?action=place&username=%s&%s" % 
+                         (Settings.WEB_ADDRESS, 
+                          Settings.USER_NAME,
+                          urllib.urlencode(upload_dict))
+                        )
 
     @QtCore.Slot()
     def stop_working(self):
@@ -583,26 +586,31 @@ if __name__ == '__main__':
 
     Settings.init()
     
+    is_first_launch = False
+    
     try:
         # See if username exists in Settings file
         username = Settings.USER_NAME
     except Undefined_Value_Error:
-        try:
-            # Register username if it doesn't exist on the server
-            client_api.get_user(getuser())
-            
-            print "Making User"
-            user = client_api.User(username=Settings.USER_NAME, 
-                                   alias=Settings.FULL_USER_NAME)
-            user.put()
-            
-            Settings.USER_NAME = getuser()
-            
-            preferences_window.display()
-
-        except client_api.Unable_To_Connect_Error:
-            print "Unable to connect to marauder's map server"
+        # Set username to system username
+        username = getuser()
+        Settings.USER_NAME = username
+        is_first_launch = True
         
+    try:
+        # Register username if it doesn't exist on the server
+        username = getuser()
+        
+        client_api.get_user(username)
+
+    except client_api.Unable_To_Connect_Error:
+        print "Unable to connect to marauder's map server"
+    except KeyError:
+        print "User not found on server. Posting."
+        print "Making User"
+        user = client_api.User(username=Settings.USER_NAME, 
+                               alias="Unknown")
+        user.put()
 
 
     
@@ -615,5 +623,7 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         # Note: we have to retain a reference to the window so that it isn't killed
-        preferences_window = setup_window()            
+        preferences_window = setup_window()     
+        if is_first_launch:
+            preferences_window.display()
         sys.exit(app.exec_())
