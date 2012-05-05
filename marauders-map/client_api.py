@@ -6,6 +6,9 @@ from copy import copy
 
 from configuration import Settings
 
+class Unable_To_Connect_Error(Exception):
+    pass
+
 class _SendableObject(object):
     def __init__(self, init, attrs):
         super(_SendableObject, self).__setattr__('_attrs', attrs)
@@ -140,10 +143,14 @@ def get_users(**crit):
 # returns a particular user with the given username
 
 def get_user(username):
-    r = requests.get(
-        '%s/users/%s' % (Settings.SERVER_ADDRESS,username))
-    user_dict = json.loads(r.text)['user']
-    return User(**user_dict)
+    try:
+        r = requests.get(
+                         '%s/users/%s' % (Settings.SERVER_ADDRESS,username))
+        user_dict = json.loads(r.text)['user']
+        return User(**user_dict)
+    except requests.exceptions.ConnectionError:
+        raise Unable_To_Connect_Error
+
 
 def delete_user(username):
     r = requests.delete(

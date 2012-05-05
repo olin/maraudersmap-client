@@ -5,8 +5,8 @@
 # and a preferences window that is accessed through the Preferences... entry
 
 # Program structure:
-#  The preferencesWindow is the root node of the program and hides itself by default
-#  It is used for infrequent configuration changes
+#  The preferencesWindow is the root node of the program and hides itself by 
+#  default. It is used for infrequent configuration changes.
 #  The systemTray ties in to all of the external functions required for the map
 
 from PySide import QtCore
@@ -17,7 +17,7 @@ import urllib
 
 import api
 import client_api
-from configuration import Settings
+from configuration import Settings, Undefined_Value_Error
 import signal_strength
 
 class GeneralPrefs(QtGui.QWidget):
@@ -28,9 +28,19 @@ class GeneralPrefs(QtGui.QWidget):
     def __init__(self):
         super(GeneralPrefs, self).__init__()
         main_layout = QtGui.QVBoxLayout()
+        self.full_name_box = QtGui.QLineEdit()
         main_layout.addWidget(
-            QtGui.QLabel("You will be able to configure basic stuff here.")
-            )
+                              QtGui.QLabel("Username: ")
+                              )
+        main_layout.addWidget(
+                              QtGui.QLabel(getuser())
+                              )
+        main_layout.addWidget(
+                              QtGui.QLabel("Full Name: ")
+                              )
+        main_layout.addWidget(
+                              self.full_name_box
+                              )
         self.setLayout(main_layout)
 
 
@@ -241,7 +251,8 @@ class LocationWorker(QtCore.QObject):
         for key, value in signals.iteritems():
             upload_dict['signals[%s]' % key] = value
 
-        webbrowser.open("%s?action=place&%s" % (Settings.WEB_ADDRESS, urllib.urlencode(upload_dict)))
+        webbrowser.open("%s?action=place&%s" % 
+                         (Settings.WEB_ADDRESS, urllib.urlencode(upload_dict)))
 
     @QtCore.Slot()
     def stop_working(self):
@@ -331,8 +342,15 @@ class PreferencesWindow(QtGui.QDialog):
         self.sys_tray.show()
 
     def create_system_tray_actions(self):
-        """Opens the Marauder's Map user interface in the default web browser.
-
+        """Create the actions for the system tray:
+            open_action
+            refresh_action
+            location_indicator
+            correct_location_action
+            other_location_action
+            offline_action
+            prefs_action
+            quit_action
         """
         self.open_action = QtGui.QAction(
             "&Open Map",
@@ -534,6 +552,7 @@ class PreferencesWindow(QtGui.QDialog):
             self.correct_location_action.setEnabled(False)
         '''
 
+
 def setup_window():
     """Create and return the Preferences window,
     which owns every other element.
@@ -546,7 +565,6 @@ def setup_window():
     """
     QtGui.QApplication.setQuitOnLastWindowClosed(False)
     preferences_window = PreferencesWindow()
-    #preferencesWindow.display()
     return preferences_window
 
 def can_launch():
@@ -564,15 +582,30 @@ if __name__ == '__main__':
     import sys
 
     Settings.init()
-
-    # Register username if it doesn't exist: #XXX Will probably fail if no server connection
+    
     try:
-        client_api.get_user(getuser())
-    except:
-        print "Making User"
-        user = client_api.User(username=getuser(), alias='Unknown User')
-        user.put()
+        # See if username exists in Settings file
+        username = Settings.USER_NAME
+    except Undefined_Value_Error:
+        try:
+            # Register username if it doesn't exist on the server
+            client_api.get_user(getuser())
+            
+            print "Making User"
+            user = client_api.User(username=Settings.USER_NAME, 
+                                   alias=Settings.FULL_USER_NAME)
+            user.put()
+            
+            Settings.USER_NAME = getuser()
+            
+            preferences_window.display()
 
+        except client_api.Unable_To_Connect_Error:
+            print "Unable to connect to marauder's map server"
+        
+
+
+    
     app = QtGui.QApplication(sys.argv)
     able_to_launch, reason = can_launch()
 
@@ -582,5 +615,5 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         # Note: we have to retain a reference to the window so that it isn't killed
-        preferences_window = setup_window()
+        preferences_window = setup_window()            
         sys.exit(app.exec_())

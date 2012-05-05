@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.join(_top_dir, "appdirs-1.2.0"))
 import appdirs
 import ConfigParser
 
+class Undefined_Value_Error(Exception):
+    pass
 
 class PreferenceCreationError(Exception):
     """Error to be thrown when prefs could not be created.
@@ -147,55 +149,91 @@ class Settings(object):
         if not cls._READY:
             raise SettingsNotInitializedError()
 
+    @classmethod
+    def _get_raw_user_defined_value(cls, key):
+        try:
+            return cls._config_parser.get('User Defined', key)
+        except ConfigParser.NoOptionError:
+            raise Undefined_Value_Error
+
+    @classmethod
+    def _set_raw_user_defined_value(cls, key, value):
+        try:
+            return cls._config_parser.set('User Defined', key, value)
+        except ConfigParser.NoOptionError:
+            raise Undefined_Value_Error
+
     class __metaclass__(type):
         """Define custom class properties (getters and setters)
         Code from: http://stackoverflow.com/a/1800999/798235
 
         .. warning:: May not work in Python 3
         """
+        #TODO: Escape user input!
+        
         @property
         def SERVER_ADDRESS(cls):
             cls._check_for_init()
-            raw_value = cls._config_parser.get('User Defined',
-                                               'SERVER_ADDRESS')
+            raw_value = cls._get_raw_user_defined_value('SERVER_ADDRESS')
             return raw_value.split(';')[0].strip()
 
         @SERVER_ADDRESS.setter
         def SERVER_ADDRESS(cls, value):
             cls._check_for_init()
-            raw_value = cls._config_parser.set('User Defined',
-                                               'SERVER_ADDRESS',
-                                               value)
+            raw_value = cls._set_raw_user_defined_value('SERVER_ADDRESS',
+                                                        value)
             cls.write_prefs_to_file()
 
         @property
         def WEB_ADDRESS(cls):
             cls._check_for_init()
-            raw_value = cls._config_parser.get('User Defined',
-                                               'WEB_ADDRESS')
+            raw_value = cls._get_raw_user_defined_value('WEB_ADDRESS')
             return raw_value.split(';')[0].strip()
 
         @WEB_ADDRESS.setter
         def WEB_ADDRESS(cls, value):
             cls._check_for_init()
-            raw_value = cls._config_parser.set('User Defined',
-                                               'WEB_ADDRESS',
-                                               value)
+            raw_value = cls._set_raw_user_defined_value('WEB_ADDRESS',
+                                                        value)
             cls.write_prefs_to_file()
 
         @property
         def REFRESH_FREQ(cls):
             cls._check_for_init()
-            raw_value = cls._config_parser.get('User Defined',
-                                               'REFRESH_FREQ')
+            raw_value = cls._get_raw_user_defined_value('REFRESH_FREQ')
             return float(raw_value.split(';')[0].strip())
 
         @REFRESH_FREQ.setter
         def REFRESH_FREQ(cls, value):
             cls._check_for_init()
-            raw_value = cls._config_parser.set('User Defined',
-                                               'REFRESH_FREQ',
-                                               value)
+            raw_value = cls._set_raw_user_defined_value('REFRESH_FREQ',
+                                                        value)
+            cls.write_prefs_to_file()
+
+        @property
+        def USER_NAME(cls):
+            cls._check_for_init()
+            raw_value = cls._get_raw_user_defined_value('USER_NAME')
+            return raw_value.split(';')[0].strip()
+
+        @USER_NAME.setter
+        def USER_NAME(cls, value):
+            cls._check_for_init()
+            raw_value = cls._set_raw_user_defined_value('USER_NAME',
+                                                        value)
+            cls.write_prefs_to_file()
+
+        @property
+        def FULL_USER_NAME(cls):
+            cls._check_for_init()
+            raw_value = cls._get_raw_user_defined_value('FULL_USER_NAME')
+            return raw_value.split(';')[0].strip()
+
+        @FULL_USER_NAME.setter
+        def FULL_USER_NAME(cls, value):
+            cls._check_for_init()
+            raw_value = cls._set_raw_user_defined_value('FULL_USER_NAME',
+                                                        value)
             cls.write_prefs_to_file()
 
 if __name__ == "__main__":
