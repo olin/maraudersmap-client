@@ -122,9 +122,9 @@ class AdvancedPrefs(QtGui.QWidget):
     def update_freq_changed(self):
         # XXX: This is totally broken
         # TODO: Convert to appropriate value in seconds
-        Settings.REFRESH_FREQ = self._slider_value_to_settings(
-                                                               self.slider.value()
-                                                               )
+        Settings.REFRESH_FREQ = str(self._slider_value_to_settings(
+                                        self.slider.value()
+                                    ))
         self.update_hint_label.setText("")
     
     def _gen_str_from_slider_val(self, value):
@@ -428,7 +428,8 @@ class PreferencesWindow(QtGui.QDialog):
             self.refresh_thread.location_updated_signal.connect(self.location_slot)
             self.refresh_thread.start()
             # TODO: Match freq to settings
-            QtCore.QTimer.singleShot(10000, self.refresh_location)
+            print Settings.REFRESH_FREQ*1000
+            QtCore.QTimer.singleShot(Settings.REFRESH_FREQ*1000, self.refresh_location)
         else:
             # Only wait a bit before rechecking 
             # if the thread is still running
