@@ -154,7 +154,7 @@ def __interpret_DB(signal_string):
     return 100 + int(signal_string)
 
 def __getExePath():
-    return '.\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
+    return '..\\windowsGetWirelessStrength\\Get Wireless Strengths\\bin\\Release\\'
 
 def __get_signal_nodes_win():
     signal_nodes_dict = dict()
