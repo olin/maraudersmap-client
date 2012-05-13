@@ -33,9 +33,9 @@ class Program
                     }
 
                     string macAddress = "";
-                    for (int i = 1; i < (tMac.Length / 2); i++)
+                    for (int i = 0; i < (tMac.Length / 2); i++)
                     {
-                        macAddress += tMac.Substring((i - 1) * 2, 2);//note C# substring(i,j) goes from i to i+j
+                        macAddress += tMac.Substring(i * 2, 2);//note C# substring(i,j) goes from i to i+j
                         if (i != 5) { macAddress += ":"; }
                     }
 
