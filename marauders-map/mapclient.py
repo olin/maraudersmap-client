@@ -450,16 +450,21 @@ class PreferencesWindow(QtGui.QDialog):
             Creates a thread to allow new bind creation.
             '''
 
+        should_create_new_thread = False
         if self.creation_thread:
             if self.creation_thread.isFinished():
                 print "Thread Finished"
                 del self.creation_thread
                 self.creation_thread = None
+                should_create_new_thread = True
             else:
                 # Only wait a bit before rechecking
                 # if the thread is still running
                 QtCore.QTimer.singleShot(200, self.new_location)
         else:
+            should_create_new_thread = True
+
+        if should_create_new_thread:
             self.sys_tray.showMessage("Gathering Data...",
                                       "Set your location once a browser is launched.")
             self.creation_thread = NewLocationThread()
