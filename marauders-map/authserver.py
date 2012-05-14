@@ -10,7 +10,6 @@ from configuration import Settings
 
 def auth_callback(cookies_dict):
     Settings.COOKIES = cookies_dict
-    print Settings.COOKIES
 
 class MapAuthHTTPServer(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -41,6 +40,8 @@ class MapAuthHTTPServer(BaseHTTPRequestHandler):
 			"session": postvars.get('session', '')[0]
 		})
 
+                #self.server.socket.close()
+
 def authenticate():
     Settings.init()
 
@@ -54,7 +55,8 @@ def authenticate():
         (Settings.AUTH_ADDRESS, port))
 
     print 'server started: http://localhost:' + str(port) + '/'
-    server.serve_forever()
+    while not Settings.COOKIES:
+        server.handle_request()
 
 if __name__=='__main__':
 	main()

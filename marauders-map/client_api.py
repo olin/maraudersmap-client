@@ -140,7 +140,6 @@ class Position(_SendableObject):
 
 
 def get_cookies():
-    print "COOKIES:",Settings.COOKIES
     return Settings.COOKIES
 
 
