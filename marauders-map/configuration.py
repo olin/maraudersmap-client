@@ -51,7 +51,7 @@ class Settings(object):
             Default: ``http://map.fwol.in/api``
         * **WEB_ADDRESS** (str) - Web address of the map; used when
             "Open Map" is clicked
-            Default: ``http://map.fwol.in/``
+            Default: ``http://map.fwol.in/ui/index.html``
 
         * **AUTH_ADDRESS** (str) - Web address of auth server; used on
             first launch
@@ -71,7 +71,7 @@ class Settings(object):
                 ('http://map.fwol.in/api',
                  'Location of the server to connect to'),
             "WEB_ADDRESS": '%s ; %s' %
-                ('http://map.fwol.in/',
+                ('http://map.fwol.in/ui/index.html',
                  'What website to open when "Open Map" is clicked'),
             "AUTH_ADDRESS": '%s ; %s' %
                 ('http://map.fwol.in/local',
