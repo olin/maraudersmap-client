@@ -58,7 +58,9 @@ class User(_SendableObject):
     def put(self):
         r = requests.put(
                 '%s/users/%s' %
-                (Settings.SERVER_ADDRESS, self.username), data=self._d)
+                (Settings.SERVER_ADDRESS, self.username), data=self._d,
+                cookies=get_cookies()
+                )
 
 class Place(_SendableObject):
 
@@ -69,13 +71,17 @@ class Place(_SendableObject):
 
     def post(self):
         r = requests.post(
-            '%s/places/' % Settings.SERVER_ADDRESS, data=self._d)
+            '%s/places/' % Settings.SERVER_ADDRESS, data=self._d,
+            cookies=get_cookies()
+            )
         response = json.loads(r.text)['place']
         self.id = response['id']
 
     def put(self):
         r = requests.put(
-            '%s/places/%s' % (Settings.SERVER_ADDRESS, self.id), data=self._d)
+            '%s/places/%s' % (Settings.SERVER_ADDRESS, self.id), data=self._d,
+            cookies=get_cookies()
+            )
         response = json.loads(r.text)['place']
 
 class Bind(_SendableObject):
@@ -102,7 +108,9 @@ class Bind(_SendableObject):
         # replaced by keys of the form 'signals[MAC_ADDRESS]'
 
         r = requests.post(
-            '%s/binds/' % Settings.SERVER_ADDRESS, data=upload_dict)
+            '%s/binds/' % Settings.SERVER_ADDRESS, data=upload_dict,
+            cookies=get_cookies()
+            )
         print r.text
         response = json.loads(r.text)['bind']
         self.id = response['id']
@@ -124,28 +132,35 @@ class Position(_SendableObject):
         upload_dict['bind'] = bind_id
 
         r = requests.post(
-                '%s/positions/' % Settings.SERVER_ADDRESS, data=upload_dict)
+                '%s/positions/' % Settings.SERVER_ADDRESS, data=upload_dict,
+                cookies=get_cookies()
+                )
         response = json.loads(r.text)['position']
         self.id = response['id']
 
-# import client_api; a = client_api._SendableObject2({},{'a'}); a.a = 5
+
+def get_cookies():
+    print "COOKIES:",Settings.COOKIES
+    return Settings.COOKIES
 
 
 # returns an array of users that match a given criterion **crit
 # @param(**crit): the criterions. The ** will make crit a dictionary of the
 #   keyword arguments.
-
 def get_users(**crit):
     r = requests.get(
-        '%s/users/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
+        '%s/users/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)),
+        cookies=get_cookies()
+        )
     return [User(**user_dict) for user_dict in json.loads(r.text)['users']]
 
 # returns a particular user with the given username
-
 def get_user(username):
     try:
         r = requests.get(
-                         '%s/users/%s' % (Settings.SERVER_ADDRESS,username))
+                         '%s/users/%s' % (Settings.SERVER_ADDRESS,username),
+                         cookies=get_cookies()
+                         )
         user_dict = json.loads(r.text)['user']
         return User(**user_dict)
     except requests.exceptions.ConnectionError:
@@ -154,25 +169,30 @@ def get_user(username):
 
 def delete_user(username):
     r = requests.delete(
-        '%s/users/%s' % (Settings.SERVER_ADDRESS, username))
+        '%s/users/%s' % (Settings.SERVER_ADDRESS, username),
+        cookies=get_cookies()
+        )
     return r.text
 
 # Places
 
 def get_places(**crit):
     r = requests.get(
-        '%s/places/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
+        '%s/places/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(crit)),
+        cookies=get_cookies())
     return [Place(**place_dict) for place_dict in json.loads(r.text)['places']]
 
 def get_place(identifier):
     r = requests.get(
-        '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier))
+        '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier),
+        cookies=get_cookies())
     place_dict = json.loads(r.text)['place']
     return Place(**place_dict)
 
 def delete_place(identifier):
     r = requests.delete(
-        '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier))
+        '%s/places/%s' % (Settings.SERVER_ADDRESS, identifier),
+        cookies=get_cookies())
     return r.text
 
 # Binds
@@ -203,18 +223,21 @@ def get_binds(**crit):
     # replaced by keys of the form 'nearest[MAC_ADDRESS]'
 
     r = requests.get(
-        '%s/binds/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(upload_dict)))
+        '%s/binds/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(upload_dict)),
+        cookies=get_cookies())
     return [Bind(**bind_dict) for bind_dict in json.loads(r.text)['binds']]
 
 def get_bind(identifier):
     r = requests.get(
-            '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier))
+            '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier),
+            cookies=get_cookies())
     bind_dict = json.loads(r.text)['bind']
     return Bind(**bind_dict)
 
 def delete_bind(identifier):
     r = requests.delete(
-            '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier))
+            '%s/binds/%s' % (Settings.SERVER_ADDRESS, identifier),
+            cookies=get_cookies())
     return r.text
 
 # Positions
@@ -222,12 +245,14 @@ def delete_bind(identifier):
 def get_positions(**crit):
     r = requests.get(
         '%s/positions/?%s' %
-        (Settings.SERVER_ADDRESS, urllib.urlencode(crit)))
+        (Settings.SERVER_ADDRESS, urllib.urlencode(crit)),
+        cookies=get_cookies())
     return [Position(**position_dict) for position_dict in json.loads(r.text)['positions']]
 
 def get_position(identifier):
     r = requests.get(
-        '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
+        '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier),
+        cookies=get_cookies())
     position_dict = json.loads(r.text)['position']
     return Position(**position_dict)
 
@@ -235,7 +260,8 @@ def get_position(identifier):
 
 def delete_position(identifier):
     r = requests.delete(
-        '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier))
+        '%s/positions/%s' % (Settings.SERVER_ADDRESS, identifier),
+        cookies=get_cookies())
     return r.text
 
 

@@ -3,6 +3,7 @@ import sys
 _top_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_top_dir, "appdirs-1.2.0"))
 import appdirs
+import json
 import ConfigParser
 
 class Undefined_Value_Error(Exception):
@@ -47,11 +48,14 @@ class Settings(object):
 
     :class attributes:
         * **SERVER_ADDRESS** (str) - Where to post server requests
-            Default: ``http://apps.olin.edu``
+            Default: ``http://map.fwol.in/api``
         * **WEB_ADDRESS** (str) - Web address of the map; used when
             "Open Map" is clicked
+            Default: ``http://map.fwol.in/``
 
-            Default: ``http://apps.olin.edu/ui/mapui.php``
+        * **AUTH_ADDRESS** (str) - Web address of auth server; used on
+            first launch
+
         * **REFRESH_FREQ** (float) - How often to refresh the location, in
             seconds
 
@@ -64,11 +68,14 @@ class Settings(object):
     # XXX: These comments get stripped out as soon as changes are written...
     _DEFAULTS = {
             "SERVER_ADDRESS": '%s ; %s' %
-                ('http://apps.olin.edu',
+                ('http://map.fwol.in/api',
                  'Location of the server to connect to'),
             "WEB_ADDRESS": '%s ; %s' %
-                ('http://apps.olin.edu/ui/mapui.php',
+                ('http://map.fwol.in/',
                  'What website to open when "Open Map" is clicked'),
+            "AUTH_ADDRESS": '%s ; %s' %
+                ('http://map.fwol.in/local',
+                 'What website to use for authentication'),
             "REFRESH_FREQ": '%i ; %s' %
                 (300,
                  'How often to refresh the location, in seconds')
@@ -95,6 +102,7 @@ class Settings(object):
         """
         cls._prefs_dir = appdirs.user_data_dir(cls.APP_NAME, cls.APP_AUTHOR)
         cls._prefs_file_path = os.path.join(cls._prefs_dir, "config.txt")
+        cls._secret_file_path = os.path.join(cls._prefs_dir, "secret")
 
         cls._config_parser = ConfigParser.RawConfigParser(cls._DEFAULTS)
         cls._config_parser.add_section('User Defined')
@@ -121,6 +129,12 @@ class Settings(object):
         else:
             cls.read_prefs_from_file()
 
+        # Detect if secret file exists
+        if not os.path.isfile(cls._secret_file_path):
+            cls.IS_AUTHENTICATED = False
+        else:
+            cls._read_secret_from_file()
+
         cls._READY = True
 
     @classmethod
@@ -143,6 +157,22 @@ class Settings(object):
         """
         with open(cls._prefs_file_path) as prefs_file:
             cls._config_parser.readfp(prefs_file)
+
+    @classmethod
+    def _read_secret_from_file(cls):
+        """Reads cookies from the 'secret' file.
+        """
+        with open(cls._secret_file_path, 'r') as secret_file:
+            cls._cookies = json.loads(secret_file.read())
+            cls.IS_AUTHENTICATED = True
+
+    @classmethod
+    def _write_secret_to_file(cls, secret_dict):
+        """Reads cookies from the 'secret' file.
+        """
+        with open(cls._secret_file_path, 'w') as secret_file:
+            secret_file.write(json.dumps(secret_dict))
+            cls.IS_AUTHENTICATED = True
 
     @classmethod
     def _check_for_init(cls):
@@ -170,7 +200,40 @@ class Settings(object):
         .. warning:: May not work in Python 3
         """
         #TODO: Escape user input!
-        
+
+        @property
+        def COOKIES(cls):
+            cls._check_for_init()
+            if cls.IS_AUTHENTICATED:
+                # Requests freaks out when there is unicode
+                cookies = {}
+                cookies['browserid'] = cls._cookies[u'browserid']
+                cookies['session'] = cls._cookies[u'session']
+                return cookies
+            else:
+                return {}
+
+        @COOKIES.setter
+        def COOKIES(cls, value):
+            cls._check_for_init()
+            cls._write_secret_to_file(value)
+            cls._cookies = value
+            cls.IS_AUTHENTICATED = True
+
+        @property
+        def AUTH_ADDRESS(cls):
+            cls._check_for_init()
+            raw_value = cls._get_raw_user_defined_value('AUTH_ADDRESS')
+            return raw_value.split(';')[0].strip()
+
+        @AUTH_ADDRESS.setter
+        def AUTH_ADDRESS(cls, value):
+            cls._check_for_init()
+            raw_value = cls._set_raw_user_defined_value('AUTH_ADDRESS',
+                                                        value)
+            cls.write_prefs_to_file()
+
+
         @property
         def SERVER_ADDRESS(cls):
             cls._check_for_init()

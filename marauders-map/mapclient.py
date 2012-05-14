@@ -24,10 +24,10 @@ from getpass import getuser
 import webbrowser
 import urllib
 
-import api
 import client_api
 from configuration import Settings, Undefined_Value_Error
 import signal_strength
+import authserver
 
 class GeneralPrefs(QtGui.QWidget):
     """Tab for general preferences in the :class:`PreferencesWindow`.
@@ -624,6 +624,9 @@ if __name__ == '__main__':
     import sys
 
     Settings.init()
+
+    if not Settings.IS_AUTHENTICATED:
+        authserver.authenticate()
 
     is_first_launch = False
 

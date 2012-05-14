@@ -3,11 +3,15 @@
 import os
 import cgi
 import sys
+import webbrowser
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
+from configuration import Settings
+
 def auth_callback(cookies_dict):
-	print(cookies_dict)
- 
+    Settings.COOKIES = cookies_dict
+    print Settings.COOKIES
+
 class MapAuthHTTPServer(BaseHTTPRequestHandler):
 	def do_GET(self):
 		self.send_response(200)
@@ -28,25 +32,29 @@ class MapAuthHTTPServer(BaseHTTPRequestHandler):
 
 
 		self.send_response(303)
-		self.send_header('Location', 'http://map.fwol.in/')
+		self.send_header('Location', Settings.WEB_ADDRESS)
 		self.end_headers()
 		self.wfile.write('User authenticated. Redirecting to the map.')
 
 		auth_callback({
-			"browserid": postvars.get('browserid', ''),
-			"session": postvars.get('session', '')
+			"browserid": postvars.get('browserid', '')[0],
+			"session": postvars.get('session', '')[0]
 		})
 
-def main():
-	try:
-		server = HTTPServer(('', 0), MapAuthHTTPServer)
-		# use this port number for other things
-		port = server.server_port
+def authenticate():
+    Settings.init()
 
-		print 'server started: http://localhost:' + str(port) + '/'
-		server.serve_forever()
-	except KeyboardInterrupt:
-		server.socket.close() 
+    server = HTTPServer(('', 0), MapAuthHTTPServer)
+
+    port = server.server_port
+
+    print "%s/?port=%s" % (Settings.AUTH_ADDRESS, port)
+
+    webbrowser.open("%s/?port=%s" %
+        (Settings.AUTH_ADDRESS, port))
+
+    print 'server started: http://localhost:' + str(port) + '/'
+    server.serve_forever()
 
 if __name__=='__main__':
 	main()
