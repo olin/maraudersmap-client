@@ -5,7 +5,7 @@ develop: main.py qt.conf setup.py Info.plist
 	python setup.py py2app -A
 
 # Mac OS X
-main.app: main.py qt.conf setup.py Info.plist
+main.app: mapclient.py qt.conf setup.py Info.plist
 	python setup.py py2app
 
 # Removing
