@@ -5,7 +5,7 @@ all: main.app
 #	python setup.py py2app -A
 
 # Mac OS X
-main.app: maraudersmap/mapclient.py maraudersmap/data/qt.conf  maraudersmap/data/Info.plist setup.py
+main.app: src/mapclient.py data/qt.conf data/Info.plist setup.py
 	python setup.py py2app
 
 # Removing

@@ -23,11 +23,27 @@ from PySide import QtGui
 from getpass import getuser
 import webbrowser
 import urllib
+import os
+import sys
 
 import client_api
 from configuration import Settings, Undefined_Value_Error
 import signal_strength
 import authserver
+
+DATA_PATH = None
+if os.getenv('DEBUG_OLIN_MM') != "TRUE":
+    basepath = os.path.dirname(__file__)
+    # Set data path based on OS
+    if sys.platform.startswith('darwin'):
+        DATA_PATH = os.path.abspath(os.path.join(basepath, "..", 'Resources'))
+    elif sys.platform.startswith('linux'):
+        pass
+    elif sys.platform.startswith('win'):
+        pass
+else:
+    basepath = os.path.dirname(__file__)
+    DATA_PATH = os.path.abspath(os.path.join(basepath, "..", 'data'))
 
 class GeneralPrefs(QtGui.QWidget):
     """Tab for general preferences in the :class:`PreferencesWindow`.
@@ -325,8 +341,8 @@ class PreferencesWindow(QtGui.QDialog):
         '''
 
             '''
-        self.sys_tray_icon_default = QtGui.QIcon("data/demoIcon.png")
-        self.sys_tray_icon_clicked = QtGui.QIcon("data/demoIconWhite.png")
+        self.sys_tray_icon_default = QtGui.QIcon(os.path.join(DATA_PATH, "demoIcon.png"))
+        self.sys_tray_icon_clicked = QtGui.QIcon(os.path.join(DATA_PATH, "demoIconWhite.png"))
         self.sys_tray = QtGui.QSystemTrayIcon(self, icon=self.sys_tray_icon_default)
         self.sys_tray.setToolTip("Marauder's Map")
 

@@ -1,5 +1,4 @@
 import os
-import sys
 import appdirs
 import json
 import ConfigParser
