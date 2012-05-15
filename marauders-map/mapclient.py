@@ -325,8 +325,8 @@ class PreferencesWindow(QtGui.QDialog):
         '''
 
             '''
-        self.sys_tray_icon_default = QtGui.QIcon("demoIcon.png")
-        self.sys_tray_icon_clicked = QtGui.QIcon("demoIconWhite.png")
+        self.sys_tray_icon_default = QtGui.QIcon("data/demoIcon.png")
+        self.sys_tray_icon_clicked = QtGui.QIcon("data/demoIconWhite.png")
         self.sys_tray = QtGui.QSystemTrayIcon(self, icon=self.sys_tray_icon_default)
         self.sys_tray.setToolTip("Marauder's Map")
 
@@ -570,35 +570,6 @@ class PreferencesWindow(QtGui.QDialog):
             self.location_indicator.setText("Location: %s" % locations[0].alias)
         else:
             print "No locations found"
-
-        '''
-            flag, response = flagResponseTuple
-            if flag:
-            pot_locs = response
-            sub_menu = QtGui.QMenu("Correct Location Submenu", self)
-            for potLoc in pot_locs:
-            def correct_location(realLoc):
-            def postFunction():
-            self.post_location(realLoc)
-            return postFunction
-
-            subAction = QtGui.QAction(potLoc.readable_name, self, triggered=correct_location(potLoc))
-            sub_menu.addAction(subAction)
-            sub_menu.addSeparator()
-            sub_menu.addAction(self.otherLocationAction)
-            self.correct_location_action.setMenu(sub_menu)
-            self.correct_location_action.setEnabled(True)
-
-            self.most_likely_loc = pot_locs[0]
-            self.location_indicator.setText(self.most_likely_loc.readable_name)
-
-            self.sys_tray.showMessage("Location: %s" % self.most_likely_loc.readable_name, "Click here to fix the location.")
-
-            else:
-            self.location_indicator.setText("Unable to Connect to Server")
-            self.correct_location_action.setEnabled(False)
-            '''
-
 
 def setup_window():
     """Create and return the Preferences window,

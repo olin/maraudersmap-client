@@ -1,11 +1,11 @@
 all: main.app
 
 # Some kind of switching needs to go here to configure behavior on different OSes
-develop: main.py qt.conf setup.py Info.plist
-	python setup.py py2app -A
+#develop: main.py qt.conf setup.py Info.plist
+#	python setup.py py2app -A
 
 # Mac OS X
-main.app: mapclient.py qt.conf setup.py Info.plist
+main.app: maraudersmap/mapclient.py maraudersmap/data/qt.conf  maraudersmap/data/Info.plist setup.py
 	python setup.py py2app
 
 # Removing
