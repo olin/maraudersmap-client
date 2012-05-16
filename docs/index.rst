@@ -26,7 +26,7 @@ Contents
 
    configuration
    mapclient
-   api
+   client_api
    signal_strength
 
 Indices and tables

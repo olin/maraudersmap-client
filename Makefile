@@ -12,3 +12,7 @@ main.app: src/mapclient.py data/qt.conf data/Info.plist setup.py
 clean:
 	rm -rf build/
 	rm -rf dist/
+	rm altgraph*
+	rm macholib*
+	rm modulegraph*
+	rm -rf py2app*
