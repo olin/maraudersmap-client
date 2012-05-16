@@ -1,0 +1,400 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>client_api &mdash; Marauder&#39;s Map Client 2.0.1a documentation</title>
+    
+    <link rel="stylesheet" href="../static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '2.0.1a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../static/jquery.js"></script>
+    <script type="text/javascript" src="../static/underscore.js"></script>
+    <script type="text/javascript" src="../static/doctools.js"></script>
+    <link rel="top" title="Marauder&#39;s Map Client 2.0.1a documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Marauder&#39;s Map Client 2.0.1a documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for client_api</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">urllib</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+
+<span class="kn">from</span> <span class="nn">configuration</span> <span class="kn">import</span> <span class="n">Settings</span>
+
+<span class="k">class</span> <span class="nc">Unable_To_Connect_Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">_SendableObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_SendableObject</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="s">&#39;_attrs&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_SendableObject</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="s">&#39;_d&#39;</span><span class="p">,</span> <span class="n">init</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="c">#super(_SendableObject, self).__setattr__(key, value)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s">&quot;</span><span class="si">%s</span><span class="s"> does not support setting &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attrs</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s">&#39;_d&#39;</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="s">&quot;</span><span class="si">%s</span><span class="s"> does not support setting &#39;</span><span class="si">%s</span><span class="s">&#39;&quot;</span> <span class="o">%</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+<div class="viewcode-block" id="User"><a class="viewcode-back" href="../client_api.html#client_api.User">[docs]</a><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">_SendableObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An object that represents a user that can be pulled from and pushed to</span>
+<span class="sd">    the server.</span>
+
+<span class="sd">    Note: The parameters are all keyword arguments.</span>
+<span class="sd">    For example: `User(username=&#39;jceipek&#39;, alias=&#39;Julian Ceipek&#39;)`</span>
+
+<span class="sd">    :param username: (required) Unique username (i.e. jceipek)</span>
+<span class="sd">    :type username: str</span>
+
+<span class="sd">    :param alias: (optional) A more readable version of the username</span>
+<span class="sd">    :type alias: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">kargs</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;alias&#39;</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;username&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;username not specified&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s">/users/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span>
+                <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+                <span class="p">)</span>
+</div>
+<span class="k">class</span> <span class="nc">Place</span><span class="p">(</span><span class="n">_SendableObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Place</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">kargs</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;alias&#39;</span><span class="p">,</span> <span class="s">&#39;floor&#39;</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;id&#39;</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">/places/&#39;</span> <span class="o">%</span> <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;place&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">put</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">/places/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;place&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">Bind</span><span class="p">(</span><span class="n">_SendableObject</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Bind</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">kargs</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;signals&#39;</span><span class="p">,</span> <span class="s">&#39;place&#39;</span><span class="p">,</span> <span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">,</span> <span class="s">&#39;id&#39;</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">upload_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&#39;signals&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;signals&#39;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;signals&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;signals[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="n">place_id</span> <span class="o">=</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;place&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">del</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;place&#39;</span><span class="p">]</span>
+        <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;place&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">place_id</span>
+
+        <span class="c"># Now upload_dict is the same as _d, but with the &#39;signals&#39; key</span>
+        <span class="c"># replaced by keys of the form &#39;signals[MAC_ADDRESS]&#39;</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">/binds/&#39;</span> <span class="o">%</span> <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">upload_dict</span><span class="p">,</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">print</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;bind&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Position"><a class="viewcode-back" href="../client_api.html#client_api.Position">[docs]</a><span class="k">class</span> <span class="nc">Position</span><span class="p">(</span><span class="n">_SendableObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To tell the server where a user is, do the following::</span>
+<span class="sd">        Position(username=&#39;TheUsername&#39;, bind=likeliest_bind).put()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Position</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">kargs</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;username&#39;</span><span class="p">,</span> <span class="s">&#39;bind&#39;</span><span class="p">,</span> <span class="s">&#39;id&#39;</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">upload_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+        <span class="n">bind_id</span> <span class="o">=</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;bind&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+        <span class="k">del</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;bind&#39;</span><span class="p">]</span>
+        <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;bind&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bind_id</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s">/positions/&#39;</span> <span class="o">%</span> <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">upload_dict</span><span class="p">,</span>
+                <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+                <span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;position&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+
+</div>
+<span class="k">def</span> <span class="nf">get_cookies</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Settings</span><span class="o">.</span><span class="n">COOKIES</span>
+
+
+<span class="c"># returns an array of users that match a given criterion **crit</span>
+<span class="c"># @param(**crit): the criterions. The ** will make crit a dictionary of the</span>
+<span class="c">#   keyword arguments.</span>
+<span class="k">def</span> <span class="nf">get_users</span><span class="p">(</span><span class="o">**</span><span class="n">crit</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/users/?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">crit</span><span class="p">)),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">User</span><span class="p">(</span><span class="o">**</span><span class="n">user_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">user_dict</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;users&#39;</span><span class="p">]]</span>
+
+<span class="c"># returns a particular user with the given username</span>
+<span class="k">def</span> <span class="nf">get_user</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                         <span class="s">&#39;</span><span class="si">%s</span><span class="s">/users/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span><span class="n">username</span><span class="p">),</span>
+                         <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+                         <span class="p">)</span>
+        <span class="n">user_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;user&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">User</span><span class="p">(</span><span class="o">**</span><span class="n">user_dict</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">Unable_To_Connect_Error</span>
+
+
+<span class="k">def</span> <span class="nf">delete_user</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/users/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">username</span><span class="p">),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+
+<span class="c"># Places</span>
+
+<span class="k">def</span> <span class="nf">get_places</span><span class="p">(</span><span class="o">**</span><span class="n">crit</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/places/?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">crit</span><span class="p">)),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">Place</span><span class="p">(</span><span class="o">**</span><span class="n">place_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">place_dict</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;places&#39;</span><span class="p">]]</span>
+
+<span class="k">def</span> <span class="nf">get_place</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/places/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">identifier</span><span class="p">),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="n">place_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;place&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Place</span><span class="p">(</span><span class="o">**</span><span class="n">place_dict</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">delete_place</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/places/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">identifier</span><span class="p">),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+
+<span class="c"># Binds</span>
+
+<div class="viewcode-block" id="get_binds"><a class="viewcode-back" href="../client_api.html#client_api.get_binds">[docs]</a><span class="k">def</span> <span class="nf">get_binds</span><span class="p">(</span><span class="o">**</span><span class="n">crit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get binds that match a set of criteria.</span>
+<span class="sd">    For example, to get the binds nearest to the current user&#39;s location::</span>
+<span class="sd">       signals = signal_strength.get_avg_signals_dict()</span>
+<span class="sd">       nearest_binds = get_binds(nearest=signals)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">upload_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">crit</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s">&#39;nearest&#39;</span> <span class="ow">in</span> <span class="n">crit</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;nearest&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s">&#39;signals&#39;</span> <span class="ow">in</span> <span class="n">crit</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;signals&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">crit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;signals&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;signals[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c"># Now upload_dict is the same as crit, but with the &#39;signals&#39; key</span>
+    <span class="c"># replaced by keys of the form &#39;signals[MAC_ADDRESS]&#39;</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">crit</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;nearest&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="n">upload_dict</span><span class="p">[</span><span class="s">&#39;nearest[</span><span class="si">%s</span><span class="s">]&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c"># Now upload_dict is the same as before, but with the &#39;nearest&#39; key</span>
+    <span class="c"># replaced by keys of the form &#39;nearest[MAC_ADDRESS]&#39;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/binds/?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">upload_dict</span><span class="p">)),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">Bind</span><span class="p">(</span><span class="o">**</span><span class="n">bind_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">bind_dict</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;binds&#39;</span><span class="p">]]</span>
+</div>
+<span class="k">def</span> <span class="nf">get_bind</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">/binds/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">identifier</span><span class="p">),</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="n">bind_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;bind&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Bind</span><span class="p">(</span><span class="o">**</span><span class="n">bind_dict</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">delete_bind</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+            <span class="s">&#39;</span><span class="si">%s</span><span class="s">/binds/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">identifier</span><span class="p">),</span>
+            <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+
+<span class="c"># Positions</span>
+
+<span class="k">def</span> <span class="nf">get_positions</span><span class="p">(</span><span class="o">**</span><span class="n">crit</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/positions/?</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+        <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">crit</span><span class="p">)),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">Position</span><span class="p">(</span><span class="o">**</span><span class="n">position_dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">position_dict</span> <span class="ow">in</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;positions&#39;</span><span class="p">]]</span>
+
+<span class="k">def</span> <span class="nf">get_position</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/positions/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">identifier</span><span class="p">),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="n">position_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)[</span><span class="s">&#39;position&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Position</span><span class="p">(</span><span class="o">**</span><span class="n">position_dict</span><span class="p">)</span>
+
+
+
+<span class="k">def</span> <span class="nf">delete_position</span><span class="p">(</span><span class="n">identifier</span><span class="p">):</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">/positions/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span><span class="p">,</span> <span class="n">identifier</span><span class="p">),</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="n">get_cookies</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span>
+
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c"># Test suite</span>
+
+    <span class="n">Settings</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+    <span class="k">print</span> <span class="s">&quot;USERS:&quot;</span>
+    <span class="k">print</span> <span class="n">get_users</span><span class="p">()</span>
+    <span class="n">User</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;jceipek&#39;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s">&#39;Julian Ceipek&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+    <span class="k">print</span> <span class="n">get_user</span><span class="p">(</span><span class="s">&#39;jceipek&#39;</span><span class="p">)</span>
+    <span class="n">delete_user</span><span class="p">(</span><span class="s">&#39;jceipek&#39;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">get_users</span><span class="p">()</span>
+    <span class="k">print</span>
+
+    <span class="k">print</span> <span class="s">&quot;PLACES:&quot;</span>
+    <span class="k">print</span> <span class="n">get_places</span><span class="p">()</span>
+    <span class="n">place</span> <span class="o">=</span> <span class="n">Place</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;Computer Lab&#39;</span><span class="p">,</span> <span class="n">floor</span><span class="o">=</span><span class="s">&#39;MHLL&#39;</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s">&#39;Den of Theives&#39;</span><span class="p">)</span>
+    <span class="n">place</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+    <span class="k">print</span> <span class="n">get_place</span><span class="p">(</span><span class="n">place</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">delete_place</span><span class="p">(</span><span class="n">place</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">get_places</span><span class="p">()</span>
+    <span class="k">print</span>
+
+    <span class="k">print</span> <span class="s">&quot;BINDS:&quot;</span>
+    <span class="k">print</span> <span class="n">get_binds</span><span class="p">()</span>
+    <span class="c">#XXX: Looks like this is not working:</span>
+    <span class="n">bind</span> <span class="o">=</span> <span class="n">Bind</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;tryan&#39;</span><span class="p">,</span> <span class="n">place</span><span class="o">=</span><span class="n">get_places</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">signals</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;AA:AA:AA:AA:AA:AA&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">},</span> <span class="n">x</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">bind</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+    <span class="k">print</span> <span class="n">get_bind</span><span class="p">(</span><span class="n">bind</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">delete_bind</span><span class="p">(</span><span class="n">bind</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">print</span>
+
+    <span class="k">print</span> <span class="s">&quot;POSITIONS:&quot;</span>
+    <span class="k">print</span> <span class="n">get_positions</span><span class="p">()</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">Position</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s">&#39;tryan&#39;</span><span class="p">,</span> <span class="n">bind</span><span class="o">=</span><span class="n">get_binds</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">pos</span><span class="o">.</span><span class="n">put</span><span class="p">()</span>
+    <span class="k">print</span> <span class="n">get_position</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="n">delete_position</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">print</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">Marauder&#39;s Map Client 2.0.1a documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Andrew Barry, Ben Fisher, Noah Tye, Julian Ceipek, Cory Dolphin, Jared Kirschner, Paul Booth, and Tim Ryan.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

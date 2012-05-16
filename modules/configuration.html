@@ -50,11 +50,12 @@
             
   <h1>Source code for configuration</h1><div class="highlight"><pre>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">_top_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_top_dir</span><span class="p">,</span> <span class="s">&quot;appdirs-1.2.0&quot;</span><span class="p">))</span>
 <span class="kn">import</span> <span class="nn">appdirs</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">ConfigParser</span>
+
+<span class="k">class</span> <span class="nc">Undefined_Value_Error</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
 
 <div class="viewcode-block" id="PreferenceCreationError"><a class="viewcode-back" href="../configuration.html#configuration.PreferenceCreationError">[docs]</a><span class="k">class</span> <span class="nc">PreferenceCreationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Error to be thrown when prefs could not be created.</span>
@@ -70,55 +71,90 @@
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
 </div>
 <span class="k">class</span> <span class="nc">SettingsNotInitializedError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="s">&quot;Call Settings.init() before using Settings!&quot;</span>
 
+
 <div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../configuration.html#configuration.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class to manipulate application settings.</span>
 
 <span class="sd">    Use it like this:</span>
+
 <span class="sd">    .. code-block:: python</span>
+
 <span class="sd">        from configuration import Settings</span>
 <span class="sd">        Settings.init() # Make it possible to use Settings</span>
 <span class="sd">        # Read settings from file</span>
 <span class="sd">        print Settings.SERVER_ADDRESS</span>
-<span class="sd">        # Change the settings everywhere</span>
+<span class="sd">        # Change the settings and write those changes to file</span>
 <span class="sd">        Settings.SERVER_ADDRESS = &quot;http://somewebsite.blah&quot;</span>
+
+<span class="sd">    .. warning:: Never create a settings instance!</span>
+
+<span class="sd">    :class attributes:</span>
+<span class="sd">        * **SERVER_ADDRESS** (str) - Where to post server requests</span>
+<span class="sd">            Default: ``http://map.fwol.in/api``</span>
+<span class="sd">        * **WEB_ADDRESS** (str) - Web address of the map; used when</span>
+<span class="sd">            &quot;Open Map&quot; is clicked</span>
+<span class="sd">            Default: ``http://map.fwol.in/ui/index.html``</span>
+
+<span class="sd">        * **AUTH_ADDRESS** (str) - Web address of auth server; used on</span>
+<span class="sd">            first launch</span>
+
+<span class="sd">        * **REFRESH_FREQ** (float) - How often to refresh the location, in</span>
+<span class="sd">            seconds</span>
+
+<span class="sd">            Default: ``300``</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_READY</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">_READY</span> <span class="o">=</span> <span class="bp">False</span>  <span class="c"># Has init() been called?</span>
 
+    <span class="c"># XXX: These comments get stripped out as soon as changes are written...</span>
     <span class="n">_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s">&quot;SERVER_ADDRESS&quot;</span><span class="p">:</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
-                <span class="p">(</span><span class="s">&#39;http://apps.olin.edu&#39;</span><span class="p">,</span> 
+            <span class="s">&quot;SERVER_ADDRESS&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s">&#39;http://map.fwol.in/api&#39;</span><span class="p">,</span>
                  <span class="s">&#39;Location of the server to connect to&#39;</span><span class="p">),</span>
-            <span class="s">&quot;WEB_ADDRESS&quot;</span><span class="p">:</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
-                <span class="p">(</span><span class="s">&#39;http://apps.olin.edu/ui/mapui.php&#39;</span><span class="p">,</span>
+            <span class="s">&quot;WEB_ADDRESS&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s">&#39;http://map.fwol.in/ui/index.html&#39;</span><span class="p">,</span>
                  <span class="s">&#39;What website to open when &quot;Open Map&quot; is clicked&#39;</span><span class="p">),</span>
-            <span class="s">&quot;REFRESH_FREQ&quot;</span><span class="p">:</span><span class="s">&#39;</span><span class="si">%i</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+            <span class="s">&quot;AUTH_ADDRESS&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s">&#39;http://map.fwol.in/local&#39;</span><span class="p">,</span>
+                 <span class="s">&#39;What website to use for authentication&#39;</span><span class="p">),</span>
+            <span class="s">&quot;REFRESH_FREQ&quot;</span><span class="p">:</span> <span class="s">&#39;</span><span class="si">%i</span><span class="s"> ; </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
                 <span class="p">(</span><span class="mi">300</span><span class="p">,</span>
                  <span class="s">&#39;How often to refresh the location, in seconds&#39;</span><span class="p">)</span>
-            <span class="p">}</span> 
+            <span class="p">}</span>
 
-    <span class="n">APP_NAME</span> <span class="o">=</span> <span class="s">&quot;MaraudersMap&quot;</span>
-    <span class="n">APP_AUTHOR</span> <span class="o">=</span> <span class="s">&quot;ohack&quot;</span>
-
-    <span class="c">#SERVER_ADDRESS = &#39;http://apps.olin.edu&#39;</span>
-    <span class="c">#WEB_ADDRESS = &#39;http://apps.olin.edu/ui/mapui.php&#39;</span>
-    <span class="c">#SERVER_ADDRESS = &#39;http://acl.olin.edu/map&#39;</span>
-    <span class="c">#WEB_ADDRESS = &#39;http://acl.olin.edu/map/ui/mapui.php&#39;</span>
+    <span class="n">APP_NAME</span> <span class="o">=</span> <span class="s">&quot;MaraudersMap&quot;</span>  <span class="c"># Used to define prefs path</span>
+    <span class="n">APP_AUTHOR</span> <span class="o">=</span> <span class="s">&quot;ohack&quot;</span>  <span class="c"># Used to define prefs path</span>
 
     <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Settings.init"><a class="viewcode-back" href="../configuration.html#configuration.Settings.init">[docs]</a>    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Call this before using Settings. Calling it multiple times</span>
+<span class="sd">        should be harmless.</span>
+
+<span class="sd">        Creates preferences directory &amp; file in the appropriate location for</span>
+<span class="sd">        the current OS if it doesn&#39;t exist and sets up the class attributes</span>
+<span class="sd">        with appropriate values.</span>
+<span class="sd">        The file is called ``config.txt``.</span>
+
+<span class="sd">        .. warning:: A limitation of the ConfigParser module that we are</span>
+<span class="sd">            using is that it strips out comments from the config file, which</span>
+<span class="sd">            is annoying in cases where the user wants to make changes</span>
+<span class="sd">            manually. If we want to remove this limitation, we should use</span>
+<span class="sd">            configobj: http://www.voidspace.org.uk/python/configobj.html</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">cls</span><span class="o">.</span><span class="n">_prefs_dir</span> <span class="o">=</span> <span class="n">appdirs</span><span class="o">.</span><span class="n">user_data_dir</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">APP_AUTHOR</span><span class="p">)</span>
         <span class="n">cls</span><span class="o">.</span><span class="n">_prefs_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_dir</span><span class="p">,</span> <span class="s">&quot;config.txt&quot;</span><span class="p">)</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_secret_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_dir</span><span class="p">,</span> <span class="s">&quot;secret&quot;</span><span class="p">)</span>
 
         <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="o">.</span><span class="n">RawConfigParser</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_DEFAULTS</span><span class="p">)</span>
         <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">)</span>
-       
+
         <span class="c"># Create the preferences directory if necessary</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_dir</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -128,7 +164,7 @@
                 <span class="k">print</span> <span class="s">&quot;Failed to create preferences directory!&quot;</span>
                 <span class="k">print</span> <span class="n">e</span>
                 <span class="k">raise</span> <span class="n">PreferenceCreationError</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_dir</span><span class="p">)</span>
-        
+
         <span class="c"># Create the preferences file if necessary, with defaults</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_file_path</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -137,67 +173,178 @@
                 <span class="k">print</span> <span class="s">&quot;Failed to create preferences file&quot;</span>
                 <span class="k">print</span> <span class="n">e</span>
                 <span class="k">raise</span> <span class="n">PreferenceCreationError</span><span class="p">(</span><span class="n">prefs_file_path</span><span class="p">)</span>
+        <span class="c"># Read prefs from the file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">read_prefs_from_file</span><span class="p">()</span>
+
+        <span class="c"># Detect if secret file exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_secret_file_path</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">IS_AUTHENTICATED</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_read_secret_from_file</span><span class="p">()</span>
 
         <span class="n">cls</span><span class="o">.</span><span class="n">_READY</span> <span class="o">=</span> <span class="bp">True</span>
 </div>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">write_defaults_to_file</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
-       <span class="k">pass</span> 
-
-    <span class="nd">@classmethod</span>
 <div class="viewcode-block" id="Settings.write_prefs_to_file"><a class="viewcode-back" href="../configuration.html#configuration.Settings.write_prefs_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">write_prefs_to_file</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Writes preferences to file. You shouldn&#39;t need to call this</span>
+<span class="sd">        manually because it gets called every time a setting is changed.</span>
+
+<span class="sd">        .. note:: Every time this method is called, all comments in the</span>
+<span class="sd">            file will be overwritten (with rare exceptions)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_file_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">prefs_file</span><span class="p">:</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prefs_file</span><span class="p">)</span>
-    </div>
+</div>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Settings.read_prefs_from_file"><a class="viewcode-back" href="../configuration.html#configuration.Settings.read_prefs_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">read_prefs_from_file</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reads preferences from file. You shouldn&#39;t need to call this</span>
+<span class="sd">        manually because it gets called on :meth:`Settings.init()` unless you</span>
+<span class="sd">        want to support users who modify the file while the application is</span>
+<span class="sd">        running.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_prefs_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">prefs_file</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">readfp</span><span class="p">(</span><span class="n">prefs_file</span><span class="p">)</span>
+</div>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_read_secret_from_file</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reads cookies from the &#39;secret&#39; file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_secret_file_path</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">secret_file</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_cookies</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">secret_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">IS_AUTHENTICATED</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_write_secret_to_file</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">secret_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reads cookies from the &#39;secret&#39; file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_secret_file_path</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">secret_file</span><span class="p">:</span>
+            <span class="n">secret_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">secret_dict</span><span class="p">))</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">IS_AUTHENTICATED</span> <span class="o">=</span> <span class="bp">True</span>
+
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_check_for_init</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cls</span><span class="o">.</span><span class="n">_READY</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">SettingsNotInitializedError</span><span class="p">()</span>
- 
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_get_raw_user_defined_value</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ConfigParser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Undefined_Value_Error</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_set_raw_user_defined_value</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ConfigParser</span><span class="o">.</span><span class="n">NoOptionError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Undefined_Value_Error</span>
+
     <span class="k">class</span> <span class="nc">__metaclass__</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Define custom class properties (getters and setters)</span>
 <span class="sd">        Code from: http://stackoverflow.com/a/1800999/798235</span>
+
+<span class="sd">        .. warning:: May not work in Python 3</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c">#TODO: Escape user input!</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">COOKIES</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">IS_AUTHENTICATED</span><span class="p">:</span>
+                <span class="c"># Requests freaks out when there is unicode</span>
+                <span class="n">cookies</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">cookies</span><span class="p">[</span><span class="s">&#39;browserid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_cookies</span><span class="p">[</span><span class="s">u&#39;browserid&#39;</span><span class="p">]</span>
+                <span class="n">cookies</span><span class="p">[</span><span class="s">&#39;session&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_cookies</span><span class="p">[</span><span class="s">u&#39;session&#39;</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">cookies</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{}</span>
+
+        <span class="nd">@COOKIES.setter</span>
+        <span class="k">def</span> <span class="nf">COOKIES</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_write_secret_to_file</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_cookies</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">IS_AUTHENTICATED</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">AUTH_ADDRESS</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_get_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;AUTH_ADDRESS&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="nd">@AUTH_ADDRESS.setter</span>
+        <span class="k">def</span> <span class="nf">AUTH_ADDRESS</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;AUTH_ADDRESS&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="p">)</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">write_prefs_to_file</span><span class="p">()</span>
+
+
         <span class="nd">@property</span>
         <span class="k">def</span> <span class="nf">SERVER_ADDRESS</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
-            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> 
-                                               <span class="s">&#39;SERVER_ADDRESS&#39;</span><span class="p">)</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_get_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;SERVER_ADDRESS&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
         <span class="nd">@SERVER_ADDRESS.setter</span>
         <span class="k">def</span> <span class="nf">SERVER_ADDRESS</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
-            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> 
-                                               <span class="s">&#39;SERVER_ADDRESS&#39;</span><span class="p">,</span>
-                                               <span class="n">value</span><span class="p">)</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;SERVER_ADDRESS&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="p">)</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">write_prefs_to_file</span><span class="p">()</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span> <span class="nf">WEB_ADDRESS</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
-            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> 
-                                               <span class="s">&#39;WEB_ADDRESS&#39;</span><span class="p">)</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_get_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;WEB_ADDRESS&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
         <span class="nd">@WEB_ADDRESS.setter</span>
         <span class="k">def</span> <span class="nf">WEB_ADDRESS</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
-            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> 
-                                               <span class="s">&#39;WEB_ADDRESS&#39;</span><span class="p">,</span>
-                                               <span class="n">value</span><span class="p">)</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;WEB_ADDRESS&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="p">)</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">write_prefs_to_file</span><span class="p">()</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span> <span class="nf">REFRESH_FREQ</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
-            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> 
-                                               <span class="s">&#39;REFRESH_FREQ&#39;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_get_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;REFRESH_FREQ&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
         <span class="nd">@REFRESH_FREQ.setter</span>
         <span class="k">def</span> <span class="nf">REFRESH_FREQ</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
-            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_config_parser</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;User Defined&#39;</span><span class="p">,</span> 
-                                               <span class="s">&#39;REFRESH_FREQ&#39;</span><span class="p">,</span>
-                                               <span class="n">value</span><span class="p">)</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;REFRESH_FREQ&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="p">)</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">write_prefs_to_file</span><span class="p">()</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">USER_NAME</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_get_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;USER_NAME&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="nd">@USER_NAME.setter</span>
+        <span class="k">def</span> <span class="nf">USER_NAME</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;USER_NAME&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="p">)</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">write_prefs_to_file</span><span class="p">()</span>
+
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">FULL_USER_NAME</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_get_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;FULL_USER_NAME&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">raw_value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="nd">@FULL_USER_NAME.setter</span>
+        <span class="k">def</span> <span class="nf">FULL_USER_NAME</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_check_for_init</span><span class="p">()</span>
+            <span class="n">raw_value</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_set_raw_user_defined_value</span><span class="p">(</span><span class="s">&#39;FULL_USER_NAME&#39;</span><span class="p">,</span>
+                                                        <span class="n">value</span><span class="p">)</span>
             <span class="n">cls</span><span class="o">.</span><span class="n">write_prefs_to_file</span><span class="p">()</span>
 </div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
@@ -205,6 +352,7 @@
     <span class="k">print</span> <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span>
     <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span> <span class="o">=</span> <span class="s">&quot;http://somewebsite.blah&quot;</span>
     <span class="k">print</span> <span class="n">Settings</span><span class="o">.</span><span class="n">SERVER_ADDRESS</span>
+    <span class="k">print</span> <span class="n">Settings</span><span class="o">.</span><span class="n">WEB_ADDRESS</span>
 </pre></div>
 
           </div>

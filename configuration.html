@@ -97,19 +97,25 @@ be created.</p>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last">
 <li><dl class="first docutils">
 <dt><strong>SERVER_ADDRESS</strong> (str) - Where to post server requests</dt>
-<dd><p class="first last">Default: <tt class="docutils literal"><span class="pre">http://apps.olin.edu</span></tt></p>
+<dd><p class="first last">Default: <tt class="docutils literal"><span class="pre">http://map.fwol.in/api</span></tt></p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><strong>WEB_ADDRESS</strong> (str) - Web address of the map; used when</dt>
-<dd><p class="first">&#8220;Open Map&#8221; is clicked</p>
-<p class="last">Default: <tt class="docutils literal"><span class="pre">http://apps.olin.edu/ui/mapui.php</span></tt></p>
+<dd><p class="first last">&#8220;Open Map&#8221; is clicked
+Default: <tt class="docutils literal"><span class="pre">http://map.fwol.in/ui/index.html</span></tt></p>
 </dd>
 </dl>
 </li>
 <li><dl class="first docutils">
-<dt><strong>REFRESH_FREQ</strong> (int) - How often to refresh the location, in</dt>
+<dt><strong>AUTH_ADDRESS</strong> (str) - Web address of auth server; used on</dt>
+<dd><p class="first last">first launch</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><strong>REFRESH_FREQ</strong> (float) - How often to refresh the location, in</dt>
 <dd><p class="first">seconds</p>
 <p class="last">Default: <tt class="docutils literal"><span class="pre">300</span></tt></p>
 </dd>
@@ -131,17 +137,17 @@ with appropriate values.
 The file is called <tt class="docutils literal"><span class="pre">config.txt</span></tt>.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">A limitation of the ConfigParser module that we are 
-using is that it strips out comments from the config file, which 
-is annoying in cases where the user wants to make changes 
-manually. If we want to remove this limitation, we should use 
+<p class="last">A limitation of the ConfigParser module that we are
+using is that it strips out comments from the config file, which
+is annoying in cases where the user wants to make changes
+manually. If we want to remove this limitation, we should use
 configobj: <a class="reference external" href="http://www.voidspace.org.uk/python/configobj.html">http://www.voidspace.org.uk/python/configobj.html</a></p>
 </div>
 </dd></dl>
 
 <dl class="classmethod">
 <dt id="configuration.Settings.read_prefs_from_file">
-<em class="property">classmethod </em><tt class="descname">read_prefs_from_file</tt><big>(</big><big>)</big><a class="headerlink" href="#configuration.Settings.read_prefs_from_file" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><tt class="descname">read_prefs_from_file</tt><big>(</big><big>)</big><a class="reference internal" href="modules/configuration.html#Settings.read_prefs_from_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#configuration.Settings.read_prefs_from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads preferences from file. You shouldn&#8217;t need to call this
 manually because it gets called on <a class="reference internal" href="#configuration.Settings.init" title="configuration.Settings.init"><tt class="xref py py-meth docutils literal"><span class="pre">Settings.init()</span></tt></a> unless you
 want to support users who modify the file while the application is

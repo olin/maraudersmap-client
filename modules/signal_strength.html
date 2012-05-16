@@ -73,7 +73,7 @@
     <span class="n">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;__MAC_address&#39;</span><span class="p">,</span> <span class="s">&#39;__name&#39;</span><span class="p">,</span> <span class="s">&#39;signal_strength&#39;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MAC_address</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">signal_strength</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__MAC_address</span> <span class="o">=</span> <span class="n">MAC_address</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">name</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">signal_strength</span> <span class="o">=</span> <span class="n">signal_strength</span>
 
     <span class="nd">@property</span>
@@ -99,11 +99,8 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
 </div>
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">,</span><span class="si">%i</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__MAC_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal_strength</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s">&quot;&lt;</span><span class="si">%s</span><span class="s">,</span><span class="si">%i</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__MAC_address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal_strength</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__MAC_address</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signal_strength</span><span class="p">))</span>
@@ -112,32 +109,54 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hash__</span><span class="p">()</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">__hash__</span><span class="p">()</span>
 
 </div>
+<div class="viewcode-block" id="get_avg_signals_dict"><a class="viewcode-back" href="../signal_strength.html#signal_strength.get_avg_signals_dict">[docs]</a><span class="k">def</span> <span class="nf">get_avg_signals_dict</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tsleep</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the average signal strength of the nearby nodes.</span>
+
+<span class="sd">    :param samples: Number of measurements to make &amp; average</span>
+<span class="sd">    :type samples: int</span>
+<span class="sd">    :param tsleep: Number of seconds to wait between measurements</span>
+<span class="sd">        (although it will take a bit longer since getCoords() takes a while to execute)</span>
+<span class="sd">    :type tsleep: float</span>
+
+<span class="sd">    :returns: dict of the form {MAC_AddressSTR : signal_strengthINT }</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">signals_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">get_avg_signal_nodes_dict</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">tsleep</span><span class="o">=</span><span class="n">tsleep</span><span class="p">)</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+    <span class="k">print</span> <span class="n">d</span>
+
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">signals_dict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">MAC_address</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">signal_strength</span>
+
+    <span class="k">return</span> <span class="n">signals_dict</span>
+
+</div>
 <div class="viewcode-block" id="get_avg_signal_nodes"><a class="viewcode-back" href="../signal_strength.html#signal_strength.get_avg_signal_nodes">[docs]</a><span class="k">def</span> <span class="nf">get_avg_signal_nodes</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tsleep</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Gets the average signal strength of the nearby nodes.</span>
 
 <span class="sd">    :param samples: Number of measurements to make &amp; average</span>
 <span class="sd">    :type samples: int</span>
-<span class="sd">    :param tsleep: Number of seconds to wait between measurements </span>
+<span class="sd">    :param tsleep: Number of seconds to wait between measurements</span>
 <span class="sd">        (although it will take a bit longer since getCoords() takes a while to execute)</span>
 <span class="sd">    :type tsleep: float</span>
 
 <span class="sd">    :returns: list of :class:`SignalNode` objects</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_avg_signal_nodes_dict</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">tsleep</span><span class="o">=</span><span class="n">tsleep</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-    </div>
+</div>
 <div class="viewcode-block" id="get_avg_signal_nodes_dict"><a class="viewcode-back" href="../signal_strength.html#signal_strength.get_avg_signal_nodes_dict">[docs]</a><span class="k">def</span> <span class="nf">get_avg_signal_nodes_dict</span><span class="p">(</span><span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">tsleep</span><span class="o">=</span><span class="mf">0.15</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Gets the average signal strength of the nearby nodes.</span>
 
 <span class="sd">    :param samples: Number of measurements to make &amp; average</span>
 <span class="sd">    :type samples: int</span>
-<span class="sd">    :param tsleep: Number of seconds to wait between measurements </span>
+<span class="sd">    :param tsleep: Number of seconds to wait between measurements</span>
 <span class="sd">        (although it will take a bit longer since getCoords() takes a while to execute)</span>
 <span class="sd">    :type tsleep: float</span>
 
-<span class="sd">    :returns: dict of the form {MAC_AddressSTR : :class:`SignalNode`\ }</span>
+<span class="sd">    :returns: dict of the form {MAC_AddressIdentifierSTR : :class:`SignalNode`\ }</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span> <span class="nn">time</span>
-    <span class="n">all_surrounding_nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> 
+    <span class="n">all_surrounding_nodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">samples</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">get_signal_node_dict</span><span class="p">()</span>
@@ -147,7 +166,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">all_surrounding_nodes</span><span class="p">[</span><span class="n">node_identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">node_identifier</span><span class="p">]</span>
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">tsleep</span><span class="p">)</span>
-    
+
 
     <span class="c">#TODO: Figure out what to in terms of division if the else statement above is triggered.</span>
 
@@ -163,9 +182,9 @@
 <span class="sd">    using platform-dependent methods.</span>
 <span class="sd">    Returns a dict mapping SignalNode identifiers to SignalNodes</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    
+
     <span class="c"># WINDOWS</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;win&#39;</span><span class="p">):</span>        
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;win&#39;</span><span class="p">):</span>
         <span class="c"># Should work on Windows &gt; XP SP3</span>
         <span class="k">return</span> <span class="n">__get_signal_nodes_win</span><span class="p">()</span>
     <span class="c"># LINUX</span>
@@ -177,16 +196,16 @@
     <span class="c"># MAC OS X</span>
     <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;darwin&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">__get_signal_nodes_mac</span><span class="p">()</span>
-    </div>
+</div>
 <span class="k">def</span> <span class="nf">__interpret_DB</span><span class="p">(</span><span class="n">signal_string</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Most platforms (nm-tool doesn&#39;t for some reason) return the Received Signal Strength Indication (RSSI) in dBm units (http://en.wikipedia.org/wiki/DBm)</span>
 <span class="sd">    The following is a convenient way to indicate, for example, that -85 is weaker than -10</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="mi">100</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">signal_string</span><span class="p">)</span>
-    
+
 <span class="k">def</span> <span class="nf">__getExePath</span><span class="p">():</span>
-    <span class="k">return</span> <span class="s">&#39;.</span><span class="se">\\</span><span class="s">windowsGetWirelessStrength</span><span class="se">\\</span><span class="s">Get Wireless Strengths</span><span class="se">\\</span><span class="s">bin</span><span class="se">\\</span><span class="s">Release</span><span class="se">\\</span><span class="s">&#39;</span>
+    <span class="k">return</span> <span class="s">&#39;..</span><span class="se">\\</span><span class="s">windowsGetWirelessStrength</span><span class="se">\\</span><span class="s">Get Wireless Strengths</span><span class="se">\\</span><span class="s">bin</span><span class="se">\\</span><span class="s">Release</span><span class="se">\\</span><span class="s">&#39;</span>
 
 <span class="k">def</span> <span class="nf">__get_signal_nodes_win</span><span class="p">():</span>
     <span class="n">signal_nodes_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -211,22 +230,22 @@
     <span class="c">#           Will perform a directed scan if the optional &lt;arg&gt; is provided</span>
     <span class="c"># -x        --xml                Print info as XML</span>
     <span class="n">signal_nodes_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    
+
     <span class="n">ntwks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c"># Get information about networks </span>
+        <span class="c"># Get information about networks</span>
         <span class="n">cmd</span> <span class="o">=</span> <span class="s">&#39;/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport&#39;</span>
         <span class="n">o</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s">&#39;/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport&#39;</span><span class="p">,</span> <span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;-x&#39;</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span>
         <span class="n">ntwks</span> <span class="o">=</span> <span class="n">plistlib</span><span class="o">.</span><span class="n">readPlist</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">print</span> <span class="s">&quot;Failed to find networks.  The command &#39;</span><span class="si">%s</span><span class="s">&#39; may not exist.&quot;</span> <span class="o">%</span> <span class="s">&#39;/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport&#39;</span>
-        <span class="k">print</span> <span class="s">&quot;Traceback is:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span>            
-    
+        <span class="k">print</span> <span class="s">&quot;Traceback is:</span><span class="se">\n</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">e</span>
+
     <span class="k">for</span> <span class="n">network</span> <span class="ow">in</span> <span class="n">ntwks</span><span class="p">:</span>
         <span class="k">if</span> <span class="s">&#39;OLIN&#39;</span> <span class="ow">in</span> <span class="n">network</span><span class="p">[</span><span class="s">&#39;SSID_STR&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="s">&#39;GUEST&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">network</span><span class="p">[</span><span class="s">&#39;SSID_STR&#39;</span><span class="p">]:</span>
             <span class="c"># Now we are pretty sure that this is a non-guest Olin network</span>
             <span class="c"># Unless someone else has a router with &#39;OLIN&#39; in the SSID</span>
-            
+
             <span class="c"># The BSSID (MAC address) is of the form 0:20:d8:2d:65:2</span>
             <span class="c"># Now we need to convert it to the format 00:20:D8:2D:65:20</span>
             <span class="n">macbytes</span> <span class="o">=</span> <span class="n">network</span><span class="p">[</span><span class="s">&#39;BSSID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>

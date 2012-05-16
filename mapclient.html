@@ -26,7 +26,7 @@
     <script type="text/javascript" src="static/underscore.js"></script>
     <script type="text/javascript" src="static/doctools.js"></script>
     <link rel="top" title="Marauder&#39;s Map Client 2.0.1a documentation" href="index.html" />
-    <link rel="next" title="API" href="api.html" />
+    <link rel="next" title="Client API" href="client_api.html" />
     <link rel="prev" title="Configuration" href="configuration.html" /> 
   </head>
   <body>
@@ -40,7 +40,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API"
+          <a href="client_api.html" title="Client API"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="configuration.html" title="Configuration"
@@ -56,6 +56,10 @@
             
   <div class="section" id="module-mapclient">
 <span id="map-client"></span><h1>Map Client<a class="headerlink" href="#module-mapclient" title="Permalink to this headline">¶</a></h1>
+<p>The main component of the client-side Marauder&#8217;s Map Application</p>
+<p>The progam&#8217;s interface is accessible via a drop-down menu from an icon in
+the system tray. It displays the user&#8217;s estimated location, provides access
+to a preferences window</p>
 <dl class="class">
 <dt id="mapclient.AdvancedPrefs">
 <em class="property">class </em><tt class="descclassname">mapclient.</tt><tt class="descname">AdvancedPrefs</tt><a class="reference internal" href="modules/mapclient.html#AdvancedPrefs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.AdvancedPrefs" title="Permalink to this definition">¶</a></dt>
@@ -69,10 +73,26 @@
 </dd></dl>
 
 <dl class="class">
-<dt id="mapclient.LocationWorker">
-<em class="property">class </em><tt class="descclassname">mapclient.</tt><tt class="descname">LocationWorker</tt><a class="reference internal" href="modules/mapclient.html#LocationWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.LocationWorker" title="Permalink to this definition">¶</a></dt>
-<dd><p>A worker object that runs in the background. It does nothing unless it gets a signal
-from the <a class="reference internal" href="#mapclient.PreferencesWindow" title="mapclient.PreferencesWindow"><tt class="xref py py-class docutils literal"><span class="pre">PreferencesWindow</span></tt></a></p>
+<dt id="mapclient.GetLocationThread">
+<em class="property">class </em><tt class="descclassname">mapclient.</tt><tt class="descname">GetLocationThread</tt><a class="reference internal" href="modules/mapclient.html#GetLocationThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.GetLocationThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>A task to obtain the nearest location.</p>
+<p>Tasks are used by the <a class="reference internal" href="#mapclient.PreferencesWindow" title="mapclient.PreferencesWindow"><tt class="xref py py-class docutils literal"><span class="pre">PreferencesWindow</span></tt></a>, which adds them
+to the global thread pool as necessary. When a task is complete, it
+emits a <cite>location_updated_signal</cite>, which is received by the
+<a class="reference internal" href="#mapclient.PreferencesWindow" title="mapclient.PreferencesWindow"><tt class="xref py py-class docutils literal"><span class="pre">PreferencesWindow</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mapclient.NewLocationThread">
+<em class="property">class </em><tt class="descclassname">mapclient.</tt><tt class="descname">NewLocationThread</tt><a class="reference internal" href="modules/mapclient.html#NewLocationThread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.NewLocationThread" title="Permalink to this definition">¶</a></dt>
+<dd><p>A task to let the user create a new bind.</p>
+<p>It spawns the bind creation view of the marauder&#8217;s map after getting
+a signal reading.</p>
+<p>A task to obtain the nearest location.</p>
+<p>Tasks are used by the <a class="reference internal" href="#mapclient.PreferencesWindow" title="mapclient.PreferencesWindow"><tt class="xref py py-class docutils literal"><span class="pre">PreferencesWindow</span></tt></a>, which adds them
+to the global thread pool as necessary. When a task is complete, it
+emits a <cite>location_updated_signal</cite>, which is received by the
+<a class="reference internal" href="#mapclient.PreferencesWindow" title="mapclient.PreferencesWindow"><tt class="xref py py-class docutils literal"><span class="pre">PreferencesWindow</span></tt></a>.</p>
 </dd></dl>
 
 <dl class="class">
@@ -85,32 +105,20 @@ It should not be instantiated more than once.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Class attributes:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last">
-<li><dl class="first docutils">
-<dt><strong>update_signal</strong> (PySide.QtCore.Signal) &#8211; When emitted (see <a class="reference external" href="http://www.pyside.org/docs/pyside/PySide/QtCore/Signal.html#PySide.QtCore.Signal.emit" title="(in PySide v1.1.0)"><tt class="xref py py-meth docutils literal"><span class="pre">PySide.QtCore.Signal.emit()</span></tt></a>), </dt>
-<dd><p class="first last">tells the LocationWorker to get the user&#8217;s new location (<tt class="xref py py-meth docutils literal"><span class="pre">LocationWorker.get_location()</span></tt>)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>offline_signal</strong> (PySide.QtCore.Signal) &#8211; When emitted (see <a class="reference external" href="http://www.pyside.org/docs/pyside/PySide/QtCore/Signal.html#PySide.QtCore.Signal.emit" title="(in PySide v1.1.0)"><tt class="xref py py-meth docutils literal"><span class="pre">PySide.QtCore.Signal.emit()</span></tt></a>), </dt>
-<dd><p class="first last">tells the LocationWorker to stop sending stuff to the server (<tt class="xref py py-meth docutils literal"><span class="pre">LocationWorker.stop_working()</span></tt>)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>post_signal</strong> (PySide.QtCore.Signal(<a class="reference internal" href="api.html#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">api.Location</span></tt></a>)) &#8211; When emitted </dt>
-<dd><p class="first last">(see <a class="reference external" href="http://www.pyside.org/docs/pyside/PySide/QtCore/Signal.html#PySide.QtCore.Signal.emit" title="(in PySide v1.1.0)"><tt class="xref py py-meth docutils literal"><span class="pre">PySide.QtCore.Signal.emit()</span></tt></a>) with a <a class="reference internal" href="api.html#api.Location" title="api.Location"><tt class="xref py py-class docutils literal"><span class="pre">api.Location</span></tt></a> instance, tells the
-<a class="reference internal" href="#mapclient.LocationWorker" title="mapclient.LocationWorker"><tt class="xref py py-class docutils literal"><span class="pre">LocationWorker</span></tt></a> to bind the current signal strength to the passed-in location and to 
-update the user&#8217;s location on the map (<tt class="xref py py-meth docutils literal"><span class="pre">LocationWorker.post_location()</span></tt>)</p>
-</dd>
-</dl>
-</li>
-</ul>
-</td>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
+<ul class="simple">
+<li><strong>update_signal</strong> (PySide.QtCore.Signal) &#8211; When emitted</li>
+</ul>
+<p>(see <a class="reference external" href="http://www.pyside.org/docs/pyside/PySide/QtCore/Signal.html#PySide.QtCore.Signal.emit" title="(in PySide v1.1.0)"><tt class="xref py py-meth docutils literal"><span class="pre">PySide.QtCore.Signal.emit()</span></tt></a>), tells the
+LocationWorker to get the user&#8217;s new location
+(<tt class="xref py py-meth docutils literal"><span class="pre">LocationWorker.get_location()</span></tt>)
+* <strong>offline_signal</strong> (PySide.QtCore.Signal) &#8211; When emitted
+(see <a class="reference external" href="http://www.pyside.org/docs/pyside/PySide/QtCore/Signal.html#PySide.QtCore.Signal.emit" title="(in PySide v1.1.0)"><tt class="xref py py-meth docutils literal"><span class="pre">PySide.QtCore.Signal.emit()</span></tt></a>), tells the
+LocationWorker to stop sending stuff to the server
+(<tt class="xref py py-meth docutils literal"><span class="pre">LocationWorker.stop_working()</span></tt>)</p>
 <dl class="method">
 <dt id="mapclient.PreferencesWindow.closeEvent">
 <tt class="descname">closeEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.closeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.closeEvent" title="Permalink to this definition">¶</a></dt>
@@ -118,15 +126,29 @@ update the user&#8217;s location on the map (<tt class="xref py py-meth docutils
 hide it; don&#8217;t close or minimize it.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Don&#8217;t call this function manually!
-This function overrides the default QT close behavior</p>
+<p class="last">Don&#8217;t call this function manually!</p>
 </div>
+<p>This function overrides the default QT close behavior</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mapclient.PreferencesWindow.create_system_tray">
 <tt class="descname">create_system_tray</tt><big>(</big><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.create_system_tray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.create_system_tray" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="mapclient.PreferencesWindow.create_system_tray_actions">
+<tt class="descname">create_system_tray_actions</tt><big>(</big><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.create_system_tray_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.create_system_tray_actions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the actions for the system tray:
+open_action
+refresh_action
+location_indicator
+correct_location_action
+other_location_action
+offline_action
+prefs_action
+quit_action</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="mapclient.PreferencesWindow.create_tab_pane">
@@ -143,24 +165,22 @@ General, Advanced</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mapclient.PreferencesWindow.locationSlot">
-<tt class="descname">locationSlot</tt><big>(</big><em>flagResponseTuple</em><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.locationSlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.locationSlot" title="Permalink to this definition">¶</a></dt>
+<dt id="mapclient.PreferencesWindow.location_slot">
+<tt class="descname">location_slot</tt><big>(</big><em>locations</em><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.location_slot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.location_slot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slot that gets data whenever a location refresh
 happens</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mapclient.PreferencesWindow.post_location">
-<tt class="descname">post_location</tt><big>(</big><em>loc</em><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.post_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.post_location" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a signal to the LocationWorker in bg_thread
-to post a specified location</p>
+<dt id="mapclient.PreferencesWindow.new_location">
+<tt class="descname">new_location</tt><big>(</big><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.new_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.new_location" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a thread to allow new bind creation.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mapclient.PreferencesWindow.refresh_location">
 <tt class="descname">refresh_location</tt><big>(</big><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.refresh_location"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.refresh_location" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a signal to the LocationWorker in bg_thread
-to get the location</p>
+<dd><p>Creates a thread to refresh the location.</p>
 </dd></dl>
 
 <dl class="method">
@@ -168,6 +188,10 @@ to get the location</p>
 <tt class="descname">sys_tray_menu_clicked</tt><big>(</big><em>reason</em><big>)</big><a class="reference internal" href="modules/mapclient.html#PreferencesWindow.sys_tray_menu_clicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mapclient.PreferencesWindow.sys_tray_menu_clicked" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connected to the &#8216;activated&#8217; signal of the system tray.
 Changes the icon to look good when clicked</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Deactivated because there is no way to go back</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -201,9 +225,9 @@ which owns every other element.</p>
 </table>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">The window must have a pointer to it, or it will get garbage collected and
-the application won&#8217;t run</p>
+<p class="last">The window must have a pointer to it, or it will get garbage collected and</p>
 </div>
+<p>the application won&#8217;t run</p>
 </dd></dl>
 
 </div>
@@ -218,8 +242,8 @@ the application won&#8217;t run</p>
   <p class="topless"><a href="configuration.html"
                         title="previous chapter">Configuration</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="api.html"
-                        title="next chapter">API</a></p>
+  <p class="topless"><a href="client_api.html"
+                        title="next chapter">Client API</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -247,7 +271,7 @@ the application won&#8217;t run</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="API"
+          <a href="client_api.html" title="Client API"
              >next</a> |</li>
         <li class="right" >
           <a href="configuration.html" title="Configuration"
