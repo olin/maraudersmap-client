@@ -37,3 +37,14 @@ and/or restarted relatively easily
 
 ## Documentation
 [HTML docs](http://ohack.github.com/maraudersmap-client/)
+
+## Releases
+### v2.0.1a - Initial Alpha Release Changelog
+* client has been rewritten from the ground up using the QT GUI framework
+* client can open the web application in standard mode
+* client can open the web application in placement mode, allowing the user to set his or her position manually
+* client can authenticate with the map server 
+* client broadcasts locations in the background
+* client's update frequency can be configured in the interface's preference window
+* client runs from source on Windows
+* client can be distributed as an app on Mac OS X
