@@ -112,6 +112,7 @@ class Bind(_SendableObject):
             cookies=get_cookies()
             )
         print r.text
+
         response = json.loads(r.text)['bind']
         self.id = response['id']
 
@@ -221,9 +222,15 @@ def get_binds(**crit):
     # Now upload_dict is the same as before, but with the 'nearest' key
     # replaced by keys of the form 'nearest[MAC_ADDRESS]'
 
+    print "Unencoded: ", upload_dict
+    print urllib.urlencode(upload_dict)
+
     r = requests.get(
         '%s/binds/?%s' % (Settings.SERVER_ADDRESS, urllib.urlencode(upload_dict)),
         cookies=get_cookies())
+
+
+
     return [Bind(**bind_dict) for bind_dict in json.loads(r.text)['binds']]
 
 def get_bind(identifier):

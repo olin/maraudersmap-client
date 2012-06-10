@@ -191,7 +191,7 @@ def __get_signal_nodes_mac():
         print "Traceback is:\n%s" % e
 
     for network in ntwks:
-        if 'OLIN' in network['SSID_STR'] and 'GUEST' not in network['SSID_STR']:
+        if True: #'OLIN' in network['SSID_STR'] and 'GUEST' not in network['SSID_STR']:
             # Now we are pretty sure that this is a non-guest Olin network
             # Unless someone else has a router with 'OLIN' in the SSID
 
